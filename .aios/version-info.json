@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "current_version": "1.0.0",
+  "previous_version": null,
+  "created_at": "2026-02-26T22:00:00.000Z",
+  "last_updated": "2026-02-26T22:00:00.000Z",
+  "total_versions": 1,
+  "versions": [
+    {
+      "version": "1.0.0",
+      "description": "Fork personalizado do Synkra AIOS com autonomous runner, 12 agentes e squad creator",
+      "timestamp": "2026-02-26T22:00:00.000Z",
+      "changes": [
+        "Fork do Synkra AIOS v3.11.3",
+        "Sistema de execução autônoma (Ralph Pattern)",
+        "12 agentes especializados",
+        "Squad Creator para agentes por domínio",
+        "Documentação PT-BR",
+        "Controle de versões ativado"
+      ],
+      "migration_required": false,
+      "breaking_changes": [],
+      "compatibility_notes": "Versão inicial - fork pessoal",
+      "release_notes": "Release inicial do aios-pessoal, baseado no Synkra AIOS v3.11.3",
+      "previous_version": null,
+      "status": "active",
+      "components_modified": [],
+      "api_changes": [],
+      "deprecations": [],
+      "migration_path": null
+    }
+  ],
+  "migration_history": [],
+  "compatibility_matrix": {}
+}
