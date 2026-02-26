@@ -51,6 +51,71 @@ Um meta-framework que orquestra **12 agentes de IA especializados** para transfo
 | V | **Quality First** — Lint, typecheck, tests, build devem passar | MUST |
 | VI | **Absolute Imports** — Usar alias `@/`, evitar `../../../` | SHOULD |
 
+## Squad Creator Premium
+
+O diferencial de qualidade do AIOS. Em vez de agentes genericos, o Squad Creator Premium clona **mentes elite reais** — experts com frameworks documentados e metodologias comprovadas. Um agente de copywriting nao e "um copywriter generico", e um agente que pensa e escreve como Gary Halbert, Eugene Schwartz ou Alex Hormozi.
+
+### Como funciona
+
+```
+/squad-creator/agents/squad-chief  →  "Quero um squad de copywriting para landing pages"
+```
+
+O sistema automaticamente:
+
+1. **Pesquisa elite minds** do dominio (3-5 iteracoes, ranqueadas por tier)
+2. **Extrai Voice DNA** — vocabulario, tom, frases-assinatura, anti-patterns
+3. **Extrai Thinking DNA** — frameworks mentais, heuristicas, arvore de decisao
+4. **Cria artefatos** — agentes, tasks, workflows, veto conditions
+5. **Roda smoke tests** — 3 testes por agente (conhecimento, decisao, objecao)
+6. **Valida qualidade** — score minimo 7/10 para aprovar
+
+### Modos de execucao
+
+| Modo | Materiais | Fidelidade | Tempo | Quando usar |
+|------|-----------|------------|-------|-------------|
+| **YOLO** | Nenhum (pesquisa web) | 60-75% | 30-45 min | Prototipacao rapida |
+| **QUALITY** | Livros, PDFs, transcricoes | 85-95% | 60-90 min | Maximo de precisao |
+| **HYBRID** | Parcial | Variavel | 45-75 min | Materiais de alguns experts |
+
+### Agentes do Squad Creator
+
+| Agente | Slash Command | Papel |
+|--------|---------------|-------|
+| Squad Chief | `/squad-creator/agents/squad-chief` | Orquestrador: triagem, pesquisa, criacao |
+| OalaNicolas | `/squad-creator/agents/oalanicolas` | Mind cloning: extracao de Voice e Thinking DNA |
+| Pedro Valerio | `/squad-creator/agents/pedro-valerio` | Process design: workflows, veto conditions |
+
+### Resultado
+
+```
+squads/{nome-do-squad}/
+├── agents/          # Agentes clonados dos experts (com DNA extraido)
+├── tasks/           # Tasks especificas do dominio
+├── workflows/       # Workflows multi-fase com checkpoints
+├── templates/       # Templates de output
+├── data/            # Knowledge base do dominio
+└── config.yaml
+```
+
+### Usando squads no desenvolvimento
+
+Durante o ciclo de dev, quando uma story precisa de expertise especializada:
+
+```
+# 1. Gere conteudo com o agente do squad (chat separado)
+/{nome-do-squad}/agents/{nome-do-expert}  →  "Crie a copy para a landing page..."
+
+# 2. Salve o output como arquivo
+docs/content/landing-page-copy.md
+
+# 3. Instrua o dev a usar o conteudo (chat separado)
+/AIOS/agents/dev  →  *develop {story-id}
+"Use a copy em docs/content/landing-page-copy.md"
+```
+
+> **Squads servem para qualquer dominio:** copywriting, vendas, juridico, nutricao, educacao, marketing — qualquer area com experts documentaveis.
+
 ## Modo Autonomo (Ralph Pattern)
 
 Execucao automatizada onde cada fase roda em uma instancia fresh do Claude Code (zero compactacao, maximo desempenho):
@@ -149,6 +214,16 @@ Instala CLIs, autentica GitHub, cria repo e estrutura base do projeto.
 
 **Saidas:** `docs/project-brief.md` → `docs/prd.md` → `docs/architecture.md` → `docs/prd/` (fragmentado)
 
+### 2.5. Squads de Dominio (se necessario)
+
+Se o projeto precisa de expertise alem de software (copy, vendas, juridico, etc.):
+
+```
+/squad-creator/agents/squad-chief  →  "Quero um squad de {dominio} para {objetivo}"
+```
+
+O sistema pesquisa elite minds, extrai DNA e gera agentes especializados. Ver seção [Squad Creator Premium](#squad-creator-premium).
+
 ### 3. Desenvolvimento (loop por story)
 
 ```
@@ -178,11 +253,11 @@ bash .aios-core/scripts/autonomous-runner.sh --phases all
 ### Fluxo Visual
 
 ```
-SETUP              PLANEJAMENTO                          DEV (loop)                    RELEASE
-─────              ────────────                          ──────────                    ───────
-@devops            @analyst → @pm → @ux → @architect     @sm → @dev → @qa → @devops   @devops
-bootstrap          brief → PRD → spec → arquitetura      story → code → review → PR    release
-                   @po valida + fragmenta                 @po fecha story
+SETUP              PLANEJAMENTO                          SQUADS (opcional)        DEV (loop)                    RELEASE
+─────              ────────────                          ────────────────         ──────────                    ───────
+@devops            @analyst → @pm → @ux → @architect     @squad-chief             @sm → @dev → @qa → @devops   @devops
+bootstrap          brief → PRD → spec → arquitetura      elite minds → DNA        story → code → review → PR    release
+                   @po valida + fragmenta                 → agentes dominio        @po fecha story
 ```
 
 ### Regras de Ouro
