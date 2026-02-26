@@ -1,0 +1,15 @@
+bundle:
+  name: Team Squad Creator Premium
+  icon: 🏗️
+  description: Premium squad creation team - creates production-ready agent squads based on elite minds.
+agents:
+  - squad-chief
+  - oalanicolas
+  - pedro-valerio
+workflows:
+  - squads/squad-creator/workflows/wf-create-squad.yaml
+  - squads/squad-creator/workflows/wf-clone-mind.yaml
+  - squads/squad-creator/workflows/wf-discover-tools.yaml
+  - squads/squad-creator/workflows/wf-squad-fusion.yaml
+  - squads/squad-creator/workflows/wf-extraction-pipeline.yaml
+  - squads/squad-creator/workflows/wf-research-then-create-agent.yaml
