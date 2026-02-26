@@ -125,6 +125,74 @@ Ative um agente no Claude Code e use comandos com prefixo `*`:
 *task {nome}  # Executar tarefa especifica
 ```
 
+## Passo a Passo: Da Instalacao ao Projeto Final
+
+> Cada agente roda em **chat separado** no Claude Code. Abra um novo chat a cada troca de agente.
+
+### 1. Setup (uma vez)
+
+```
+/AIOS/agents/devops  →  *environment-bootstrap
+```
+Instala CLIs, autentica GitHub, cria repo e estrutura base do projeto.
+
+### 2. Planejamento (uma vez por projeto)
+
+```
+/AIOS/agents/analyst          →  *create-project-brief     # Pesquisa e brief da ideia
+/AIOS/agents/pm               →  *create-prd               # Gera PRD com requisitos e epicos
+/AIOS/agents/ux-design-expert →  (descreva a spec)         # Wireframes e design system
+/AIOS/agents/architect        →  *create-full-stack-architecture  # Arquitetura do sistema
+/AIOS/agents/po               →  *execute-checklist-po     # Valida todos os docs
+/AIOS/agents/po               →  *shard-doc docs/prd.md    # Fragmenta PRD por epico
+```
+
+**Saidas:** `docs/project-brief.md` → `docs/prd.md` → `docs/architecture.md` → `docs/prd/` (fragmentado)
+
+### 3. Desenvolvimento (loop por story)
+
+```
+/AIOS/agents/sm      →  *draft                    # Cria story com criterios de aceitacao
+/AIOS/agents/dev     →  *develop {story-id}       # Implementa codigo + testes (SEM push)
+/AIOS/agents/qa      →  *review-build {story-id}  # QA em 10 fases (PASS/FAIL)
+/AIOS/agents/devops  →  *pre-push → *create-pr    # Quality gates + push + PR
+/AIOS/agents/po      →  *close-story {story-id}   # Fecha story, proxima iteracao
+```
+
+Repita ate completar todas as stories de todos os epicos.
+
+### 4. Release
+
+```
+/AIOS/agents/devops  →  *release {version}        # Tag, release notes, deploy
+```
+
+### Alternativa: Modo Autonomo
+
+Se os docs base ja existem, rode tudo automaticamente:
+
+```bash
+bash .aios-core/scripts/autonomous-runner.sh --phases all
+```
+
+### Fluxo Visual
+
+```
+SETUP              PLANEJAMENTO                          DEV (loop)                    RELEASE
+─────              ────────────                          ──────────                    ───────
+@devops            @analyst → @pm → @ux → @architect     @sm → @dev → @qa → @devops   @devops
+bootstrap          brief → PRD → spec → arquitetura      story → code → review → PR    release
+                   @po valida + fragmenta                 @po fecha story
+```
+
+### Regras de Ouro
+
+1. **Um agente por chat** — Sempre abra chat novo ao trocar de agente
+2. **Salve os docs** — Cada agente gera output em `docs/`, salve antes de prosseguir
+3. **Nunca pule o PO** — Validacao e fragmentacao sao essenciais pro dev funcionar
+4. **Apenas @devops faz push** — Nenhum outro agente tem essa permissao
+5. **Story first** — O dev nao comeca sem story criada pelo SM
+
 ## Documentacao
 
 | Documento | Descricao |
