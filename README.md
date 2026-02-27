@@ -38,6 +38,21 @@ Um meta-framework que orquestra **12 agentes de IA especializados** para transfo
 9. Release & Deploy (@devops)    -> Push, PR, release, deploy
 ```
 
+### Fluxo Brownfield (Projetos Existentes)
+
+Para projetos existentes, o AIOS oferece workflows especializados:
+
+```
+Tamanho da mudanca:
+  Bug fix (< 4h)       → @pm → *brownfield-create-story → @dev → @qa → Done
+  Feature (1-3 stories) → @pm → *brownfield-create-epic → Dev Cycle loop
+  Enhancement grande    → Fluxo completo com templates brownfield
+  Divida tecnica        → Workflow brownfield-discovery
+```
+
+**Workflows:** `brownfield-fullstack`, `brownfield-discovery`, `brownfield-ui`, `brownfield-service`
+**Guia completo:** `.aios-core/working-in-the-brownfield.md`
+
 ## Constituicao (6 Principios)
 
 | # | Principio | Nivel |
@@ -402,6 +417,22 @@ Instala CLIs, autentica GitHub, cria repo e estrutura base do projeto.
 
 **Saidas:** `docs/project-brief.md` → `docs/prd.md` → `docs/architecture.md` → `docs/prd/` (fragmentado)
 
+#### 2-alt. Planejamento Brownfield (projetos existentes)
+
+```
+/AIOS/agents/architect        →  *analyze-brownfield                  # Analisa sistema existente
+/AIOS/agents/pm               →  *create-doc brownfield-prd           # PRD focado em integracao
+/AIOS/agents/architect        →  *create-doc brownfield-architecture  # Arquitetura de integracao (se necessario)
+/AIOS/agents/po               →  *execute-checklist-po                # Valida todos os docs
+/AIOS/agents/po               →  *shard-doc docs/prd.md               # Fragmenta PRD por epico
+```
+
+Para mudancas menores, pule o planejamento completo:
+- `@pm → *brownfield-create-story` (bug fix, < 4h)
+- `@pm → *brownfield-create-epic` (feature isolada, 1-3 stories)
+
+Guia completo: `.aios-core/working-in-the-brownfield.md`
+
 ### 2.5. Squads de Dominio (se necessario)
 
 Se o projeto precisa de expertise alem de software (copy, vendas, juridico, etc.):
@@ -446,6 +477,12 @@ SETUP              PLANEJAMENTO                          SQUADS (opcional)      
 @devops            @analyst → @pm → @ux → @architect     @squad-chief             @sm → @dev → @qa → @devops   @devops
 bootstrap          brief → PRD → spec → arquitetura      elite minds → DNA        story → code → review → PR    release
                    @po valida + fragmenta                 → agentes dominio        @po fecha story
+
+BROWNFIELD         ANALISE                                PLANEJAMENTO BF          DEV (loop)                    RELEASE
+──────────         ───────                                ───────────────          ──────────                    ───────
+                   @architect → analyze-brownfield         @pm → brownfield-prd     @sm → @dev → @qa → @devops   @devops
+                   @analyst → document-project             @architect → bf-arch     story → code → review → PR    release
+                                                           @po valida + fragmenta   @po fecha story
 ```
 
 ### Regras de Ouro
@@ -464,6 +501,7 @@ bootstrap          brief → PRD → spec → arquitetura      elite minds → D
 | [passos.md](passos.md) | Workflow completo das 10 fases (PT-BR) |
 | [Constituicao](.aios-core/constitution.md) | 6 principios inviolaveis do framework |
 | [User Guide](.aios-core/user-guide.md) | Handbook completo do usuario |
+| [Brownfield Guide](.aios-core/working-in-the-brownfield.md) | Guia completo para projetos existentes |
 | [CHANGELOG.md](CHANGELOG.md) | Historico de versoes e mudancas |
 
 ## Modos de Desenvolvimento
@@ -505,4 +543,4 @@ bootstrap          brief → PRD → spec → arquitetura      elite minds → D
 
 ---
 
-*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.1.0*
+*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.2.0*

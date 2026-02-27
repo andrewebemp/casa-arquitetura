@@ -5,6 +5,29 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.2.0] - 2026-02-27
+
+### Adicionado
+- Opcao brownfield integrada em toda a documentacao do usuario
+- Secao "Greenfield ou Brownfield?" no guia-pratico.md com tabela comparativa
+- Secao "Tipo de Projeto" no passos.md com arvore de roteamento por tamanho
+- Secao "Fluxo Brownfield (Projetos Existentes)" no README.md
+- Marcadores [BF] no guia-pratico.md para pontos de divergencia brownfield
+- Subsecoes "Variante Brownfield" em todas as fases do passos.md (0-8)
+- Comandos brownfield na referencia rapida do guia-pratico.md
+- Planejamento brownfield alternativo (2-alt) no README.md
+- Checklist brownfield adicional no passos.md
+- Regra de ouro #8: documentar sistema existente antes de planejar
+- Linha brownfield no fluxo visual do README.md
+- Link para Brownfield Guide na tabela de documentacao do README.md
+- Entrada de troubleshooting para projetos brownfield no guia-pratico.md
+
+### Referenciado
+- `.aios-core/working-in-the-brownfield.md` como guia dedicado
+- Workflows: brownfield-fullstack, brownfield-discovery, brownfield-ui, brownfield-service
+- Tasks: analyze-brownfield, brownfield-create-story, brownfield-create-epic, create-brownfield-story
+- Templates: brownfield-prd-tmpl.yaml, brownfield-architecture-tmpl.yaml
+
 ## [1.1.0] - 2026-02-26
 
 ### Adicionado
@@ -42,5 +65,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Controle de versões com semantic versioning
 - Repositório privado no GitHub
 
+[1.2.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/andrewebemp/aios-pessoal/releases/tag/v1.0.0

@@ -4,8 +4,26 @@
 >
 > O AIOS tem dezenas de caminhos possiveis. Aqui voce segue UM fluxo testado.
 >
-> **Premissas:** Projeto greenfield, Claude Code como IDE.
+> **Premissas:** Claude Code como IDE. Funciona para projetos **greenfield** (novo) e **brownfield** (existente).
+> **Brownfield?** Se voce esta trabalhando em um projeto existente, este guia marca os pontos de divergencia com **[BF]**. Para o guia brownfield completo, consulte `.aios-core/working-in-the-brownfield.md`.
 > **Referencia detalhada:** Consulte `passos.md` para versao completa com todos os criterios.
+
+---
+
+## Greenfield ou Brownfield?
+
+Antes de comecar, identifique o tipo do seu projeto:
+
+| | Greenfield (novo) | Brownfield (existente) |
+|---|---|---|
+| **Quando** | Projeto do zero, sem codigo existente | Adicionar features, corrigir bugs, modernizar |
+| **Config** | `project.type: greenfield` em `core-config.yaml` | `project.type: brownfield` em `core-config.yaml` |
+| **Fluxo** | Siga este guia linearmente (Partes 1-7) | Siga este guia com as notas **[BF]** ou use o guia dedicado |
+| **Guia dedicado** | Este documento | `.aios-core/working-in-the-brownfield.md` |
+
+> **Dica:** Para mudancas pequenas em projetos existentes, voce NAO precisa do fluxo completo. Use diretamente:
+> - `@pm → *brownfield-create-story` (bug fix, < 4 horas)
+> - `@pm → *brownfield-create-epic` (feature pequena, 1-3 stories)
 
 ---
 
@@ -55,11 +73,19 @@ projeto/
 
 **SE** o projeto ja tem `.aios/environment-report.json` → pule este passo.
 
+> **[BF] Brownfield:** Se voce esta integrando o AIOS em um projeto existente, o bootstrap adiciona `.aios/` e `docs/` sem alterar a estrutura do projeto. Apos o bootstrap, rode `@architect → *analyze-brownfield` para mapear tech stack, padroes e constraints do sistema existente.
+
 ### Passo 1.2 -- Decidir Sobre Squads
 
 **SE** seu projeto precisa de expertise que nao existe nos agentes core (ex: copywriting, vendas, juridico, nutricao) → va para a **Parte 2**.
 
 **SE** seu projeto usa apenas desenvolvimento de software padrao → pule para a **Parte 3**.
+
+**SE** voce esta trabalhando em um projeto existente (brownfield):
+- **Mudanca pequena** (bug fix, < 4h) → `@pm → *brownfield-create-story` → va direto para a **Parte 4** (passo 4.2)
+- **Feature isolada** (1-3 stories) → `@pm → *brownfield-create-epic` → va para a **Parte 4** (passo 4.1)
+- **Enhancement grande** (multiplos epicos) → siga a **Parte 3** usando templates brownfield
+- **Divida tecnica / migracao** → rode o workflow `brownfield-discovery` primeiro
 
 ---
 
@@ -208,6 +234,8 @@ O Morgan le o brief, faz perguntas de esclarecimento, e gera o PRD com requisito
 
 **Checkpoint:** Revise os epicos e requisitos. O PRD guia TODO o desenvolvimento.
 
+> **[BF] Brownfield:** Em vez de `*create-prd`, use `*create-doc brownfield-prd` que gera um PRD focado na integracao com o sistema existente. O PM analisa o codebase atual antes de definir requisitos. Template: `brownfield-prd-tmpl.yaml`. Para mudancas menores: `*brownfield-create-epic` (1-3 stories) ou `*brownfield-create-story` (bug fix < 4h).
+
 ### Passo 3.3 -- Especificacao Frontend
 
 Chat novo:
@@ -249,6 +277,8 @@ A Aria le PRD + spec UI/UX e gera: stack tecnologico, design de APIs, infraestru
 **Saida:** `docs/architecture.md`
 
 **SE** a arquitetura sugere mudancas no PRD → volte ao `/AIOS/agents/pm` para atualizar.
+
+> **[BF] Brownfield:** Use `*create-doc brownfield-architecture` em vez de `*create-full-stack-architecture`. A Aria foca em estrategia de integracao, riscos de compatibilidade e plano de migracao. Template: `brownfield-architecture-tmpl.yaml`. Se a mudanca segue padroes existentes sem alteracao arquitetural, este passo pode ser pulado.
 
 ### Passo 3.5 -- Validacao e Sharding
 
@@ -315,6 +345,8 @@ Depois:
 O River le o PRD fragmentado, identifica a proxima story, e gera com criterios de aceitacao (Given/When/Then).
 
 **Saida:** `docs/stories/{story-id}/story.md`
+
+> **[BF] Brownfield:** O SM pode usar `*create-brownfield-story` em vez de `*draft` para criar stories com awareness de integracao. Essas stories incluem tasks de integracao e testes de regressao.
 
 ### Passo 4.2 -- Implementar
 
@@ -521,6 +553,23 @@ Use a copy em docs/content/landing-page-copy.md para implementar o componente
 /squad-creator/agents/squad-chief → [descreva o dominio]
 ```
 
+### Comandos Brownfield
+
+```bash
+# === ANALISE (projeto existente) ===
+/AIOS/agents/architect  → *analyze-brownfield           # Analise do sistema existente
+/AIOS/agents/analyst    → *document-project              # Documentar projeto existente
+
+# === PLANEJAMENTO BROWNFIELD ===
+/AIOS/agents/pm         → *create-doc brownfield-prd     # PRD com foco em integracao
+/AIOS/agents/architect  → *create-doc brownfield-architecture  # Arquitetura de integracao
+/AIOS/agents/pm         → *brownfield-create-epic        # Epic para feature isolada (1-3 stories)
+/AIOS/agents/pm         → *brownfield-create-story       # Story para bug fix / mudanca pequena
+
+# === DESENVOLVIMENTO BROWNFIELD ===
+/AIOS/agents/sm         → *create-brownfield-story       # Story com awareness de integracao
+```
+
 ### Estrutura de Pastas do Projeto
 
 ```
@@ -558,6 +607,7 @@ projeto/
 | Squad nao ativa | Verifique se `squads/{nome}/config.yaml` existe |
 | Agente ignora contexto | Rode `/AIOS/agents/po → *shard-doc` novamente |
 | Precisa de ajuda | Em qualquer agente, digite `*help` |
+| Projeto existente (brownfield) | Consulte `.aios-core/working-in-the-brownfield.md` e use os comandos `*brownfield-*` |
 
 ### Fluxo Visual
 
@@ -587,6 +637,7 @@ SETUP           PLANEJAMENTO                     DEV (loop por story)
 5. **Story first.** O dev nao comeca sem story. O SM cria a story. Respeite a sequencia.
 6. **Squads em chat separado.** Gere conteudo com o squad, salve como arquivo, depois passe ao dev.
 7. **Modo autonomo e opcional.** Se preferir controle total, use o fluxo manual. Se quiser velocidade, use `autonomous-runner.sh`.
+8. **Brownfield: documente primeiro.** Em projetos existentes, rode `*analyze-brownfield` ou `*document-project` ANTES de planejar. Os agentes precisam de contexto do sistema atual.
 
 ---
 
@@ -688,5 +739,5 @@ AUTONOMO (Parte 7):
 
 ---
 
-*Synkra AIOS -- Guia Pratico Simplificado v1.1*
+*Synkra AIOS -- Guia Pratico Simplificado v1.2*
 *Baseado em: AIOS-Core v2.1.0, Squad Creator Premium v3.0.0, Autonomous Runner v1.0.0*

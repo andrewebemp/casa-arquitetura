@@ -7,8 +7,46 @@ que transforma uma ideia em produto pronto para producao. Cada agente tem autori
 exclusiva sobre seu dominio e trabalha em contexto limpo (chat separado).
 
 ```
-IDEIA ──► DISCOVERY ──► PRD ──► UX ──► SQUADS ──► ARCHITECTURE ──► DATA ──► VALIDATION ──► DEV CYCLE ──► DEPLOY
+GREENFIELD:  IDEIA ──► DISCOVERY ──► PRD ──► UX ──► SQUADS ──► ARCHITECTURE ──► DATA ──► VALIDATION ──► DEV CYCLE ──► DEPLOY
+BROWNFIELD:  PROJETO EXISTENTE ──► ANALISE ──► PRD (brownfield) ──► ARCHITECTURE (integracao) ──► VALIDATION ──► DEV CYCLE ──► DEPLOY
 ```
+
+### Tipo de Projeto: Greenfield vs Brownfield
+
+Antes de iniciar o fluxo, identifique o tipo do seu projeto:
+
+| Tipo | Descricao | Fluxo |
+|------|-----------|-------|
+| **Greenfield** | Projeto novo, do zero | Siga todas as fases 0-9 linearmente |
+| **Brownfield** | Projeto existente (adicionar features, modernizar, corrigir) | Siga as fases com as variantes brownfield marcadas abaixo |
+
+**Configuracao:** No `core-config.yaml`, defina `project.type: greenfield` ou `project.type: brownfield`.
+
+**Guia dedicado brownfield:** `.aios-core/working-in-the-brownfield.md`
+
+#### Roteamento Brownfield (por tamanho da mudanca)
+
+```
+Qual o tamanho da mudanca?
+├─ Bug fix / mudanca < 4 horas (1 story)
+│   └─ @pm → *brownfield-create-story → Dev → QA → Done
+├─ Feature isolada (1-3 stories)
+│   └─ @pm → *brownfield-create-epic → SM → Dev → QA loop → Done
+├─ Enhancement grande (multiplos epicos)
+│   └─ Fluxo completo com templates brownfield (fases 1-9 com variantes)
+├─ Divida tecnica / migracao de legado
+│   └─ Workflow brownfield-discovery → depois fluxo completo
+├─ Enhancement apenas frontend
+│   └─ Workflow brownfield-ui
+└─ Enhancement apenas backend/API
+    └─ Workflow brownfield-service
+```
+
+**Workflows brownfield disponiveis:**
+- `brownfield-fullstack.yaml` — Enhancement full-stack (auto-roteia por complexidade)
+- `brownfield-discovery.yaml` — Auditoria tecnica e assessment de divida
+- `brownfield-ui.yaml` — Enhancement exclusivamente frontend
+- `brownfield-service.yaml` — Enhancement exclusivamente backend/API
 
 ---
 
@@ -43,6 +81,20 @@ projeto/
 - [ ] Estrutura base do projeto gerada
 - [ ] `git push` inicial realizado
 
+### Variante Brownfield
+
+Se o projeto ja existe:
+1. O bootstrap adiciona `.aios/` e `docs/` sem alterar a estrutura existente
+2. Apos o bootstrap, rode `@architect → *analyze-brownfield` para mapear:
+   - Tech stack existente, padroes de codigo, CI/CD
+   - Divida tecnica e areas de risco
+   - Constraints que devem ser respeitadas
+3. O resultado alimenta todas as fases seguintes
+
+**Criterios adicionais:**
+- [ ] Analise brownfield executada (`*analyze-brownfield`)
+- [ ] Constraints do sistema existente documentadas
+
 ---
 
 ## FASE 1 - Pesquisa e Ideacao
@@ -64,6 +116,18 @@ projeto/
 - [ ] Brief do projeto documentado
 - [ ] Pesquisa de mercado/competidores realizada
 - [ ] Publico-alvo e proposta de valor definidos
+
+### Variante Brownfield
+
+Em projetos existentes, a pesquisa foca em:
+- Analise do sistema atual vs. o que se deseja mudar
+- Gap analysis entre estado atual e estado desejado
+- Impacto nos usuarios existentes
+- Riscos de regressao
+
+**Comando adicional:** `@analyst → *document-project` (gera documentacao do sistema existente)
+
+> **Dica:** Para projetos grandes, use o Gemini Web (contexto de 1M+ tokens) para analisar o codebase inteiro. Veja `.aios-core/working-in-the-brownfield.md` para detalhes.
 
 ### Handoff:
 > "Brief completo. Salve como `docs/project-brief.md`, depois crie o PRD com `@pm`"
@@ -96,6 +160,23 @@ projeto/
 - [ ] Restricoes mapeadas (CON-*)
 - [ ] Epicos estruturados
 - [ ] PRD salvo em `docs/prd.md`
+
+### Variante Brownfield
+
+**Comando alternativo:** `@pm → *create-doc brownfield-prd`
+
+Diferencas do PRD brownfield:
+- **Template:** Usa `brownfield-prd-tmpl.yaml` em vez de `prd-tmpl.yaml`
+- **Analise previa:** O PM explora o codebase para entender o estado atual
+- **Foco em integracao:** Requisitos incluem compatibilidade com sistema existente
+- **Riscos:** Identifica regressoes, breaking changes, migracoes necessarias
+- **Duas abordagens:**
+  - **PRD-First** (recomendado para codebases grandes) — Define requisitos, depois documenta apenas areas afetadas
+  - **Document-First** (para codebases pequenos/desconhecidos) — Documenta tudo, depois cria PRD
+
+**Para mudancas menores (sem PRD completo):**
+- `@pm → *brownfield-create-epic` — Feature de 1-3 stories
+- `@pm → *brownfield-create-story` — Bug fix ou mudanca < 4 horas
 
 ### Handoff:
 > "PRD pronto. Salve como `docs/prd.md`, depois crie a especificacao UI/UX com `@ux-design-expert`"
@@ -131,6 +212,15 @@ projeto/
 - [ ] Fluxos de navegacao definidos
 - [ ] Design tokens documentados
 - [ ] Especificacao acessivel (WCAG)
+
+### Variante Brownfield
+
+Em projetos existentes com UI:
+- Respeitar design system e padroes visuais existentes
+- Documentar componentes existentes antes de criar novos
+- Garantir consistencia com a experiencia atual do usuario
+- **SE** enhancement e puramente frontend, considere o workflow `brownfield-ui.yaml`
+- **SE** projeto nao tem frontend ou mudanca nao afeta UI → pule esta fase
 
 ### Handoff:
 > "Spec UI/UX completa. Prossiga com a arquitetura do sistema com `@architect`"
@@ -470,6 +560,19 @@ Pode ser feito a qualquer momento para adicionar:
 - [ ] Consideracoes de seguranca
 - [ ] Estrategia de performance
 
+### Variante Brownfield
+
+**Comando alternativo:** `@architect → *create-doc brownfield-architecture`
+
+Diferencas da arquitetura brownfield:
+- **Template:** Usa `brownfield-architecture-tmpl.yaml` em vez de `architecture-tmpl.yaml`
+- **Foco:** Estrategia de integracao com sistema existente, nao design do zero
+- **Inclui:** Plano de migracao, estrategia de rollback, feature flags
+- **Compatibilidade:** Respeita tech stack, padroes e CI/CD existentes
+- **Pode ser pulado** se a mudanca segue padroes existentes sem alteracao arquitetural
+
+**Para enhancements apenas backend/API:** Considere o workflow `brownfield-service.yaml`
+
 ### Handoff:
 > "Arquitetura completa. Salve em `docs/architecture.md`. Se necessario, acione `@data-engineer` para schema do banco."
 
@@ -506,6 +609,15 @@ Pode ser feito a qualquer momento para adicionar:
 - [ ] RLS policies definidas
 - [ ] Migrations planejadas
 - [ ] Indices otimizados por access patterns
+
+### Variante Brownfield
+
+Em projetos existentes com banco de dados:
+- Analisar schema existente antes de propor mudancas (`*domain-modeling` com contexto do banco atual)
+- Migrations devem ser reversiveis e seguras
+- Novas tabelas/colunas devem seguir convencoes existentes
+- RLS policies devem complementar (nao conflitar com) as existentes
+- **SE** nao ha mudancas de banco → pule esta fase
 
 ### Handoff:
 > "Schema completo. Prossiga com validacao dos artefatos com `@po`"
@@ -566,6 +678,14 @@ Gera documentos de referencia para os desenvolvedores:
 - [ ] Arquitetura fragmentada por dominio
 - [ ] Guias de desenvolvimento gerados
 
+### Variante Brownfield
+
+Alem da validacao padrao, o PO verifica:
+- Compatibilidade com sistema existente (sem breaking changes)
+- Estrategia de migracao documentada (se aplicavel)
+- Plano de rollback definido
+- Testes de regressao incluidos nas stories
+
 ### Handoff:
 > "Documentos validados e fragmentados! source-tree.md, tech-stack.md criados. Crie stories com `@sm`"
 
@@ -609,6 +729,20 @@ O que acontece:
    - Dependencias
 
 Saida: `docs/stories/{story-id}/story.md`
+
+#### Variante Brownfield (Story Creation)
+
+**Comando alternativo:** `@sm → *create-brownfield-story`
+
+Stories brownfield incluem tasks adicionais:
+- Analise de impacto no codigo existente
+- Testes de integracao com funcionalidades existentes
+- Testes de regressao obrigatorios
+- Plano de rollback (se aplicavel)
+
+Para mudancas menores que nao passam pelo fluxo completo:
+- `@pm → *brownfield-create-story` — Bug fix ou mudanca < 4 horas (story unica)
+- `@pm → *brownfield-create-epic` — Feature isolada de 1-3 stories
 
 Status da story: **Draft**
 
@@ -707,6 +841,14 @@ Se FAIL:
 4. Self-healing automatico para issues criticas
 
 **Modelo de autoridade do QA:** Advisory only — QA revisa, nao bloqueia. Dev decide.
+
+#### QA Brownfield
+
+Em projetos brownfield, o QA da atencao especial a:
+- **Regressoes:** Funcionalidades existentes continuam funcionando
+- **Integracao:** Mudancas integram corretamente com sistema existente
+- **Performance:** Nenhuma degradacao de performance
+- **Dados:** Migracoes de dados seguras e reversiveis
 
 ### Loop:
 Volta ao Passo 8.1 para a proxima story, ate completar todas as stories de todos os epicos.
@@ -927,6 +1069,18 @@ Squads podem ser distribuidos em 3 niveis:
 - [ ] Deploy em producao
 - [ ] Projeto no ar e funcionando
 
+### Checklist Brownfield (adicional)
+
+Se o projeto e brownfield, valide tambem:
+
+- [ ] Sistema existente analisado (`*analyze-brownfield` ou `*document-project`)
+- [ ] PRD brownfield criado com foco em integracao
+- [ ] Arquitetura de integracao definida (se necessario)
+- [ ] Testes de regressao incluidos em cada story
+- [ ] Plano de rollback documentado
+- [ ] Compatibilidade com sistema existente validada
+- [ ] Nenhuma breaking change introduzida (ou migracoes documentadas)
+
 ---
 
 ## MODO AUTONOMO (Opcional)
@@ -1063,5 +1217,5 @@ plan/                                 # Gerado automaticamente
 
 ---
 
-*Synkra AIOS - Da Ideia ao Deploy (10 Fases)*
-*Fork pessoal v1.1.0 | Baseado em AIOS-Core v3.11.3*
+*Synkra AIOS - Da Ideia ao Deploy (10 Fases) | Greenfield & Brownfield*
+*Fork pessoal v1.2.0 | Baseado em AIOS-Core v3.11.3*
