@@ -7,7 +7,7 @@ que transforma uma ideia em produto pronto para producao. Cada agente tem autori
 exclusiva sobre seu dominio e trabalha em contexto limpo (chat separado).
 
 ```
-IDEIA ──► DISCOVERY ──► PRD ──► SQUADS ──► ARCHITECTURE ──► SHARDING ──► STORIES ──► DEV ──► QA ──► DEPLOY
+IDEIA ──► DISCOVERY ──► PRD ──► UX ──► SQUADS ──► ARCHITECTURE ──► DATA ──► VALIDATION ──► DEV CYCLE ──► DEPLOY
 ```
 
 ---
@@ -1063,5 +1063,5 @@ plan/                                 # Gerado automaticamente
 
 ---
 
-*Synkra AIOS - Da Ideia ao Deploy*
-*Referencia: https://github.com/synkraAI/aios-core*
+*Synkra AIOS - Da Ideia ao Deploy (10 Fases)*
+*Fork pessoal v1.1.0 | Baseado em AIOS-Core v3.11.3*

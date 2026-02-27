@@ -49,19 +49,37 @@ When an agent is active:
 ## AIOS Framework Structure
 
 ```
-aios-core/
-├── agents/         # Agent persona definitions (YAML/Markdown)
-├── tasks/          # Executable task workflows
-├── workflows/      # Multi-step workflow definitions
-├── templates/      # Document and code templates
-├── checklists/     # Validation and review checklists
-└── rules/          # Framework rules and patterns
+.aios-core/
+├── constitution.md             # 6 princípios invioláveis
+├── core-config.yaml            # Configuração do framework
+├── user-guide.md               # Handbook completo
+├── core/
+│   ├── execution/              # Story parser, engine
+│   ├── quality-gates/          # Quality gates automáticos
+│   └── utils/                  # 70+ utilitários
+├── development/
+│   ├── agents/                 # 12 definições de agentes
+│   ├── tasks/                  # 115+ tarefas executáveis
+│   ├── workflows/              # Workflows multi-step
+│   ├── templates/              # Templates de documentos
+│   ├── checklists/             # Checklists de validação
+│   └── data/                   # Frameworks de decisão
+├── data/
+│   └── tech-presets/           # Presets de tecnologia
+├── scripts/
+│   ├── autonomous-runner.sh    # Orquestrador autônomo
+│   ├── phase-executors/        # Executores por fase (0-9)
+│   └── update-aios.sh          # Script de atualização
+└── templates/
+    └── phase-prompts/          # Prompts por fase
 
 docs/
-├── stories/        # Development stories (numbered)
-├── prd/            # Product requirement documents
-├── architecture/   # System architecture documentation
-└── guides/         # User and developer guides
+├── stories/                    # Development stories
+├── prd/                        # PRD fragmentado por épico
+├── architecture/               # Arquitetura fragmentada
+└── framework/                  # Guias de dev (source-tree, tech-stack)
+
+squads/                         # Squads de agentes por domínio
 ```
 <!-- AIOS-MANAGED-END: framework-structure -->
 
@@ -147,15 +165,15 @@ await story.save();
 ## Environment Setup
 
 ### Required Tools
-- Node.js 18+
-- GitHub CLI
+- Node.js 20+
+- GitHub CLI (gh)
 - Git
-- Your preferred package manager (npm/yarn/pnpm)
+- npm (package manager)
 
 ### Configuration Files
-- `.aios/config.yaml` - Framework configuration
-- `.env` - Environment variables
-- `aios.config.js` - Project-specific settings
+- `.aios-core/core-config.yaml` - Framework configuration
+- `.env` - Environment variables (keys de API)
+- `.env.example` - Template de variáveis de ambiente
 
 <!-- AIOS-MANAGED-START: common-commands -->
 ## Common Commands
@@ -172,6 +190,26 @@ await story.save();
 - `npm run lint` - Check code style
 - `npm run build` - Build project
 <!-- AIOS-MANAGED-END: common-commands -->
+
+<!-- AIOS-MANAGED-START: squad-creator -->
+## Squad Creator Premium
+
+The Squad Creator Premium creates domain-specific agents based on real elite minds.
+Instead of generic agents, it clones experts with documented frameworks and methodologies.
+
+### Key Agents
+- `/squad-creator/agents/squad-chief` - Orchestrator: triage, research, creation
+- `/squad-creator/agents/oalanicolas` - Mind cloning: Voice DNA + Thinking DNA extraction
+- `/squad-creator/agents/pedro-valerio` - Process design: workflows, veto conditions
+
+### Execution Modes
+- **YOLO** (60-75% fidelity) - Web research only, no materials needed
+- **QUALITY** (85-95% fidelity) - With books, PDFs, transcriptions
+- **HYBRID** (variable) - Partial materials
+
+### Output Structure
+Squads are created in `squads/{squad-name}/` with agents, tasks, workflows, templates, and data.
+<!-- AIOS-MANAGED-END: squad-creator -->
 
 <!-- AIOS-MANAGED-START: autonomous-mode -->
 ## Autonomous Mode
@@ -259,4 +297,4 @@ npm run trace -- workflow-name
 - Document breaking changes prominently
 
 ---
-*Synkra AIOS Claude Code Configuration v2.0*
+*Synkra AIOS Claude Code Configuration v2.1*

@@ -8,36 +8,34 @@ Um meta-framework que orquestra **12 agentes de IA especializados** para transfo
 
 ## Agentes
 
-| Agente | ID | Papel |
-|--------|-----|-------|
-| AIOS Master | `@aios-master` | Orquestrador do framework |
-| Analyst | `@analyst` | Pesquisa de mercado, brainstorming |
-| Architect | `@architect` | Design de sistema, tech stack, APIs |
-| Data Engineer | `@data-engineer` | Modelagem de dados, banco de dados |
-| Developer | `@dev` | Implementacao full-stack |
-| DevOps | `@devops` | Infra, git/GitHub, deploys |
-| Product Manager | `@pm` | PRD, requisitos, specs |
-| Product Owner | `@po` | Backlog, priorizacao |
-| QA Engineer | `@qa` | Testes, quality gates |
-| Scrum Master | `@sm` | Historias, sprints |
-| UX Designer | `@ux-design-expert` | Experiencia do usuario, design |
-| Squad Creator | `@squad-creator` | Cria squads de agentes por dominio |
+| Agente | ID (Nome) | Papel | Slash Command |
+|--------|-----------|-------|---------------|
+| AIOS Master | `@aios-master` (Orion) | Orquestrador do framework | `/AIOS/agents/aios-master` |
+| Analyst | `@analyst` (Atlas) | Pesquisa de mercado, brainstorming | `/AIOS/agents/analyst` |
+| Architect | `@architect` (Aria) | Design de sistema, tech stack, APIs | `/AIOS/agents/architect` |
+| Data Engineer | `@data-engineer` (Dara) | Modelagem de dados, banco de dados | `/AIOS/agents/data-engineer` |
+| Developer | `@dev` (Dex) | Implementacao full-stack (SEM push) | `/AIOS/agents/dev` |
+| DevOps | `@devops` (Gage) | Infra, git/GitHub, deploys (UNICO push) | `/AIOS/agents/devops` |
+| Product Manager | `@pm` (Morgan) | PRD, requisitos, specs | `/AIOS/agents/pm` |
+| Product Owner | `@po` (Pax) | Backlog, validacao, sharding | `/AIOS/agents/po` |
+| QA Engineer | `@qa` (Quinn) | Testes, quality gates | `/AIOS/agents/qa` |
+| Scrum Master | `@sm` (River) | Historias, sprints | `/AIOS/agents/sm` |
+| UX Designer | `@ux-design-expert` (Uma) | Experiencia do usuario, design | `/AIOS/agents/ux-design-expert` |
+| Squad Creator | `@squad-creator` (Craft) | Cria squads de agentes por dominio | `/AIOS/agents/squad-creator` |
 
-## Fluxo de Desenvolvimento (12 Fases)
+## Fluxo de Desenvolvimento (10 Fases)
 
 ```
-0. Bootstrap (@devops)       -> Setup do ambiente
-1. Brainstorm (@analyst)     -> Pesquisa e brief
-2. PRD (@pm)                 -> Requisitos e specs
-3. Arquitetura (@architect)  -> Design do sistema
-4. Squad (@po/@sm)           -> Composicao do time
-5. Sharding (@pm/@architect) -> Quebra em epicos
-6. Stories (@sm)             -> Historias de dev
-7. Desenvolvimento (@dev)    -> Implementacao
-8. Testes (@qa)              -> Validacao QA
-9. Review (@qa/@architect)   -> Code review
-10. Integracao (@devops)     -> PRs e merge
-11. Deploy (@devops)         -> Release em producao
+0. Bootstrap (@devops)           -> Setup do ambiente
+1. Pesquisa & Ideacao (@analyst) -> Pesquisa de mercado e brief
+2. PRD (@pm)                     -> Requisitos, epicos e specs
+3. UX/UI (@ux-design-expert)     -> Wireframes, design system
+4. Squads (@squad-creator)       -> Agentes de dominio (opcional)
+5. Arquitetura (@architect)      -> Design do sistema e APIs
+6. Modelagem de Dados (@data-engineer) -> Schema, migrations, RLS
+7. Validacao & Sharding (@po)    -> Validar docs e fragmentar
+8. Dev Cycle (loop: @sm->@dev->@qa) -> Stories, codigo, testes
+9. Release & Deploy (@devops)    -> Push, PR, release, deploy
 ```
 
 ## Constituicao (6 Principios)
@@ -134,50 +132,240 @@ bash .aios-core/scripts/autonomous-runner.sh --resume
 ## Estrutura do Projeto
 
 ```
-.aios-core/
-  ├── constitution.md        # Constituicao (6 principios)
-  ├── core-config.yaml       # Configuracao do projeto
+.aios-core/                         # Framework core (NAO edite diretamente)
+  ├── constitution.md               # Constituicao (6 principios inviolaveis)
+  ├── core-config.yaml              # Configuracao do framework
+  ├── user-guide.md                 # Handbook completo do usuario
+  ├── core/
+  │   ├── execution/                # Story parser, engine de execucao
+  │   ├── quality-gates/            # Quality gates automaticos
+  │   ├── utils/                    # 70+ utilitarios
+  │   └── docs/                     # Documentacao tecnica do core
   ├── development/
-  │   ├── agents/            # 12 definicoes de agentes
-  │   ├── tasks/             # 115+ tarefas executaveis
-  │   ├── templates/         # Templates de documentos
-  │   ├── workflows/         # Workflows multi-step
-  │   └── checklists/        # Checklists de validacao
+  │   ├── agents/                   # 12 definicoes de agentes
+  │   ├── tasks/                    # 115+ tarefas executaveis
+  │   ├── templates/                # Templates de documentos
+  │   ├── workflows/                # Workflows multi-step
+  │   ├── checklists/               # Checklists de validacao
+  │   └── data/                     # Frameworks de decisao e qualidade
+  ├── data/
+  │   ├── technical-preferences.md  # Preferencias de tech stack
+  │   └── tech-presets/             # Presets de tecnologia (Next.js, etc)
   ├── scripts/
-  │   ├── autonomous-runner.sh   # Orquestrador autonomo
-  │   └── phase-executors/       # Executores por fase
+  │   ├── autonomous-runner.sh      # Orquestrador autonomo (Ralph Pattern)
+  │   ├── phase-executors/          # Executores por fase (0-9)
+  │   ├── pm.sh                     # Process manager para agentes
+  │   └── update-aios.sh            # Script de atualizacao do framework
   └── templates/
-      └── phase-prompts/         # Prompts por fase
+      └── phase-prompts/            # Prompts por fase
 
-docs/                        # Documentacao do projeto
-squads/                      # Squads de agentes por dominio
-guia-pratico.md              # Guia rapido (PT-BR)
-passos.md                    # Workflow completo (PT-BR)
+.claude/                            # Integracao Claude Code
+  ├── CLAUDE.md                     # Regras e configuracao do Claude Code
+  ├── commands/AIOS/agents/         # Slash commands dos 12 agentes core
+  └── rules/                        # Regras MCP
+
+docs/                               # Documentacao do projeto (gerada pelos agentes)
+  ├── stories/                      # Stories de desenvolvimento
+  ├── prd/                          # PRD fragmentado por epico
+  ├── architecture/                 # Arquitetura fragmentada
+  └── framework/                    # Guias de dev (source-tree, tech-stack, coding-standards)
+
+squads/                             # Squads de agentes por dominio
+  └── squad-creator/                # Squad Creator Premium (meta-squad)
+
+guia-pratico.md                     # Guia rapido simplificado (PT-BR)
+passos.md                           # Workflow completo das 10 fases (PT-BR)
+CHANGELOG.md                        # Historico de versoes
 ```
 
-## Quick Start
+## Instalacao
 
 ### Pre-requisitos
 
-- Node.js 20+
-- GitHub CLI (`gh`)
-- Git
-- Claude Code (IDE recomendada)
+| Ferramenta | Versao Minima | Verificar | Obrigatorio |
+|------------|---------------|-----------|-------------|
+| **Node.js** | 20+ | `node --version` | Sim |
+| **Git** | 2.x | `git --version` | Sim |
+| **GitHub CLI** | 2.x | `gh --version` | Sim |
+| **Claude Code** | latest | `claude --version` | Sim |
+| **rsync** | qualquer | `rsync --version` | Para updates |
 
-### Setup
+### Instalacao do Zero
 
 ```bash
-# Clonar o repositorio
+# 1. Clonar o repositorio
 git clone https://github.com/andrewebemp/aios-pessoal.git
 cd aios-pessoal
 
-# Configurar variaveis de ambiente
-cp .env.example .env
-# Editar .env com suas chaves de API
-
-# Instalar dependencias
+# 2. Instalar dependencias
 npm install
+
+# 3. Configurar variaveis de ambiente
+cp .env.example .env
+# Editar .env com suas chaves de API (veja secao Configuracao abaixo)
+
+# 4. Verificar se esta tudo certo
+npm test
 ```
+
+### Instalacao em Novo Projeto (usar como template)
+
+Se voce quer usar o AIOS como base para um novo projeto:
+
+```bash
+# 1. Criar repositorio a partir do template no GitHub
+# Acesse https://github.com/andrewebemp/aios-pessoal e clique "Use this template"
+
+# OU clone manualmente e reconfigure o remote
+git clone https://github.com/andrewebemp/aios-pessoal.git meu-projeto
+cd meu-projeto
+rm -rf .git
+git init
+git remote add origin https://github.com/SEU-USUARIO/meu-projeto.git
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar ambiente
+cp .env.example .env
+
+# 4. Bootstrap automatico (dentro do Claude Code)
+# Abre o Claude Code e executa:
+#   /AIOS/agents/devops  →  *environment-bootstrap
+```
+
+### Configuracao (.env)
+
+Copie `.env.example` para `.env` e preencha as chaves necessarias:
+
+```bash
+cp .env.example .env
+```
+
+| Variavel | Obrigatorio | Onde Obter |
+|----------|-------------|------------|
+| `ANTHROPIC_API_KEY` | Sim* | [console.anthropic.com](https://console.anthropic.com/) |
+| `GITHUB_TOKEN` | Sim | [github.com/settings/tokens](https://github.com/settings/tokens) |
+| `DEEPSEEK_API_KEY` | Nao | [platform.deepseek.com](https://platform.deepseek.com/api_keys) |
+| `OPENROUTER_API_KEY` | Nao | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| `EXA_API_KEY` | Nao | [exa.ai](https://exa.ai/) |
+| `SUPABASE_URL` | Nao | Projeto Supabase |
+
+> *Nao necessario se usar Claude Max subscription diretamente.
+
+---
+
+## Atualizacao
+
+### Atualizar o Framework AIOS Core (upstream)
+
+Quando uma nova versao do AIOS Core for publicada, sincronize com:
+
+```bash
+bash .aios-core/scripts/update-aios.sh
+```
+
+**O que o script faz:**
+
+| Cenario | Acao |
+|---------|------|
+| Arquivo so local (sua customizacao) | **Mantem** |
+| Arquivo local + upstream | **Sobrescreve** (upstream vence) |
+| Arquivo so no upstream (novo) | **Cria** |
+| Removido no upstream | **Deleta** |
+
+**Requisitos:** git tree limpa para `.aios-core/` e `rsync` instalado.
+
+Apos o sync, revise o relatorio e aplique:
+
+```bash
+# Aceitar as mudancas
+git add .aios-core && git commit -m "chore: sync AIOS framework"
+
+# OU reverter se algo deu errado
+git checkout -- .aios-core/
+```
+
+### Bump de Versao do Seu Projeto
+
+Para criar uma nova versao do seu projeto, use o script de versionamento semantico:
+
+```bash
+# Detecta automaticamente pelo tipo dos commits
+npm run version:bump
+
+# Forcar tipo de bump
+npm run version:bump -- --patch   # 1.0.0 → 1.0.1 (bugfixes)
+npm run version:bump -- --minor   # 1.0.0 → 1.1.0 (features)
+npm run version:bump -- --major   # 1.0.0 → 2.0.0 (breaking changes)
+
+# Preview sem alterar nada
+npm run version:bump -- --dry-run
+```
+
+**O que o script faz:**
+1. Analisa commits convencionais desde a ultima tag
+2. Atualiza `package.json` com a nova versao
+3. Gera entrada no `CHANGELOG.md`
+4. Exibe comandos para criar tag e fazer push
+
+Apos o bump, finalize a release:
+
+```bash
+git add package.json CHANGELOG.md
+git commit -m "chore(release): v1.1.0"
+git tag -a v1.1.0 -m "Release v1.1.0"
+git push && git push --tags
+```
+
+### Atualizar Dependencias Node
+
+```bash
+npm update          # Atualiza dentro do range do package.json
+npm outdated        # Ver pacotes desatualizados
+```
+
+---
+
+## Comandos Uteis
+
+### NPM Scripts
+
+| Comando | Descricao |
+|---------|-----------|
+| `npm test` | Rodar testes |
+| `npm run lint` | Verificar code style |
+| `npm run typecheck` | Verificar tipos TypeScript |
+| `npm run build` | Build do projeto |
+| `npm run version:bump` | Bump de versao semantico |
+
+### AIOS CLI
+
+```bash
+npx aios-core doctor     # Diagnostico do ambiente
+npx aios-core info       # Informacoes do projeto
+npx aios-core init       # Inicializar novo projeto
+npx aios-core config     # Gerenciar configuracao
+npx aios-core migrate    # Migrar entre versoes do AIOS
+npx aios-core mcp setup  # Configurar MCP servers
+```
+
+### Scripts de Automacao
+
+```bash
+# Atualizar framework AIOS
+bash .aios-core/scripts/update-aios.sh
+
+# Modo autonomo (ver secao Modo Autonomo)
+bash .aios-core/scripts/autonomous-runner.sh --phases all
+
+# Spawnar agente em terminal separado
+bash .aios-core/scripts/pm.sh <agente> <tarefa>
+```
+
+---
+
+## Quick Start
 
 ### Uso
 
@@ -272,26 +460,49 @@ bootstrap          brief → PRD → spec → arquitetura      elite minds → D
 
 | Documento | Descricao |
 |-----------|-----------|
-| [guia-pratico.md](guia-pratico.md) | Guia rapido para comecar (PT-BR) |
-| [passos.md](passos.md) | Workflow completo das 12 fases (PT-BR) |
-| [Constituicao](.aios-core/constitution.md) | 6 principios do framework |
+| [guia-pratico.md](guia-pratico.md) | Guia rapido simplificado para comecar (PT-BR) |
+| [passos.md](passos.md) | Workflow completo das 10 fases (PT-BR) |
+| [Constituicao](.aios-core/constitution.md) | 6 principios inviolaveis do framework |
 | [User Guide](.aios-core/user-guide.md) | Handbook completo do usuario |
+| [CHANGELOG.md](CHANGELOG.md) | Historico de versoes e mudancas |
 
 ## Modos de Desenvolvimento
 
+### Squad Creator Premium
+
 | Modo | Tempo | Fidelidade | Descricao |
 |------|-------|------------|-----------|
-| **YOLO** | 30-45 min | 60-75% | Sem materiais expert, rapido |
-| **QUALITY** | 60-90 min | 85-95% | Com materiais expert, completo |
+| **YOLO** | 30-45 min | 60-75% | Sem materiais expert, usa pesquisa web |
+| **QUALITY** | 60-90 min | 85-95% | Com materiais expert (livros, PDFs, transcricoes) |
 | **HYBRID** | 45-75 min | Variavel | Materiais parciais |
+
+### Dev Agent
+
+| Modo | Autonomia | Descricao |
+|------|-----------|-----------|
+| **YOLO** | Total | Tasks simples e deterministicas, 0-1 prompts |
+| **Interactive** | Balanceada | Padrao, decisoes com checkpoints, 5-10 prompts |
+| **Pre-Flight** | Planejamento completo | Tasks complexas e criticas, 10-15 prompts |
 
 ## Provedores LLM Suportados
 
-- Anthropic (Claude)
-- DeepSeek
-- OpenAI (GPT-4)
-- OpenRouter (multi-model)
+| Provedor | Configuracao | Uso |
+|----------|-------------|-----|
+| Anthropic (Claude) | `ANTHROPIC_API_KEY` ou Claude Max | Principal |
+| DeepSeek | `DEEPSEEK_API_KEY` | Alternativo |
+| OpenAI (GPT-4) | Via OpenRouter | Alternativo |
+| OpenRouter | `OPENROUTER_API_KEY` | Multi-model |
+
+## MCP Servers (Opcionais)
+
+| Server | Funcao |
+|--------|--------|
+| Docker MCP | Operacoes com containers |
+| Playwright | Automacao de browser |
+| EXA | Pesquisa web via Docker |
+| Context7 | Documentacao de bibliotecas |
+| Apify | Web scraping e extracao de dados |
 
 ---
 
-*Synkra AIOS v3.11.3 — Fork pessoal customizado*
+*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.1.0*
