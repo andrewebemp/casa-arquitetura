@@ -22,6 +22,7 @@ Um meta-framework que orquestra **12 agentes de IA especializados** para transfo
 | Scrum Master | `@sm` (River) | Historias, sprints | `/AIOS/agents/sm` |
 | UX Designer | `@ux-design-expert` (Uma) | Experiencia do usuario, design | `/AIOS/agents/ux-design-expert` |
 | Squad Creator | `@squad-creator` (Craft) | Cria squads de agentes por dominio | `/AIOS/agents/squad-creator` |
+| Conselheiro-Mor | `@conselheiro-mor` | Conselho Deliberativo (analise de decisoes) | `/conselho/agents/conselheiro-mor` |
 
 ## Fluxo de Desenvolvimento (10 Fases)
 
@@ -129,6 +130,56 @@ docs/content/landing-page-copy.md
 
 > **Squads servem para qualquer dominio:** copywriting, vendas, juridico, nutricao, educacao, marketing — qualquer area com experts documentaveis.
 
+## Conselho Deliberativo
+
+Sistema de deliberacao multi-agente que analisa decisoes com rigor antes de recomendar um caminho. Inspirado no conceito de "Conclave", mas com melhorias significativas: deteccao de vieses cognitivos, pre-mortem, confianca decomposta, memoria de decisoes, e consulta cross-squad.
+
+### Como funciona
+
+```
+/conselho/agents/conselheiro-mor  →  "Devo migrar minha stack para Next.js?"
+```
+
+O Conselheiro-Mor classifica a decisao, sugere o modo de deliberacao, e orquestra o processo:
+
+1. **Classifica** o tipo de decisao (negocio, tecnico, pessoal, conteudo, estrategico)
+2. **Convoca consultores** cross-squad relevantes (AIOS Core, squads locais, ou repo externo)
+3. **Coleta pareceres** tecnicos dos agentes convocados
+4. **Critica** a qualidade do raciocinio (score 0-100 com deteccao de vieses)
+5. **Ataca** a decisao com advogado do diabo (5 entregas + pre-mortem)
+6. **Sintetiza** em recomendacao final com confianca decomposta
+
+### Modos de deliberacao
+
+| Modo | Fases | Quando usar |
+|------|-------|-------------|
+| **Full** (`*deliberar`) | 5 fases | Decisoes criticas ou irreversiveis |
+| **Quick** (`*quick`) | 3 fases | Decisoes moderadas e reversiveis |
+| **Audit** (`*audit`) | 3 fases | Auditoria de decisao ja tomada |
+
+### Agentes do Conselho
+
+| Agente | Slash Command | Papel |
+|--------|---------------|-------|
+| Conselheiro-Mor | `/conselho/agents/conselheiro-mor` | Orchestrator: triage, convocacao, moderacao |
+| Critico Metodologico | `/conselho/agents/critico-metodologico` | Score 0-100, deteccao de vieses, quality gate |
+| Advogado do Diabo | `/conselho/agents/advogado-do-diabo` | 5 entregas obrigatorias + exercicio de pre-mortem |
+| Sintetizador | `/conselho/agents/sintetizador` | Confianca decomposta, matriz de stakeholders |
+
+### Consulta cross-squad
+
+O Conselho pode convocar agentes de **3 fontes** para enriquecer a analise:
+
+| Fonte | Agentes | Acesso |
+|-------|---------|--------|
+| **AIOS Core** | 9 agentes (@architect, @dev, @qa, etc.) | Sempre disponivel |
+| **Squads locais** | Qualquer squad em `squads/` | Leitura direta |
+| **Squads externos** | 99 agentes em 13 squads (`andrewebemp/squads-criados`) | Via `gh api` |
+
+### Resultado
+
+Decisoes sao registradas em `squads/conselho/decisions/` com contexto, pareceres, scores, e proximos passos — criando memoria para aprendizado futuro.
+
 ## Modo Autonomo (Ralph Pattern)
 
 Execucao automatizada onde cada fase roda em uma instancia fresh do Claude Code (zero compactacao, maximo desempenho):
@@ -177,6 +228,7 @@ bash .aios-core/scripts/autonomous-runner.sh --resume
 .claude/                            # Integracao Claude Code
   ├── CLAUDE.md                     # Regras e configuracao do Claude Code
   ├── commands/AIOS/agents/         # Slash commands dos 12 agentes core
+  ├── commands/conselho/agents/     # Slash commands do Conselho Deliberativo
   └── rules/                        # Regras MCP
 
 docs/                               # Documentacao do projeto (gerada pelos agentes)
@@ -186,6 +238,7 @@ docs/                               # Documentacao do projeto (gerada pelos agen
   └── framework/                    # Guias de dev (source-tree, tech-stack, coding-standards)
 
 squads/                             # Squads de agentes por dominio
+  ├── conselho/                     # Conselho Deliberativo (analise de decisoes)
   └── squad-creator/                # Squad Creator Premium (meta-squad)
 
 guia-pratico.md                     # Guia rapido simplificado (PT-BR)
@@ -503,6 +556,7 @@ BROWNFIELD         ANALISE                                PLANEJAMENTO BF       
 | [User Guide](.aios-core/user-guide.md) | Handbook completo do usuario |
 | [Brownfield Guide](.aios-core/working-in-the-brownfield.md) | Guia completo para projetos existentes |
 | [CHANGELOG.md](CHANGELOG.md) | Historico de versoes e mudancas |
+| [Conselho Deliberativo](squads/conselho/docs/README.md) | Documentacao do squad Conselho |
 
 ## Modos de Desenvolvimento
 
@@ -543,4 +597,4 @@ BROWNFIELD         ANALISE                                PLANEJAMENTO BF       
 
 ---
 
-*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.2.0*
+*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.3.0*

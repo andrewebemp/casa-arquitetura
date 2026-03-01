@@ -1,0 +1,50 @@
+name: conselho
+version: 1.0.0
+tested: false
+updated_at: "2026-03-01"
+short-title: Conselho Deliberativo
+description: >-
+  Sistema de deliberação multi-agente para análise rigorosa de decisões.
+  Orchestrator: @conselheiro-mor (classificação, convocação, orquestração).
+  L1: @critico-metodologico (auditoria de processo, scoring 0-100, detecção de vieses),
+  @advogado-do-diabo (ataque a premissas, pré-mortem, 4 vulnerabilidades obrigatórias),
+  @sintetizador (integração, confiança decomposta, matriz de stakeholders).
+  Consulta cross-squad: AIOS Core (9 agentes), squads locais, e repositório
+  externo andrewebemp/squads-criados (13 squads, 99 agentes, 70+ mentes elite).
+  3 modos: Full (5 fases), Quick (3 fases), Audit (pós-decisão).
+author: AIOS Team
+entry_agent: conselheiro-mor
+slashPrefix: conselho
+
+settings:
+  activation:
+    show_ecosystem_report: false
+    show_greeting: true
+    show_quick_commands: true
+
+modes:
+  full:
+    phases: 5
+    description: "Deliberação completa com pareceres cross-squad, crítica, advocacia e síntese"
+    includes_debate: true
+    includes_cross_squad: true
+  quick:
+    phases: 3
+    description: "Deliberação rápida: contexto + advogado + síntese"
+    includes_debate: false
+    includes_cross_squad: optional
+  audit:
+    phases: 3
+    description: "Auditoria pós-decisão: contexto + crítica + lições aprendidas"
+    includes_debate: false
+    includes_cross_squad: optional
+
+cross_squad:
+  sources:
+    - type: aios-core
+      path: .claude/commands/AIOS/agents/
+    - type: squads-locais
+      path: squads/*/agents/*.md
+    - type: squads-externos
+      repo: andrewebemp/squads-criados
+      fetch: "gh api repos/andrewebemp/squads-criados/contents/{squad}/agents/{agent}.md"

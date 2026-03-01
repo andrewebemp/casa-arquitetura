@@ -1,0 +1,168 @@
+# Workflow: Protocolo de Deliberação do Conselho
+# Define o fluxo formal de deliberação em seus 3 modos
+
+name: deliberacao
+version: 1.0.0
+description: >-
+  Protocolo de deliberação multi-agente com 3 modos (Full, Quick, Audit).
+  Orquestrado pelo Conselheiro-Mor com consultas cross-squad opcionais.
+
+# ═══════════════════════════════════════════════════════════════
+# MODO FULL — 5 Fases
+# ═══════════════════════════════════════════════════════════════
+
+full:
+  phases: 5
+  description: "Deliberação completa para decisões críticas ou irreversíveis"
+
+  phase_0:
+    name: "CONTEXTO & CONVOCAÇÃO"
+    agent: conselheiro-mor
+    elicit: true
+    actions:
+      - action: "Classificar tipo de decisão"
+        reference: "data/tipos-decisao.yaml"
+      - action: "Confirmar modo Full com usuário"
+      - action: "Identificar domínios → sugerir consultores cross-squad"
+        reference: "data/consulta-cross-squad.yaml"
+      - action: "Usuário aprova configuração e consultores"
+    checkpoint: "Configuração aprovada pelo usuário"
+    gate: null
+
+  phase_1:
+    name: "PARECERES & DEBATE"
+    agent: conselheiro-mor
+    elicit: false
+    actions:
+      - action: "Resolver fonte de cada consultor (AIOS/local/externo)"
+        reference: "tasks/consultar-especialista.md"
+      - action: "Gerar parecer de cada consultor"
+      - action: "Identificar convergências e divergências"
+      - action: "Sintetizar pontos de debate"
+    checkpoint: "Todos os pareceres coletados + síntese do debate"
+    gate: null
+
+  phase_2:
+    name: "CRÍTICA METODOLÓGICA"
+    agent: critico-metodologico
+    elicit: false
+    actions:
+      - action: "Avaliar qualidade do raciocínio (pareceres + argumentos)"
+        reference: "data/scoring-framework.yaml"
+      - action: "Pontuar 5 critérios (0-20 cada)"
+      - action: "Aplicar penalidades"
+      - action: "Detectar vieses cognitivos"
+        reference: "data/vieses-cognitivos.yaml"
+      - action: "Preencher template de output"
+        reference: "templates/output-critico.md"
+    checkpoint: "Score calculado + vieses + gaps + recomendação"
+    gate:
+      condition: "score < 50"
+      action: "Alertar usuário — perguntar se deseja continuar ou pausar"
+
+  phase_3:
+    name: "ADVOGADO DO DIABO"
+    agent: advogado-do-diabo
+    elicit: false
+    actions:
+      - action: "Produzir 5 entregas obrigatórias"
+      - action: "1. Premissa mais frágil"
+      - action: "2. Risco principal não discutido"
+      - action: "3. Cenário de arrependimento 12 meses"
+      - action: "4. Alternativa ignorada"
+      - action: "5. Pré-mortem"
+      - action: "Preencher template de output"
+        reference: "templates/output-advogado.md"
+    checkpoint: "5 entregas completas"
+    gate: null
+
+  phase_4:
+    name: "SÍNTESE FINAL"
+    agent: sintetizador
+    elicit: false
+    actions:
+      - action: "Integrar pareceres + crítica + advocacia"
+      - action: "Calcular confiança decomposta (dados/modelo/execução)"
+      - action: "Construir matriz de stakeholders"
+      - action: "Definir riscos residuais com mitigações"
+      - action: "Definir próximos passos com responsáveis e prazos"
+      - action: "Definir critérios de reversão (mínimo 2)"
+      - action: "Preencher template de output"
+        reference: "templates/output-sintese.md"
+      - action: "Registrar decisão no histórico"
+        reference: "tasks/registrar-decisao.md"
+    checkpoint: "Síntese completa + decisão registrada"
+    gate:
+      condition: "confianca < 60%"
+      action: "Usar formato INCONCLUSIVO — apresentar opções para decisão humana"
+
+# ═══════════════════════════════════════════════════════════════
+# MODO QUICK — 3 Fases
+# ═══════════════════════════════════════════════════════════════
+
+quick:
+  phases: 3
+  description: "Deliberação rápida para decisões moderadas e reversíveis"
+
+  phase_0:
+    name: "CONTEXTO"
+    agent: conselheiro-mor
+    elicit: true
+    actions:
+      - action: "Classificar decisão"
+      - action: "Oferecer 1-2 consultas rápidas cross-squad (opcional)"
+      - action: "Resumir contexto em 3-5 frases"
+    checkpoint: "Contexto definido"
+
+  phase_1:
+    name: "ADVOGADO DO DIABO"
+    agent: advogado-do-diabo
+    actions:
+      - action: "5 entregas obrigatórias (versão concisa)"
+      - action: "Preencher template"
+    checkpoint: "Vulnerabilidades identificadas"
+
+  phase_2:
+    name: "SÍNTESE"
+    agent: sintetizador
+    actions:
+      - action: "Integrar input do usuário + advocacia + pareceres"
+      - action: "Confiança decomposta"
+      - action: "Próximos passos + critérios de reversão"
+      - action: "Registrar decisão"
+    checkpoint: "Recomendação final"
+
+# ═══════════════════════════════════════════════════════════════
+# MODO AUDIT — 3 Fases
+# ═══════════════════════════════════════════════════════════════
+
+audit:
+  phases: 3
+  description: "Auditoria retroativa de decisão já tomada"
+
+  phase_0:
+    name: "CONTEXTO"
+    agent: conselheiro-mor
+    elicit: true
+    actions:
+      - action: "Coletar: decisão tomada, contexto, razões, resultados"
+      - action: "Consulta retroativa cross-squad (opcional)"
+    checkpoint: "Contexto da decisão original claro"
+
+  phase_1:
+    name: "CRÍTICA METODOLÓGICA"
+    agent: critico-metodologico
+    actions:
+      - action: "Auditoria retroativa do processo original"
+      - action: "Score + vieses + gaps"
+      - action: "Comparar processo vs resultado observado"
+    checkpoint: "Auditoria completa"
+
+  phase_2:
+    name: "SÍNTESE"
+    agent: sintetizador
+    actions:
+      - action: "Lições aprendidas"
+      - action: "Ajustes recomendados (manter/ajustar/reverter)"
+      - action: "Registrar auditoria"
+    checkpoint: "Lições + recomendações"

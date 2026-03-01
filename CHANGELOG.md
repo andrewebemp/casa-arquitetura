@@ -5,6 +5,32 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2026-03-01
+
+### Adicionado
+- **Squad Conselho Deliberativo** — sistema de deliberação multi-agente com 3 modos (Full, Quick, Audit)
+- 4 agentes especializados: Conselheiro-Mor, Crítico Metodológico, Advogado do Diabo, Sintetizador
+- Detecção de 12 vieses cognitivos (anchoring, confirmation bias, sunk cost, etc.)
+- Exercício de pré-mortem no Advogado do Diabo (5 entregas obrigatórias)
+- Confiança decomposta no Sintetizador (dados/modelo/execução)
+- Scoring framework 0-100 com 5 critérios × 20 pontos
+- Matriz de impacto por stakeholder
+- Memória de decisões em `squads/conselho/decisions/`
+- Consulta cross-squad: AIOS Core (9 agentes), squads locais, e repositório externo `andrewebemp/squads-criados` (13 squads, 99 agentes)
+- Slash commands: `/conselho/agents/conselheiro-mor`, `critico-metodologico`, `advogado-do-diabo`, `sintetizador`
+- Tasks: deliberar-full, deliberar-quick, deliberar-audit, consultar-especialista, registrar-decisao
+- Templates de output: crítico, advogado, síntese, registro de decisão
+- Data files: vieses-cognitivos, scoring-framework, tipos-decisao, consulta-cross-squad, conselho-kb
+- Workflow formal de deliberação (deliberacao.yaml)
+- Documentação completa do squad em `squads/conselho/docs/README.md`
+
+### Atualizado
+- CLAUDE.md: seção conselho adicionada com key agents e modos
+- README.md: seção Conselho Deliberativo, tabela de agentes, árvore de estrutura, documentação
+- passos.md: menção ao Conselho na Fase 4
+- guia-pratico.md: Conselho no cartão de referência rápida
+- squad-registry.yaml: registro do squad conselho
+
 ## [1.2.0] - 2026-02-27
 
 ### Adicionado
@@ -65,6 +91,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Controle de versões com semantic versioning
 - Repositório privado no GitHub
 
+[1.3.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/andrewebemp/aios-pessoal/releases/tag/v1.0.0

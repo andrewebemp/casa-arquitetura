@@ -528,6 +528,15 @@ Use a copy em docs/content/landing-page-copy.md para implementar o componente
 | OalaNicolas | `/squad-creator/agents/oalanicolas` | Mind cloning, extracao de DNA |
 | Pedro Valerio | `/squad-creator/agents/pedro-valerio` | Design de processos, veto conditions |
 
+### Conselho Deliberativo
+
+| Agente | Slash Command | Faz |
+|--------|---------------|-----|
+| Conselheiro-Mor | `/conselho/agents/conselheiro-mor` | Orchestrator: triage, convocacao, moderacao |
+| Critico Metodologico | `/conselho/agents/critico-metodologico` | Score 0-100, deteccao de vieses cognitivos |
+| Advogado do Diabo | `/conselho/agents/advogado-do-diabo` | 5 entregas obrigatorias + pre-mortem |
+| Sintetizador | `/conselho/agents/sintetizador` | Confianca decomposta, matriz stakeholders |
+
 ### Comandos Mais Usados
 
 ```bash
@@ -551,6 +560,11 @@ Use a copy em docs/content/landing-page-copy.md para implementar o componente
 
 # === SQUADS ===
 /squad-creator/agents/squad-chief → [descreva o dominio]
+
+# === CONSELHO DELIBERATIVO ===
+/conselho/agents/conselheiro-mor → *deliberar [questao]   # Full (5 fases)
+/conselho/agents/conselheiro-mor → *quick [questao]       # Quick (3 fases)
+/conselho/agents/conselheiro-mor → *audit [decisao]       # Auditoria
 ```
 
 ### Comandos Brownfield
@@ -578,6 +592,7 @@ projeto/
 ├── .aios/                   # Estado do projeto
 ├── .claude/commands/        # Slash commands (agentes)
 │   ├── AIOS/agents/         # Agentes core
+│   ├── conselho/agents/     # Conselho Deliberativo
 │   └── squad-creator/agents/# Agentes premium
 ├── docs/
 │   ├── project-brief.md     # Brief (Analyst)
@@ -590,6 +605,7 @@ projeto/
 │   │   └── coding-standards.md
 │   └── stories/             # Stories (SM → Dev → QA)
 ├── squads/                  # Squads de dominio
+│   ├── conselho/            # Conselho Deliberativo
 │   └── squad-creator/       # Squad Creator Premium
 ├── src/                     # Codigo fonte (Dev)
 └── package.json
@@ -739,5 +755,5 @@ AUTONOMO (Parte 7):
 
 ---
 
-*Synkra AIOS -- Guia Pratico Simplificado v1.2*
+*Synkra AIOS -- Guia Pratico Simplificado v1.3*
 *Baseado em: AIOS-Core v2.1.0, Squad Creator Premium v3.0.0, Autonomous Runner v1.0.0*

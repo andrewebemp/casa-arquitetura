@@ -1,0 +1,89 @@
+# Tipos de Decisão e Configurações por Modo — Conselho Deliberativo
+
+classificacao:
+  tipos:
+    - id: negocio
+      nome: "Decisão de Negócio"
+      exemplos:
+        - "Investir R$X em Y?"
+        - "Mudar modelo de pricing?"
+        - "Entrar em novo mercado?"
+        - "Contratar ou terceirizar?"
+      agentes_sugeridos:
+        aios_core: [analyst, pm, po]
+        squads_externos: [one-person-business, marketing-ops, exec-transport]
+      criterios_extras:
+        - "ROI projetado"
+        - "Payback period"
+        - "Custo de oportunidade"
+
+    - id: tecnico
+      nome: "Decisão Técnica"
+      exemplos:
+        - "Migrar de X para Y?"
+        - "Refatorar ou reescrever?"
+        - "Qual arquitetura usar?"
+        - "Monolito ou microserviços?"
+      agentes_sugeridos:
+        aios_core: [architect, dev, qa, devops, data-engineer]
+        squads_externos: [squad-creator]
+      criterios_extras:
+        - "Complexidade de implementação"
+        - "Débito técnico"
+        - "Manutenibilidade"
+
+    - id: pessoal
+      nome: "Decisão Pessoal / Carreira"
+      exemplos:
+        - "Mudar de carreira?"
+        - "Iniciar novo projeto?"
+        - "Investir em formação X?"
+        - "Aceitar proposta Y?"
+      agentes_sugeridos:
+        aios_core: [analyst]
+        squads_externos: [zona-genialidade, top-30, personal-dev-content]
+      criterios_extras:
+        - "Alinhamento com valores"
+        - "Impacto na qualidade de vida"
+        - "Reversibilidade"
+
+    - id: conteudo
+      nome: "Decisão de Conteúdo / Marketing"
+      exemplos:
+        - "Qual plataforma priorizar?"
+        - "Formato longo ou curto?"
+        - "Nicho ou generalista?"
+        - "Orgânico ou pago?"
+      agentes_sugeridos:
+        aios_core: [analyst, ux-design-expert]
+        squads_externos: [content-distillery, youtube, vctop-organico, marketing-ops, design]
+      criterios_extras:
+        - "Alcance vs engajamento"
+        - "Custo por lead"
+        - "Sustentabilidade a longo prazo"
+
+    - id: estrategico
+      nome: "Decisão Estratégica"
+      exemplos:
+        - "Pivotar o modelo de negócio?"
+        - "Fusão ou aquisição?"
+        - "Expandir ou consolidar?"
+      agentes_sugeridos:
+        aios_core: [analyst, pm, po, architect]
+        squads_externos: [one-person-business, marketing-ops, zona-genialidade]
+      criterios_extras:
+        - "Visão de 3-5 anos"
+        - "Vantagem competitiva"
+        - "Riscos existenciais"
+
+modo_sugerido:
+  regras:
+    - condicao: "Decisão irreversível ou alto valor (>R$50k)"
+      modo: full
+    - condicao: "Decisão moderada, reversível com custo"
+      modo: quick
+    - condicao: "Decisão já tomada, precisa avaliar"
+      modo: audit
+    - condicao: "Dúvida sobre qual modo"
+      modo: full
+      nota: "Na dúvida, use Full — melhor deliberar demais do que de menos"

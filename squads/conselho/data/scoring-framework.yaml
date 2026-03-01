@@ -1,0 +1,108 @@
+# Framework de Pontuação — Crítico Metodológico
+# Score de qualidade do processo de raciocínio (0-100)
+
+scoring:
+  total: 100
+  criterios: 5
+  pontos_por_criterio: 20
+
+  criterio_1:
+    id: premissas
+    nome: "Premissas Declaradas Explicitamente"
+    peso: 20
+    descricao: "As suposições fundamentais foram identificadas e declaradas?"
+    niveis:
+      - score: 0-5
+        descricao: "Premissas completamente implícitas ou ausentes"
+      - score: 6-10
+        descricao: "Algumas premissas declaradas, mas principais estão implícitas"
+      - score: 11-15
+        descricao: "Premissas principais declaradas, mas faltam premissas secundárias"
+      - score: 16-20
+        descricao: "Todas as premissas relevantes identificadas e declaradas explicitamente"
+
+  criterio_2:
+    id: evidencias
+    nome: "Evidências com Fontes Rastreáveis"
+    peso: 20
+    descricao: "As afirmações estão apoiadas em evidências verificáveis?"
+    niveis:
+      - score: 0-5
+        descricao: "Sem evidências ou apenas opinião"
+      - score: 6-10
+        descricao: "Algumas evidências, mas maioria sem fonte"
+      - score: 11-15
+        descricao: "Evidências presentes com fontes parciais"
+      - score: 16-20
+        descricao: "Evidências robustas com fontes rastreáveis e verificáveis"
+
+  criterio_3:
+    id: logica
+    nome: "Lógica Consistente (Sem Contradições)"
+    peso: 20
+    descricao: "O raciocínio é internamente coerente?"
+    niveis:
+      - score: 0-5
+        descricao: "Contradições fundamentais no raciocínio"
+      - score: 6-10
+        descricao: "Lógica parcial com saltos ou gaps significativos"
+      - score: 11-15
+        descricao: "Lógica consistente com gaps menores"
+      - score: 16-20
+        descricao: "Raciocínio internamente coerente, sem contradições"
+
+  criterio_4:
+    id: cenarios
+    nome: "Cenários Alternativos Considerados"
+    peso: 20
+    descricao: "Opções alternativas foram exploradas antes da conclusão?"
+    niveis:
+      - score: 0-5
+        descricao: "Nenhuma alternativa considerada"
+      - score: 6-10
+        descricao: "Alternativas mencionadas mas não analisadas"
+      - score: 11-15
+        descricao: "2+ alternativas analisadas com trade-offs"
+      - score: 16-20
+        descricao: "Alternativas rigorosamente comparadas com critérios claros"
+
+  criterio_5:
+    id: conflitos
+    nome: "Conflitos Resolvidos Adequadamente"
+    peso: 20
+    descricao: "Divergências e tensões foram tratadas, não ignoradas?"
+    niveis:
+      - score: 0-5
+        descricao: "Conflitos ignorados ou suprimidos"
+      - score: 6-10
+        descricao: "Conflitos reconhecidos mas não resolvidos"
+      - score: 11-15
+        descricao: "Conflitos principais resolvidos, alguns pendentes"
+      - score: 16-20
+        descricao: "Todos os conflitos endereçados com justificativa clara"
+
+thresholds:
+  aprovar:
+    min: 70
+    descricao: "Processo rigoroso. Gaps são menores e podem ser aceitos."
+  revisar:
+    min: 50
+    max: 69
+    descricao: "Gaps significativos. Endereçar antes de prosseguir."
+  rejeitar:
+    max: 49
+    descricao: "Processo fundamentalmente falho. Reiniciar análise."
+
+penalidades:
+  - tipo: "Afirmação numérica sem fonte (alto impacto)"
+    pontos: -5
+  - tipo: "Fonte sem localização específica"
+    pontos: -3
+  - tipo: "'Todo mundo sabe que...' sem citação"
+    pontos: -3
+  - tipo: "Análise financeira sem cenários (otimista/realista/pessimista)"
+    pontos: -10
+  - tipo: "Alternativa relevante não endereçada"
+    pontos: -10
+  - tipo: "Viés cognitivo detectado e não mitigado"
+    pontos: -5

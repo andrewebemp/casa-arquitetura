@@ -241,6 +241,12 @@ Existem **duas abordagens** para criar squads:
 | **Premium (recomendado)** | `/squad-creator/agents/squad-chief` | Precisa de expertise de dominio (copy, vendas, juridico) | Agentes clonados de mentes elite reais com DNA extraido |
 | **Basico** | `/AIOS/agents/squad-creator` | Precisa de agentes funcionais baseados no PRD | Agentes genericos baseados em entidades do projeto |
 
+> **Dica: Conselho Deliberativo** — Se voce precisa analisar uma **decisao critica** (migrar stack, investir em X, mudar modelo de pricing), use o Conselho antes de decidir:
+> ```
+> /conselho/agents/conselheiro-mor  →  *deliberar "Devo migrar para Next.js?"
+> ```
+> O Conselho orquestra 3 agentes (Critico Metodologico, Advogado do Diabo, Sintetizador) e pode consultar agentes de qualquer squad para enriquecer a analise. Modos: Full (5 fases), Quick (3 fases), Audit (pos-decisao).
+
 ---
 
 ### OPCAO A: Squad Creator Premium (Recomendado)
@@ -1217,5 +1223,242 @@ plan/                                 # Gerado automaticamente
 
 ---
 
+## ESTRATEGIAS AVANCADAS: Maximizando AIOS + Squads
+
+> **O que e:** Tecnicas para extrair o maximo poder da combinacao entre agentes AIOS
+> (execucao tecnica) e Squads de dominio (expertise especializada). Estas estrategias
+> complementam o fluxo padrao das fases 0-9 e podem ser adotadas incrementalmente.
+
+### Estrategia 1: Squads como Validadores de Dominio
+
+No fluxo padrao, a validacao e puramente tecnica (@qa valida codigo, @po valida artefatos).
+Esta estrategia adiciona uma **camada de validacao de dominio** usando os squads.
+
+#### Quando usar:
+- O projeto tem requisitos de dominio complexos (copy persuasiva, compliance juridico, UX comportamental)
+- Erros de dominio sao tao graves quanto bugs tecnicos
+- O squad foi criado no modo QUALITY (alta fidelidade)
+
+#### Como funciona:
+
+Apos o QA tecnico (Passo 8.3), adicione um passo **8.4 - Validacao de Dominio**:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│   8.1 @sm ──► 8.2 @dev ──► 8.3 @qa ──► 8.4 Squad de Dominio      │
+│                                              │                      │
+│                                         ┌────┴────┐                 │
+│                                         │         │                 │
+│                                    DOMAIN-OK  DOMAIN-FAIL           │
+│                                         │    (ajuste de dominio)    │
+│                                         │         │                 │
+│                                         ▼         ▼                 │
+│                                    Proxima     Volta p/ @dev        │
+│                                    story       (com feedback        │
+│                                                 do expert)          │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### Exemplo pratico:
+
+```
+# Apos QA aprovar tecnicamente uma landing page:
+/{squad-copy}/agents/eugene-schwartz
+
+"Revise a landing page implementada na story 2.3.1.
+Valide contra os 5 Levels of Awareness.
+A copy esta no nivel correto para o publico-alvo definido no PRD?"
+```
+
+O expert clonado avalia com seus frameworks reais — nao com criterios genericos.
+
+#### Criterios de validacao de dominio (exemplos por tipo de squad):
+
+| Squad | O que valida | Framework usado |
+|-------|-------------|-----------------|
+| Copywriting | Nivel de awareness, headline power, CTA | Schwartz 5 Levels |
+| Growth | Metricas de conversao, funil, retention hooks | Hormozi Value Equation |
+| UX Comportamental | Friction points, cognitive load, nudges | BJ Fogg Behavior Model |
+| Juridico/Compliance | Termos, LGPD, consentimento | Checklists regulatorios |
+
+---
+
+### Estrategia 2: Composicao entre Squads (Pipelines de Dominio)
+
+Squads nao precisam operar isolados. Podem ser **encadeados em pipelines** onde a
+saida de um alimenta a entrada do proximo.
+
+#### Quando usar:
+- O projeto envolve multiplos dominios que se conectam (ex: conteudo + marketing + growth)
+- Voce tem 2+ squads criados que cobrem partes complementares do mesmo fluxo
+- Quer automatizar fluxos de dominio end-to-end
+
+#### Padroes de composicao:
+
+**Padrao 1: Pipeline Linear**
+```
+Squad A (estrategia) ──► Squad B (producao) ──► Squad C (distribuicao)
+
+Exemplo concreto:
+/youtube:agents:youtube-chief     →  Define estrategia do video (titulo, hook, estrutura)
+/conteudo:agents:roteirista       →  Escreve roteiro completo baseado na estrategia
+/conteudo:agents:editor-copy      →  Refina copy, CTA, descricao para SEO
+```
+
+**Padrao 2: Hub & Spoke (um orquestrador, varios especialistas)**
+```
+                    ┌── Squad Copy (headlines, body)
+                    │
+Squad Strategy ─────┼── Squad Design (visual, layout)
+  (orquestrador)    │
+                    └── Squad Growth (metricas, testes A/B)
+```
+
+**Padrao 3: Feedback Cruzado (squads revisam uns aos outros)**
+```
+Squad A cria ──► Squad B revisa ──► Squad A refina
+
+Exemplo:
+/copy:agents:gary-halbert    →  Escreve email de vendas
+/growth:agents:sabri-suby    →  Avalia funil e conversao do email
+/copy:agents:gary-halbert    →  Refina com feedback de conversao
+```
+
+#### Como implementar na pratica:
+
+1. Ative o primeiro squad e execute a task de dominio
+2. Salve o output em `squads/{squad}/data/` ou em um arquivo compartilhado
+3. Ative o proximo squad referenciando o output anterior como input
+4. Repita ate completar o pipeline
+
+> **Dica:** Documente seus pipelines recorrentes em `squads/{squad}/workflows/` como
+> workflows formais. Assim eles ficam repetiveis e automatizaveis.
+
+---
+
+### Estrategia 3: Feedback Loop Pos-Deploy (Squads como Analistas de Resultado)
+
+No fluxo padrao, o projeto termina na Fase 9 (deploy). Esta estrategia adiciona uma
+**Fase 10 implicita** onde squads analisam resultados reais e alimentam o proximo ciclo.
+
+#### Quando usar:
+- O projeto ja esta no ar e gerando dados reais
+- Voce quer decisoes data-informed para o proximo ciclo de desenvolvimento
+- O squad de dominio tem frameworks de analise (growth, retention, conversao)
+
+#### Como funciona:
+
+```
+FASE 9 (Deploy) ──► PROJETO NO AR ──► Coleta de dados reais
+                                              │
+                                              ▼
+                                     FASE 10 (implicita)
+                                 ┌──────────────────────┐
+                                 │  Squad de Dominio    │
+                                 │  analisa resultados  │
+                                 │  com frameworks do   │
+                                 │  expert clonado      │
+                                 └──────────┬───────────┘
+                                            │
+                                   ┌────────┴────────┐
+                                   │                 │
+                               Ajustes           Novas
+                               rapidos           features
+                                   │                 │
+                                   ▼                 ▼
+                              Volta p/          Volta p/
+                              Fase 8            Fase 1-2
+                              (bug fix/         (novo ciclo
+                              tweak)            completo)
+```
+
+#### Exemplo pratico:
+
+```
+# 2 semanas apos o deploy de um SaaS:
+/growth:agents:alex-hormozi
+
+"Analise os dados das primeiras 2 semanas:
+- 500 visitantes, 23 signups (4.6% conversao)
+- 8 usuarios ativos apos 7 dias (34.8% retention D7)
+- Ticket medio: R$0 (todos no free tier)
+
+Usando o Value Equation (Dream Outcome x Perceived Likelihood / Time Delay x Effort),
+quais ajustes voce recomenda para o proximo sprint?"
+```
+
+O expert responde com **recomendacoes baseadas em seus frameworks**, nao em achismos:
+- "Retention de 34.8% indica que o perceived likelihood esta baixo — o onboarding nao mostra valor rapido"
+- "Zero conversao para pago sugere que o time delay para ver resultado e muito longo — adicione quick wins"
+
+Essas recomendacoes viram stories no proximo ciclo (Fase 8).
+
+#### Acumulacao de conhecimento entre ciclos:
+
+Cada ciclo de feedback enriquece o squad:
+
+```
+squads/{squad}/data/
+├── cycle-1-metrics.md          # Dados reais do primeiro deploy
+├── cycle-2-metrics.md          # Dados apos ajustes
+├── cycle-3-metrics.md          # Dados apos novas features
+└── insights-acumulados.md      # Padroes identificados entre ciclos
+```
+
+Com o tempo, o squad acumula **inteligencia especifica do projeto** alem da expertise
+generica do expert clonado. Isso cria um efeito composto: cada ciclo e mais preciso
+que o anterior.
+
+---
+
+### Estrategia 4: Squads Mid-Project (Criacao sob Demanda)
+
+No fluxo padrao, squads sao criados na Fase 4 como etapa unica. Mas na pratica,
+necessidades de dominio surgem durante o desenvolvimento.
+
+#### Quando usar:
+- Durante a Fase 8, percebe-se que falta expertise de dominio nao prevista
+- Um novo requisito exige conhecimento especializado (ex: compliance LGPD, i18n, acessibilidade)
+- O projeto pivotou e o dominio mudou
+
+#### Como funciona:
+
+```
+Fase 8 (Dev Cycle)
+  │
+  ├── Story 3.2 precisa de copy persuasiva
+  │   └── Nao tem squad de copy? Crie agora:
+  │       1. Pause o dev cycle
+  │       2. /squad-creator/agents/squad-chief → crie squad de copy (modo YOLO = 30 min)
+  │       3. Sync com IDE
+  │       4. Retome o dev cycle com o novo squad disponivel
+  │
+  └── Story 4.1 precisa de compliance LGPD
+      └── Crie squad juridico sob demanda
+```
+
+#### Regra importante:
+- Squads criados mid-project seguem o **mesmo padrao** de validacao (smoke tests, quality score)
+- O squad e adicionado ao `squad-registry.yaml` e fica disponivel para o restante do projeto
+- Nao e necessario voltar para a Fase 4 — basta criar, validar e sincronizar
+
+---
+
+### Resumo: Quando Usar Cada Estrategia
+
+| Estrategia | Complexidade | Valor | Quando adotar |
+|------------|-------------|-------|---------------|
+| **1. Validacao de Dominio** | Baixa | Alto | Desde o primeiro projeto com squads |
+| **2. Composicao entre Squads** | Media | Muito alto | Quando tiver 2+ squads complementares |
+| **3. Feedback Pos-Deploy** | Baixa | Composto | Apos primeiro deploy com dados reais |
+| **4. Squads Mid-Project** | Baixa | Situacional | Quando surgir necessidade nao prevista |
+
+> **Principio geral:** Squads nao sao so "criados na Fase 4 e esquecidos" — sao
+> **ativos vivos** que participam de validacao, composicao, analise e evolucao
+> durante todo o ciclo de vida do projeto.
+
+---
+
 *Synkra AIOS - Da Ideia ao Deploy (10 Fases) | Greenfield & Brownfield*
-*Fork pessoal v1.2.0 | Baseado em AIOS-Core v3.11.3*
+*Fork pessoal v1.3.0 | Baseado em AIOS-Core v3.11.3*

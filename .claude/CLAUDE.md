@@ -211,6 +211,30 @@ Instead of generic agents, it clones experts with documented frameworks and meth
 Squads are created in `squads/{squad-name}/` with agents, tasks, workflows, templates, and data.
 <!-- AIOS-MANAGED-END: squad-creator -->
 
+<!-- AIOS-MANAGED-START: conselho -->
+## Conselho Deliberativo
+
+O Conselho Deliberativo analisa decisões com rigor multi-perspectiva antes de recomendar um caminho.
+Ativado via `/conselho/agents/conselheiro-mor`, orquestra 3 agentes especializados e pode consultar agentes de qualquer squad.
+
+### Key Agents
+- `/conselho/agents/conselheiro-mor` - Orchestrator: triage, classificação, convocação
+- `/conselho/agents/critico-metodologico` - Avalia qualidade do raciocínio (score 0-100)
+- `/conselho/agents/advogado-do-diabo` - Ataca a decisão (5 entregas obrigatórias + pré-mortem)
+- `/conselho/agents/sintetizador` - Integra perspectivas (confiança decomposta)
+
+### Deliberation Modes
+- **Full** (5 fases) - Decisões críticas/irreversíveis, com pareceres cross-squad
+- **Quick** (3 fases) - Decisões moderadas e reversíveis
+- **Audit** (3 fases) - Auditoria de decisão já tomada
+
+### Cross-Squad Consultation
+O Conselho pode convocar agentes de 3 fontes: AIOS Core, squads locais, e repositório externo `andrewebemp/squads-criados` (13 squads, 99 agentes).
+
+### Output Structure
+Decisões são registradas em `squads/conselho/decisions/` para memória e aprendizado futuro.
+<!-- AIOS-MANAGED-END: conselho -->
+
 <!-- AIOS-MANAGED-START: autonomous-mode -->
 ## Autonomous Mode
 

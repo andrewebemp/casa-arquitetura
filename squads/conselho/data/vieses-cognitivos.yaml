@@ -1,0 +1,148 @@
+# Catálogo de Vieses Cognitivos — Conselho Deliberativo
+# Usado pelo Crítico Metodológico para detectar vieses no raciocínio
+# Referências: Kahneman (Thinking Fast and Slow), Ariely, Thaler
+
+vieses:
+  - id: anchoring
+    nome: Ancoragem
+    descricao: >-
+      Dependência excessiva da primeira informação recebida.
+      O primeiro número, proposta ou referência ancora toda a análise subsequente.
+    sinais:
+      - "Primeira opção apresentada recebe peso desproporcional"
+      - "Números iniciais dominam a análise sem questionamento"
+      - "Ajustes insuficientes a partir do ponto de partida"
+    pergunta_deteccao: "A análise seria diferente se a primeira informação tivesse sido outra?"
+    severidade: alta
+
+  - id: confirmation_bias
+    nome: Viés de Confirmação
+    descricao: >-
+      Buscar, interpretar e lembrar informações que confirmam crenças pré-existentes.
+      Ignorar ou desvalorizar evidências contrárias.
+    sinais:
+      - "Apenas evidências favoráveis são citadas"
+      - "Contra-argumentos são descartados superficialmente"
+      - "Fontes selecionadas confirmam a posição pré-definida"
+    pergunta_deteccao: "Que evidências contrárias foram ativamente buscadas e consideradas?"
+    severidade: alta
+
+  - id: sunk_cost
+    nome: Falácia do Custo Irrecuperável
+    descricao: >-
+      Continuar investindo em algo por já ter investido muito,
+      mesmo quando evidências indicam que parar seria melhor.
+    sinais:
+      - "'Já investimos muito para parar agora'"
+      - "Histórico de investimento justifica continuidade"
+      - "Decisão futura baseada em custos passados, não em retorno esperado"
+    pergunta_deteccao: "Se começássemos do zero hoje, tomaríamos a mesma decisão?"
+    severidade: alta
+
+  - id: overconfidence
+    nome: Excesso de Confiança
+    descricao: >-
+      Superestimar a própria capacidade de prever resultados ou a precisão
+      das próprias estimativas. Subestimar incertezas.
+    sinais:
+      - "Estimativas sem margem de erro"
+      - "Cenários negativos considerados 'improváveis' sem justificativa"
+      - "Confiança alta sem evidências proporcionais"
+    pergunta_deteccao: "Qual seria a margem de erro realista? O que acontece nos piores 20% dos cenários?"
+    severidade: alta
+
+  - id: availability_heuristic
+    nome: Heurística de Disponibilidade
+    descricao: >-
+      Julgar a probabilidade de eventos pela facilidade com que exemplos
+      vêm à mente, não pela frequência real.
+    sinais:
+      - "Exemplos recentes ou dramáticos dominam a análise"
+      - "Dados estatísticos ignorados em favor de anedotas"
+      - "'Todo mundo sabe que...' sem dados"
+    pergunta_deteccao: "A análise é baseada em dados ou em exemplos que vieram à mente primeiro?"
+    severidade: media
+
+  - id: groupthink
+    nome: Pensamento de Grupo
+    descricao: >-
+      Conformidade com a opinião dominante do grupo, suprimindo
+      dissidência e alternativas.
+    sinais:
+      - "Consenso rápido demais sem debate real"
+      - "Vozes discordantes minimizadas ou ignoradas"
+      - "Pressão implícita para concordar"
+    pergunta_deteccao: "Houve espaço genuíno para discordância? Alternativas foram exploradas a fundo?"
+    severidade: alta
+
+  - id: status_quo_bias
+    nome: Viés do Status Quo
+    descricao: >-
+      Preferência pela situação atual simplesmente porque é familiar,
+      mesmo quando alternativas são objetivamente melhores.
+    sinais:
+      - "'Sempre fizemos assim'"
+      - "Mudança vista como risco, manutenção vista como segurança"
+      - "Custos da mudança superestimados, custos da inação ignorados"
+    pergunta_deteccao: "Se não existisse a situação atual, escolheríamos criá-la?"
+    severidade: media
+
+  - id: survivorship_bias
+    nome: Viés de Sobrevivência
+    descricao: >-
+      Focar nos casos de sucesso e ignorar os fracassos,
+      gerando conclusões distorcidas.
+    sinais:
+      - "Apenas casos de sucesso citados como referência"
+      - "Nenhuma análise de quem tentou e falhou"
+      - "'Fulano fez X e deu certo, logo devemos fazer X'"
+    pergunta_deteccao: "Quantos tentaram a mesma abordagem e falharam? Por que falharam?"
+    severidade: media
+
+  - id: framing_effect
+    nome: Efeito de Enquadramento
+    descricao: >-
+      A forma como a informação é apresentada influencia a decisão
+      mais do que o conteúdo em si.
+    sinais:
+      - "Mesma informação apresentada de forma diferente gera conclusões opostas"
+      - "Foco em ganhos ou perdas dependendo da narrativa"
+      - "Números relativos vs absolutos usados seletivamente"
+    pergunta_deteccao: "A conclusão muda se enquadrarmos a mesma informação de forma diferente?"
+    severidade: media
+
+  - id: planning_fallacy
+    nome: Falácia do Planejamento
+    descricao: >-
+      Subestimar tempo, custos e riscos enquanto superestima
+      benefícios de ações planejadas.
+    sinais:
+      - "Timeline 'otimista' sem buffer"
+      - "Custos estimados sem contingência"
+      - "Histórico de atrasos ignorado"
+    pergunta_deteccao: "Quanto tempo/dinheiro levaram projetos similares no passado? Estamos dentro da base rate?"
+    severidade: alta
+
+  - id: authority_bias
+    nome: Viés de Autoridade
+    descricao: >-
+      Aceitar acriticamente opiniões de figuras de autoridade,
+      independente da qualidade do argumento.
+    sinais:
+      - "'Fulano (expert) disse que...', sem avaliar o argumento"
+      - "Credenciais substituem evidências"
+      - "Questionamento visto como desrespeito"
+    pergunta_deteccao: "O argumento se sustenta pelos seus méritos, independente de quem o disse?"
+    severidade: media
+
+  - id: loss_aversion
+    nome: Aversão à Perda
+    descricao: >-
+      Perdas são sentidas ~2x mais intensamente que ganhos equivalentes,
+      levando a decisões excessivamente conservadoras.
+    sinais:
+      - "Foco desproporcional no que pode dar errado"
+      - "Oportunidades descartadas pelo medo de perda"
+      - "Assimetria na avaliação de riscos vs recompensas"
+    pergunta_deteccao: "Estamos avaliando riscos e recompensas na mesma escala?"
+    severidade: media

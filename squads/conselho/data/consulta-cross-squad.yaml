@@ -1,0 +1,146 @@
+# Registry de Agentes Consultáveis — Conselho Deliberativo
+# 3 fontes: AIOS Core, Squads Locais, Repositório Externo
+# O Conselheiro-Mor consulta este arquivo para identificar consultores relevantes
+
+sources:
+  # Fonte 1: Agentes AIOS Core (sempre disponíveis)
+  aios-core:
+    path: .claude/commands/AIOS/agents/
+    activation: "Skill tool com AIOS:agents:{agent-id}"
+    agents:
+      - id: architect
+        expertise: [arquitetura, padrões, tech-stack, escalabilidade, design-patterns]
+        quando: "Decisões técnicas de arquitetura e stack"
+      - id: dev
+        expertise: [implementação, código, debugging, performance, refactoring]
+        quando: "Decisões sobre implementação e código"
+      - id: qa
+        expertise: [qualidade, testes, edge-cases, riscos-técnicos, automação]
+        quando: "Avaliar riscos e qualidade de abordagens técnicas"
+      - id: analyst
+        expertise: [pesquisa, dados, mercado, benchmarks, análise-competitiva]
+        quando: "Decisões que precisam de dados e pesquisa"
+      - id: data-engineer
+        expertise: [dados, banco-de-dados, pipelines, modelagem, ETL]
+        quando: "Decisões envolvendo dados e infraestrutura de dados"
+      - id: pm
+        expertise: [roadmap, priorização, stakeholders, timeline, escopo]
+        quando: "Decisões de priorização e planejamento"
+      - id: po
+        expertise: [produto, requisitos, valor, backlog, user-stories]
+        quando: "Decisões de produto e valor para o usuário"
+      - id: devops
+        expertise: [infraestrutura, deploy, CI/CD, segurança, monitoramento]
+        quando: "Decisões de infraestrutura e operações"
+      - id: ux-design-expert
+        expertise: [UX, UI, usabilidade, acessibilidade, pesquisa-usuario]
+        quando: "Decisões de experiência do usuário e design"
+
+  # Fonte 2: Squads locais instalados
+  squads-locais:
+    discovery: "Escanear squads/*/config.yaml em runtime"
+    path_pattern: squads/*/agents/*.md
+    activation: "Ler agent .md diretamente do filesystem"
+    nota: "Squads locais têm prioridade sobre externos por estarem customizados"
+
+  # Fonte 3: Repositório externo de squads (99 agentes, 70+ mentes elite)
+  squads-externos:
+    repo: andrewebemp/squads-criados
+    fetch_method: "gh api repos/andrewebemp/squads-criados/contents/{squad}/agents/{agent}.md --jq '.content' | base64 -d"
+    nota: "Agentes do repo externo são lidos via GitHub API e suas personas informam os pareceres"
+
+    squads:
+      - name: content-distillery
+        descricao: "Transformar livestreams em 60+ peças de conteúdo"
+        expertise: [conteúdo, atomização, livestream, multi-plataforma, frameworks-mentais]
+        key_agents: [distillery-chief, tacit-extractor, content-atomizer, knowledge-architect]
+        quando: "Decisões sobre estratégia de conteúdo e repurposing"
+
+      - name: design
+        descricao: "Design completo: marca, design ops, logo, fotografia, sistemas"
+        expertise: [marca, design-system, logo, fotografia, UI, identidade-visual]
+        key_agents: [design-chief, marty-neumeier, chris-do, brad-frost, aaron-draplin]
+        quando: "Decisões de branding, identidade visual, design systems"
+
+      - name: exec-transport
+        descricao: "Marketing para transporte executivo de luxo"
+        expertise: [marketing-luxo, transporte-executivo, branding, ads, funis]
+        key_agents: [chris-do, donald-miller, alex-hormozi, sabri-suby]
+        quando: "Decisões de marketing premium e posicionamento de luxo"
+
+      - name: knowledge-harvester
+        descricao: "Extração de conhecimento de múltiplas fontes"
+        expertise: [extração-conhecimento, RAG, Obsidian, sumarização, curadoria]
+        key_agents: [harvester-chief, extractor, distiller, architect]
+        quando: "Decisões sobre gestão de conhecimento e sistemas de informação"
+
+      - name: marketing-ops
+        descricao: "Operações completas de marketing pessoal"
+        expertise: [marketing-pessoal, marca, ideação, produção, métricas, distribuição]
+        key_agents: [marketing-cmo, marketing-brand, marketing-ideation, marketing-metrics]
+        quando: "Decisões de marketing, métricas, estratégia de conteúdo"
+
+      - name: one-person-business
+        descricao: "Criar e escalar negócio solo online"
+        expertise: [negócio-solo, ofertas, funis, tráfego, operações, escala]
+        key_agents: [opb-chief, dan-koe, alex-hormozi, russell-brunson, justin-welsh]
+        quando: "Decisões de modelo de negócio, ofertas, monetização"
+
+      - name: personal-dev-content
+        descricao: "Conteúdo de desenvolvimento pessoal"
+        expertise: [desenvolvimento-pessoal, produtividade, motivação, hábitos, escrita]
+        key_agents: [james-clear, jay-shetty, mel-robbins, ali-abdaal, brendon-burchard]
+        quando: "Decisões sobre crescimento pessoal e conteúdo inspiracional"
+
+      - name: top-30
+        descricao: "Anti-procrastinação, vida ideal, rotina sustentável"
+        expertise: [anti-procrastinação, vida-ideal, rotina, saúde, hábitos, sono]
+        key_agents: [coach-top, diagnosticador, estrategista-rps, guardiao-saude]
+        quando: "Decisões sobre produtividade, rotina, bem-estar"
+
+      - name: vctop-organico
+        descricao: "Produção de conteúdo orgânico para marca Você Top"
+        expertise: [conteúdo-orgânico, YouTube, copywriting, email, shorts, reels]
+        key_agents: [diretor-conteudo, roteirista, copywriter, analista-metricas]
+        quando: "Decisões sobre produção e distribuição de conteúdo orgânico"
+
+      - name: youtube
+        descricao: "YouTube completo: estratégia, scripts, SEO, dark channels"
+        expertise: [YouTube, SEO, scripts, retenção, thumbnails, dark-channels, shorts]
+        key_agents: [youtube-chief, paddy-galloway, mrbeast-producer, george-blackman]
+        quando: "Decisões sobre presença e crescimento no YouTube"
+
+      - name: zona-genialidade
+        descricao: "Descoberta da zona de genialidade via 7 frameworks"
+        expertise: [autoconhecimento, perfil-comportamental, monetização, strengths]
+        key_agents: [zona-genialidade-chief, gay-hendricks, don-clifton, dan-sullivan]
+        quando: "Decisões sobre carreira, autoconhecimento, posicionamento pessoal"
+
+      - name: squad-creator
+        descricao: "Meta-squad que cria outros squads via mind cloning"
+        expertise: [criação-agentes, mind-cloning, processos, validação]
+        key_agents: [squad-chief, oalanicolas, pedro-valerio]
+        quando: "Decisões sobre criação ou modificação de agentes e squads"
+
+# Protocolo de consulta padronizado
+protocolo:
+  formato_consulta: |
+    CONSULTA DO CONSELHO:
+      Questão: {decisão em análise}
+      Contexto: {contexto relevante}
+      Agente consultado: {nome} ({squad})
+      Aspecto específico: {o que se espera deste agente}
+      Formato esperado: Posição clara + evidências + riscos identificados
+      Limite: Máximo 500 palavras, foco no domínio de expertise
+
+  formato_parecer: |
+    PARECER DE {AGENTE} ({SQUAD}):
+      Posição: {favorável/desfavorável/neutra} — {resumo em 1 frase}
+      Evidências:
+        1. {evidência 1}
+        2. {evidência 2}
+      Riscos no meu domínio:
+        - {risco 1}
+        - {risco 2}
+      Recomendação específica: {ação concreta}
+      Confiança: {0-100}%
