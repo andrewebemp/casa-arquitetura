@@ -5,6 +5,25 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2026-03-02
+
+### Adicionado
+- **Autonomous Runner Nativo** (`*run-autonomous`) — executa fases do AIOS dentro do Claude Code via Task tool, sem sair para o terminal
+- Task definition completa em `.aios-core/development/tasks/run-autonomous.md` com suporte a fase única, lista (`2,4,5`), range (`2-5`) e `all`
+- Opções: `--max-retries`, `--skip-on-fail`, `--pause-between`, `--resume`
+- Contexto isolado por fase via subagent (equivalente ao Ralph loop, mas nativo ao Claude Code)
+- Fase 0 (Bootstrap) via Bash; fases padrão (2,3,4,5,6,7,9) via Task tool; Fase 8 (Dev Cycle) com loop story + subagentes dev/QA
+- State persistence compatível com `plan/autonomous-state.json` (mesmo schema do shell runner)
+- Learnings acumulados em `plan/autonomous-learnings.md` com substituição de `{{LEARNINGS}}` nos templates
+
+### Atualizado
+- `aios-master.md`: comando `run-autonomous` adicionado com `visibility: full`, dependência `run-autonomous.md` registrada, atalho na seção Quick Commands
+- `README.md`: seção "Modo Autonomo" expandida com dois modos (nativo e shell fallback), exemplos de uso do `*run-autonomous`, modo nativo indicado como recomendado
+- `package.json`: versão 1.2.0 → 1.4.0
+
+### Mantido
+- `autonomous-runner.sh` preservado sem alterações como fallback para execução via terminal
+
 ## [1.3.0] - 2026-03-01
 
 ### Adicionado

@@ -1,9 +1,10 @@
 {
   "name": "aios-pessoal",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "Fork personalizado do Synkra AIOS - AI-Orchestrated System para desenvolvimento full-stack",
   "private": true,
   "scripts": {
+    "postinstall": "cd .aios-core && npm install",
     "test": "npm run test --prefix .aios-core",
     "lint": "npm run lint --prefix .aios-core",
     "typecheck": "npm run typecheck --prefix .aios-core",
@@ -18,5 +19,8 @@
   "license": "UNLICENSED",
   "engines": {
     "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "supabase": "^2.76.15"
   }
 }

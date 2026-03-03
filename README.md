@@ -180,20 +180,43 @@ O Conselho pode convocar agentes de **3 fontes** para enriquecer a analise:
 
 Decisoes sao registradas em `squads/conselho/decisions/` com contexto, pareceres, scores, e proximos passos — criando memoria para aprendizado futuro.
 
-## Modo Autonomo (Ralph Pattern)
+## Modo Autonomo
 
-Execucao automatizada onde cada fase roda em uma instancia fresh do Claude Code (zero compactacao, maximo desempenho):
+Execucao automatizada de fases do AIOS com dois modos de execucao:
+
+### Modo Nativo (dentro do Claude Code) — Recomendado
+
+Executa fases diretamente na sessao do Claude Code via Task tool. Cada fase roda como subagent com contexto isolado (janela de contexto limpa). Sem sair para o terminal.
+
+```
+@aios-master
+*run-autonomous 2                   # Fase unica
+*run-autonomous 2,4,5               # Multiplas fases
+*run-autonomous 2-5                 # Range de fases
+*run-autonomous all                 # Todas as fases
+*run-autonomous --resume            # Retomar do ultimo estado
+*run-autonomous 8 --max-retries=5  # Com opcoes
+*run-autonomous 2,4 --skip-on-fail # Pular fases que falharem
+```
+
+O progresso e exibido na mesma sessao:
+```
+[Phase 2 - PRD Creation] COMPLETE ✓ (attempt 1)
+[Phase 4 - Squad Creation] COMPLETE ✓ (attempt 1)
+[Phase 5 - Architecture] FAILED ✗ (3/3 attempts)
+```
+
+### Modo Shell (fallback — terminal externo)
+
+Para rodar fora do Claude Code via terminal:
 
 ```bash
-# Rodar uma fase
 bash .aios-core/scripts/autonomous-runner.sh --phase N
-
-# Rodar todas as fases
 bash .aios-core/scripts/autonomous-runner.sh --phases all
-
-# Retomar execucao interrompida
 bash .aios-core/scripts/autonomous-runner.sh --resume
 ```
+
+Ambos os modos compartilham o mesmo estado em `plan/autonomous-state.json` e learnings em `plan/autonomous-learnings.md`.
 
 ## Estrutura do Projeto
 
@@ -424,12 +447,14 @@ npx aios-core mcp setup  # Configurar MCP servers
 # Atualizar framework AIOS
 bash .aios-core/scripts/update-aios.sh
 
-# Modo autonomo (ver secao Modo Autonomo)
+# Modo autonomo — shell fallback (ver secao Modo Autonomo)
 bash .aios-core/scripts/autonomous-runner.sh --phases all
 
 # Spawnar agente em terminal separado
 bash .aios-core/scripts/pm.sh <agente> <tarefa>
 ```
+
+**Modo nativo (preferido):** Use `@aios-master *run-autonomous {phases}` dentro do Claude Code.
 
 ---
 
@@ -516,7 +541,13 @@ Repita ate completar todas as stories de todos os epicos.
 
 ### Alternativa: Modo Autonomo
 
-Se os docs base ja existem, rode tudo automaticamente:
+Se os docs base ja existem, rode tudo automaticamente dentro do Claude Code:
+
+```
+@aios-master *run-autonomous all
+```
+
+Ou via terminal (fallback):
 
 ```bash
 bash .aios-core/scripts/autonomous-runner.sh --phases all
@@ -597,4 +628,4 @@ BROWNFIELD         ANALISE                                PLANEJAMENTO BF       
 
 ---
 
-*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.3.0*
+*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.4.0*

@@ -138,6 +138,10 @@ commands:
     args: '{name} [start|continue|status|skip|abort] [--mode=guided|engine]'
     description: 'Workflow execution: guided (persona-switch) or engine (real subagent spawning)'
     visibility: full
+  - name: run-autonomous
+    args: '{phases} [--max-retries=N] [--skip-on-fail] [--pause-between] [--resume]'
+    description: 'Native Task-tool autonomous runner: execute phases as isolated subagents inside Claude Code (single 2, list 2,4,5, range 2-5, or all)'
+    visibility: full
   - name: analyze-framework
     description: 'Analyze framework structure and patterns'
   - name: list-components
@@ -247,6 +251,7 @@ dependencies:
     - validate-workflow.md
     - run-workflow.md
     - run-workflow-engine.md
+    - run-autonomous.md
   # Delegated tasks (Story 6.1.2.3):
   #   brownfield-create-epic.md → @pm
   #   brownfield-create-story.md → @pm
@@ -316,6 +321,7 @@ autoClaude:
 
 - `*task {task}` - Execute specific task
 - `*workflow {name}` - Start workflow
+- `*run-autonomous {phases}` - Autonomous execution via Task tool subagents (e.g. `2,4,5` or `all`)
 
 **Workflow & Planning:**
 
