@@ -537,6 +537,19 @@ Use a copy em docs/content/landing-page-copy.md para implementar o componente
 | Advogado do Diabo | `/conselho/agents/advogado-do-diabo` | 5 entregas obrigatorias + pre-mortem |
 | Sintetizador | `/conselho/agents/sintetizador` | Confianca decomposta, matriz stakeholders |
 
+### Process Excellence
+
+| Agente | Slash Command | Faz |
+|--------|---------------|-----|
+| Orquestrador | `/process-excellence/agents/orquestrador-de-processos` | Triage e delegacao |
+| Decompositor | `/process-excellence/agents/decompositor-de-tarefas` | Micro-tarefas ELI5 (David Allen) |
+| Otimizador | `/process-excellence/agents/otimizador-de-processos` | Theory of Constraints (Taiichi Ohno) |
+| Auditor | `/process-excellence/agents/auditor-de-processos` | Score de aderencia 0-100 |
+| Documentador | `/process-excellence/agents/documentador-sop` | SOPs e documentacao |
+| Analista | `/process-excellence/agents/analista-de-metricas` | KPIs, Balanced Scorecard |
+| Gestor | `/process-excellence/agents/gestor-de-mudanca` | Change management (Kotter) |
+| Cacador | `/process-excellence/agents/cacador-de-automacao` | Automacao e RPA |
+
 ### Comandos Mais Usados
 
 ```bash
@@ -565,6 +578,12 @@ Use a copy em docs/content/landing-page-copy.md para implementar o componente
 /conselho/agents/conselheiro-mor → *deliberar [questao]   # Full (5 fases)
 /conselho/agents/conselheiro-mor → *quick [questao]       # Quick (3 fases)
 /conselho/agents/conselheiro-mor → *audit [decisao]       # Auditoria
+
+# === PROCESS EXCELLENCE ===
+/process-excellence/agents/orquestrador-de-processos → [descreva o processo]
+/process-excellence/agents/decompositor-de-tarefas   → *decompor [tarefa]
+/process-excellence/agents/otimizador-de-processos   → *otimizar [fluxo]
+/process-excellence/agents/auditor-de-processos      → *auditar [processo]
 ```
 
 ### Comandos Brownfield
@@ -593,6 +612,7 @@ projeto/
 ├── .claude/commands/        # Slash commands (agentes)
 │   ├── AIOS/agents/         # Agentes core
 │   ├── conselho/agents/     # Conselho Deliberativo
+│   ├── process-excellence/agents/ # Process Excellence (8 agentes)
 │   └── squad-creator/agents/# Agentes premium
 ├── docs/
 │   ├── project-brief.md     # Brief (Analyst)
@@ -606,6 +626,7 @@ projeto/
 │   └── stories/             # Stories (SM → Dev → QA)
 ├── squads/                  # Squads de dominio
 │   ├── conselho/            # Conselho Deliberativo
+│   ├── process-excellence/  # Process Excellence
 │   └── squad-creator/       # Squad Creator Premium
 ├── src/                     # Codigo fonte (Dev)
 └── package.json
@@ -721,7 +742,14 @@ bash .aios-core/scripts/autonomous-runner.sh --phases all --dry-run
 
 # Continuar mesmo se uma fase falhar:
 bash .aios-core/scripts/autonomous-runner.sh --phases 2,3,4,5,6,7 --skip-on-fail
+
+# Com integracao de squads (decision gates + process hooks):
+bash .aios-core/scripts/autonomous-runner.sh --phases all --conselho-gates --process-excellence
 ```
+
+**Flags de Squad Integration:**
+- `--conselho-gates` — Ativa decision gates do Conselho nas fases 2, 5 e 7
+- `--process-excellence` — Ativa hooks de decomposicao, otimizacao e auditoria nas fases 2, 5, 7 e 8
 
 ### 7.6 -- Retomar Execucao Interrompida
 
@@ -755,5 +783,5 @@ AUTONOMO (Parte 7):
 
 ---
 
-*Synkra AIOS -- Guia Pratico Simplificado v1.3*
-*Baseado em: AIOS-Core v2.1.0, Squad Creator Premium v3.0.0, Autonomous Runner v1.0.0*
+*Synkra AIOS -- Guia Pratico Simplificado v1.6*
+*Baseado em: AIOS-Core v2.1.0, Squad Creator Premium v3.0.0, Autonomous Runner v1.0.0, Process Excellence v1.0.0*

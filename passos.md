@@ -247,6 +247,14 @@ Existem **duas abordagens** para criar squads:
 > ```
 > O Conselho orquestra 3 agentes (Critico Metodologico, Advogado do Diabo, Sintetizador) e pode consultar agentes de qualquer squad para enriquecer a analise. Modos: Full (5 fases), Quick (3 fases), Audit (pos-decisao).
 
+> **Dica: Process Excellence** — Para otimizar processos de desenvolvimento, decompor tarefas complexas ou auditar aderencia entre documentos:
+> ```
+> /process-excellence/agents/decompositor-de-tarefas  →  *decompor "Implementar sistema de auth JWT"
+> /process-excellence/agents/otimizador-de-processos  →  *otimizar "Fluxo de deploy para producao"
+> /process-excellence/agents/auditor-de-processos     →  *auditar "Aderencia entre PRD e arquitetura"
+> ```
+> 8 agentes baseados em mind clones de David Allen, Taiichi Ohno, Kotter e outros experts.
+
 ---
 
 ### OPCAO A: Squad Creator Premium (Recomendado)
@@ -1149,6 +1157,11 @@ bash .aios-core/scripts/autonomous-runner.sh --phases 4,5,6,7,8 \
   --max-retries 3 \
   --pause-between-phases \
   --skip-on-fail
+
+# Com integracao de squads (decision gates + process hooks):
+bash .aios-core/scripts/autonomous-runner.sh --phases all \
+  --conselho-gates \
+  --process-excellence
 ```
 
 ### Opcoes
@@ -1164,6 +1177,8 @@ bash .aios-core/scripts/autonomous-runner.sh --phases 4,5,6,7,8 \
 | `--dry-run` | Mostra prompts sem executar | false |
 | `--verbose` | Output detalhado | false |
 | `--resume` | Retoma execucao interrompida | - |
+| `--conselho-gates` | Ativa decision gates do Conselho (fases 2, 5, 7) | false |
+| `--process-excellence` | Ativa hooks do Process Excellence (fases 2, 5, 7, 8) | false |
 
 ### Fases Automatizaveis
 
@@ -1461,4 +1476,4 @@ Fase 8 (Dev Cycle)
 ---
 
 *Synkra AIOS - Da Ideia ao Deploy (10 Fases) | Greenfield & Brownfield*
-*Fork pessoal v1.3.0 | Baseado em AIOS-Core v3.11.3*
+*Fork pessoal v1.6.0 | Baseado em AIOS-Core v3.11.3*

@@ -49,6 +49,15 @@ LEARNINGS_FILE="${PLAN_DIR}/autonomous-learnings.md"
 # Claude CLI command (configurable via environment)
 CLAUDE_CMD="${CLAUDE_CMD:-claude}"
 
+# Squad integration flags (opt-in via autonomous-runner flags)
+CONSELHO_GATES="${AIOS_CONSELHO_GATES:-false}"
+PROCESS_EXCELLENCE="${AIOS_PROCESS_EXCELLENCE:-false}"
+
+# Squad paths
+CONSELHO_ENTRY="${PROJECT_ROOT}/squads/conselho/agents/conselheiro-mor.md"
+PE_ENTRY="${PROJECT_ROOT}/squads/process-excellence/agents/orquestrador-de-processos.md"
+CONSELHO_DECISIONS="${PROJECT_ROOT}/squads/conselho/decisions"
+
 # Maximum retries for dev/QA cycle (configurable via environment)
 MAX_RETRIES="${AIOS_MAX_RETRIES:-3}"
 
@@ -467,6 +476,150 @@ run_claude() {
 
   log_debug "Claude output length: ${#output} characters"
   echo "$output"
+  return 0
+}
+
+# ============================================================================
+#                    SQUAD INTEGRATION: CONSELHO DELIBERATIVO
+# ============================================================================
+
+# Invoke Conselho Deliberativo as a decision gate.
+# Spawns a fresh Claude instance with the Conselheiro-Mor persona.
+#
+# Usage: run_conselho_gate "decision question" "full|quick|audit"
+# Returns: 0 if approved (confidence >= 60%), 1 if inconclusive
+# Note: Non-blocking on execution errors (returns 0 to not halt pipeline)
+run_conselho_gate() {
+  local decision="$1"
+  local mode="${2:-quick}"
+
+  if [[ "$CONSELHO_GATES" != "true" ]]; then
+    log_debug "Conselho gates disabled, skipping"
+    return 0
+  fi
+
+  log_info "🏛️ Conselho Deliberativo Gate (modo: ${mode})"
+  log_info "   Questão: ${decision}"
+
+  # Build Conselho prompt
+  local learnings_ctx
+  learnings_ctx="$(read_learnings 2>/dev/null || echo 'Nenhum learning anterior.')"
+
+  local conselho_prompt
+  conselho_prompt="Você é o Conselheiro-Mor do Conselho Deliberativo.
+
+Leia sua definição completa em: squads/conselho/agents/conselheiro-mor.md
+
+Execute uma deliberação em modo ${mode} para a seguinte questão:
+${decision}
+
+Contexto do projeto (learnings acumulados):
+${learnings_ctx}
+
+IMPORTANTE:
+- Siga TODAS as fases do modo ${mode} conforme squads/conselho/workflows/deliberacao.yaml
+- Use os templates de output em squads/conselho/templates/
+- Registre a decisão em squads/conselho/decisions/ usando o template registro-decisao.md
+- Ao final, emita: CONSELHO_CONFIDENCE=XX (onde XX é o percentual de confiança)
+- Se confiança >= 60%, emita: CONSELHO_APPROVED
+- Se confiança < 60%, emita: CONSELHO_INCONCLUSIVE"
+
+  local output
+  output=$(run_claude "$conselho_prompt") || {
+    log_warn "Conselho gate failed to execute, proceeding anyway"
+    return 0
+  }
+
+  # Extract confidence from output
+  local confidence
+  confidence=$(echo "$output" | grep -oP 'CONSELHO_CONFIDENCE=\K[0-9]+' | tail -1)
+
+  if [[ -z "$confidence" ]]; then
+    log_warn "Could not extract Conselho confidence. Proceeding anyway."
+    record_learnings "conselho-gate" "Conselho invocado para: ${decision}. Confiança não extraída."
+    return 0
+  fi
+
+  record_learnings "conselho-gate" "Conselho (${mode}) para: ${decision}. Confiança: ${confidence}%."
+
+  if echo "$output" | grep -q "CONSELHO_INCONCLUSIVE"; then
+    log_warn "⚠️ Conselho INCONCLUSIVO (confiança: ${confidence}%)"
+    log_warn "   Decisão requer intervenção humana."
+    return 1
+  fi
+
+  log_success "✅ Conselho aprovou (confiança: ${confidence}%)"
+  return 0
+}
+
+# ============================================================================
+#                    SQUAD INTEGRATION: PROCESS EXCELLENCE
+# ============================================================================
+
+# Invoke a Process Excellence agent for a specific task.
+# Spawns a fresh Claude instance with the specified agent persona.
+#
+# Usage: run_process_excellence "agent-name" "task description"
+#   agent-name: one of decompositor-de-tarefas, otimizador-de-processos,
+#               auditor-de-processos, documentador-sop, analista-de-metricas,
+#               gestor-de-mudanca, cacador-de-automacao
+# Returns: 0 on success, 1 on failure
+# Note: Non-blocking on execution errors (returns 0 to not halt pipeline)
+run_process_excellence() {
+  local agent="$1"
+  local task="$2"
+
+  if [[ "$PROCESS_EXCELLENCE" != "true" ]]; then
+    log_debug "Process Excellence disabled, skipping"
+    return 0
+  fi
+
+  log_info "⚙️ Process Excellence: @${agent}"
+  log_info "   Tarefa: ${task}"
+
+  # Verify agent file exists
+  local agent_file="${PROJECT_ROOT}/squads/process-excellence/agents/${agent}.md"
+  if [[ ! -f "$agent_file" ]]; then
+    log_warn "Agent file not found: ${agent_file}. Skipping."
+    return 0
+  fi
+
+  local learnings_ctx
+  learnings_ctx="$(read_learnings 2>/dev/null || echo 'Nenhum learning anterior.')"
+
+  local pe_prompt
+  pe_prompt="Você é o agente ${agent} do squad Process Excellence.
+
+Leia sua definição completa em: squads/process-excellence/agents/${agent}.md
+
+Execute a seguinte tarefa:
+${task}
+
+Contexto do projeto (learnings acumulados):
+${learnings_ctx}
+
+IMPORTANTE:
+- Siga seus frameworks e metodologias conforme definido no seu agente
+- Use os templates de output em squads/process-excellence/templates/
+- Ao final, emita: PE_COMPLETE
+- Se não conseguir completar, emita: PE_FAILED:REASON={motivo}"
+
+  local output
+  output=$(run_claude "$pe_prompt") || {
+    log_warn "Process Excellence @${agent} failed to execute, proceeding anyway"
+    return 0
+  }
+
+  if echo "$output" | grep -q "PE_FAILED"; then
+    local reason
+    reason=$(echo "$output" | grep -oP 'PE_FAILED:REASON=\K.*' | head -1)
+    log_warn "Process Excellence @${agent} falhou: ${reason:-unknown}"
+    record_learnings "pe-${agent}" "PE @${agent} falhou para: ${task}. Motivo: ${reason:-desconhecido}"
+    return 1
+  fi
+
+  log_success "✅ Process Excellence @${agent} completou"
+  record_learnings "pe-${agent}" "PE @${agent} completou: ${task}"
   return 0
 }
 

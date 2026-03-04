@@ -55,4 +55,15 @@ When push and PR are complete:
 PHASE_COMPLETE:PR_URL={url}
 ```
 
+## Squad Consultation Points
+
+### Conselho Deliberativo (se --conselho-gates ativo)
+Modo QUICK para decisão de release:
+- "Este build está pronto para deploy? Riscos identificados?"
+
+### Process Excellence (se --process-excellence ativo)
+Use o Caçador de Automação para:
+- Identificar oportunidades de automação no CI/CD
+- Propor melhorias no pipeline de deploy
+
 {{LEARNINGS}}

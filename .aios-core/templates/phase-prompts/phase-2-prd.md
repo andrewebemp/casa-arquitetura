@@ -39,4 +39,17 @@ When the PRD is complete and saved to `docs/prd.md`, output:
 PHASE_COMPLETE
 ```
 
+## Squad Consultation Points
+
+### Conselho Deliberativo (se --conselho-gates ativo)
+Antes de finalizar o PRD, submeta decisões de escopo ao Conselho:
+- Modo FULL para: escopo geral do projeto, trade-offs de funcionalidade vs prazo
+- Questão sugerida: "O escopo definido neste PRD é viável e completo dado o brief?"
+- Cross-squad: convocar @analyst (viabilidade) e @architect (complexidade técnica)
+
+### Process Excellence (se --process-excellence ativo)
+Após criar os épicos, use o Decompositor para:
+- Quebrar cada épico em stories estimáveis com critérios claros
+- Validar que cada story é independente e testável
+
 {{LEARNINGS}}

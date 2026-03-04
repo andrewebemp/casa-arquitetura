@@ -60,4 +60,18 @@ If you cannot complete the story, output:
 PHASE_BLOCKED:STORY_ID={{STORY_ID}}:REASON={description}
 ```
 
+## Squad Consultation Points
+
+### Process Excellence (se --process-excellence ativo)
+ANTES de implementar, use o Decompositor para:
+- Gerar micro-tarefas ELI5 para cada acceptance criterion
+- Incluir critérios de conclusão explícitos e troubleshooting
+- Usar output como guia de implementação
+
+### Conselho Deliberativo (se --conselho-gates ativo)
+Modo QUICK apenas se a story envolver decisão técnica significativa:
+- Escolha de biblioteca/framework não definida na arquitetura
+- Trade-off de performance vs legibilidade
+- Mudança de abordagem que afeta stories futuras
+
 {{LEARNINGS}}

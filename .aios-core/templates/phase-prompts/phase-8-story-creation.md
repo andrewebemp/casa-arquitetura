@@ -70,4 +70,12 @@ When the story is created and saved, output:
 PHASE_COMPLETE:STORY_ID={id}
 ```
 
+## Squad Consultation Points
+
+### Process Excellence (se --process-excellence ativo)
+Após criar stories, use o Decompositor para validar que:
+- Cada story é independente e testável
+- Acceptance criteria são mensuráveis
+- Dependências entre stories estão mapeadas
+
 {{LEARNINGS}}

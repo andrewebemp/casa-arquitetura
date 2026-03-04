@@ -71,6 +71,23 @@ validate_output() {
   # Verify docs/prd.md was created and has content
   validate_file_created "docs/prd.md" "PRD document" || return 1
 
+  # --- Squad Integration Hooks ---
+
+  # Conselho Gate: Validate PRD scope (FULL mode - irreversible decisions)
+  if [[ "$CONSELHO_GATES" == "true" ]]; then
+    if ! run_conselho_gate \
+      "O escopo definido no PRD (docs/prd.md) é viável, completo e alinhado com o brief?" \
+      "full"; then
+      log_warn "Conselho inconclusivo para PRD. Registrado nos learnings."
+    fi
+  fi
+
+  # Process Excellence: Validate epic decomposability
+  if [[ "$PROCESS_EXCELLENCE" == "true" ]]; then
+    run_process_excellence "decompositor-de-tarefas" \
+      "Analise os épicos definidos em docs/prd.md e valide que cada um é decomponível em stories independentes e testáveis." || true
+  fi
+
   # Additional content checks
   local prd_path="${PROJECT_ROOT}/docs/prd.md"
   local line_count

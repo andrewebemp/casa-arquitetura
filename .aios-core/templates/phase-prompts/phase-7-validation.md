@@ -66,4 +66,19 @@ When validation and sharding are complete, output:
 PHASE_COMPLETE
 ```
 
+## Squad Consultation Points
+
+### Conselho Deliberativo (se --conselho-gates ativo)
+Modo AUDIT para avaliar decisões tomadas nas fases 2-6:
+- Questão: "As decisões de PRD e arquitetura foram sólidas? Que lições aprendemos?"
+- Registrar lessons learned em squads/conselho/decisions/
+
+### Process Excellence (se --process-excellence ativo)
+Use o Auditor para validação cruzada:
+- Score de aderência (0-100) entre PRD ↔ Architecture ↔ Data Model
+- Identificar gaps entre "definido" vs "planejado"
+Use o Analista de Métricas para:
+- Definir baseline de métricas pré-desenvolvimento
+- Propor KPIs de qualidade para o dev cycle
+
 {{LEARNINGS}}

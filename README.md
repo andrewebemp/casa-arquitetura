@@ -23,6 +23,7 @@ Um meta-framework que orquestra **12 agentes de IA especializados** para transfo
 | UX Designer | `@ux-design-expert` (Uma) | Experiencia do usuario, design | `/AIOS/agents/ux-design-expert` |
 | Squad Creator | `@squad-creator` (Craft) | Cria squads de agentes por dominio | `/AIOS/agents/squad-creator` |
 | Conselheiro-Mor | `@conselheiro-mor` | Conselho Deliberativo (analise de decisoes) | `/conselho/agents/conselheiro-mor` |
+| Orquestrador PE | `@orquestrador-pe` | Process Excellence (otimizacao de processos) | `/process-excellence/agents/orquestrador-de-processos` |
 
 ## Fluxo de Desenvolvimento (10 Fases)
 
@@ -180,6 +181,45 @@ O Conselho pode convocar agentes de **3 fontes** para enriquecer a analise:
 
 Decisoes sao registradas em `squads/conselho/decisions/` com contexto, pareceres, scores, e proximos passos — criando memoria para aprendizado futuro.
 
+## Process Excellence
+
+Squad de otimizacao de processos baseado em mind clones de experts reais (David Allen, Taiichi Ohno, Kotter, Deming). 8 agentes especializados que decompoe, otimizam, auditam e automatizam processos de desenvolvimento.
+
+### Como funciona
+
+```
+/process-excellence/agents/orquestrador-de-processos  →  "Otimize o fluxo de deploy do meu projeto"
+```
+
+O Orquestrador analisa a demanda e delega para o agente especializado mais adequado.
+
+### Agentes do Process Excellence
+
+| Agente | Slash Command | Papel |
+|--------|---------------|-------|
+| Orquestrador | `/process-excellence/agents/orquestrador-de-processos` | Triage e delegacao para agente correto |
+| Decompositor | `/process-excellence/agents/decompositor-de-tarefas` | Quebra tarefas em micro-steps ELI5 (David Allen + Tiago Forte) |
+| Otimizador | `/process-excellence/agents/otimizador-de-processos` | Theory of Constraints, Value Stream Mapping (Taiichi Ohno + Goldratt) |
+| Auditor | `/process-excellence/agents/auditor-de-processos` | Score de aderencia 0-100, gap analysis (ISO 9001/COSO) |
+| Documentador | `/process-excellence/agents/documentador-sop` | Cria SOPs e documentacao de processos |
+| Analista de Metricas | `/process-excellence/agents/analista-de-metricas` | KPIs, Balanced Scorecard, OKRs |
+| Gestor de Mudanca | `/process-excellence/agents/gestor-de-mudanca` | Change management (Kotter 8-Step + ADKAR) |
+| Cacador de Automacao | `/process-excellence/agents/cacador-de-automacao` | Identifica oportunidades de automacao (RPA) |
+
+### Integracao com Autonomous Runner
+
+O Process Excellence pode ser invocado automaticamente durante a execucao autonoma:
+
+```bash
+bash .aios-core/scripts/autonomous-runner.sh --phases all --process-excellence
+```
+
+Pontos de integracao:
+- **Fase 2 (PRD):** Decompositor valida que epicos sao decomponíveis em stories independentes
+- **Fase 5 (Arquitetura):** Otimizador analisa fluxo de dados com Theory of Constraints
+- **Fase 7 (Validacao):** Auditor mede aderencia PRD-Arquitetura (0-100) + Analista define baseline de metricas
+- **Fase 8 (Dev):** Decompositor gera micro-tarefas ELI5 antes de cada story
+
 ## Modo Autonomo
 
 Execucao automatizada de fases do AIOS com dois modos de execucao:
@@ -214,7 +254,15 @@ Para rodar fora do Claude Code via terminal:
 bash .aios-core/scripts/autonomous-runner.sh --phase N
 bash .aios-core/scripts/autonomous-runner.sh --phases all
 bash .aios-core/scripts/autonomous-runner.sh --resume
+
+# Com integracao de squads (opt-in)
+bash .aios-core/scripts/autonomous-runner.sh --phases all --conselho-gates --process-excellence
 ```
+
+| Flag | Descricao |
+|------|-----------|
+| `--conselho-gates` | Ativa decision gates do Conselho Deliberativo em fases criticas |
+| `--process-excellence` | Ativa hooks de decomposicao, otimizacao e auditoria do Process Excellence |
 
 Ambos os modos compartilham o mesmo estado em `plan/autonomous-state.json` e learnings em `plan/autonomous-learnings.md`.
 
@@ -252,6 +300,7 @@ Ambos os modos compartilham o mesmo estado em `plan/autonomous-state.json` e lea
   ├── CLAUDE.md                     # Regras e configuracao do Claude Code
   ├── commands/AIOS/agents/         # Slash commands dos 12 agentes core
   ├── commands/conselho/agents/     # Slash commands do Conselho Deliberativo
+  ├── commands/process-excellence/agents/ # Slash commands do Process Excellence (8 agentes)
   └── rules/                        # Regras MCP
 
 docs/                               # Documentacao do projeto (gerada pelos agentes)
@@ -262,6 +311,7 @@ docs/                               # Documentacao do projeto (gerada pelos agen
 
 squads/                             # Squads de agentes por dominio
   ├── conselho/                     # Conselho Deliberativo (analise de decisoes)
+  ├── process-excellence/           # Process Excellence (otimizacao de processos)
   └── squad-creator/                # Squad Creator Premium (meta-squad)
 
 guia-pratico.md                     # Guia rapido simplificado (PT-BR)
@@ -588,6 +638,7 @@ BROWNFIELD         ANALISE                                PLANEJAMENTO BF       
 | [Brownfield Guide](.aios-core/working-in-the-brownfield.md) | Guia completo para projetos existentes |
 | [CHANGELOG.md](CHANGELOG.md) | Historico de versoes e mudancas |
 | [Conselho Deliberativo](squads/conselho/docs/README.md) | Documentacao do squad Conselho |
+| [Process Excellence](squads/process-excellence/docs/README.md) | Documentacao do squad Process Excellence |
 
 ## Modos de Desenvolvimento
 
@@ -628,4 +679,4 @@ BROWNFIELD         ANALISE                                PLANEJAMENTO BF       
 
 ---
 
-*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.4.0*
+*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.6.0*

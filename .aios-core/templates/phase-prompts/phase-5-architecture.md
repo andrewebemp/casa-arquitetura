@@ -39,4 +39,18 @@ When architecture is complete and saved to `docs/architecture.md`, output:
 PHASE_COMPLETE
 ```
 
+## Squad Consultation Points
+
+### Conselho Deliberativo (se --conselho-gates ativo)
+OBRIGATÓRIO para decisões irreversíveis de arquitetura:
+- Modo FULL para: escolha de stack, padrão arquitetural (monolito/micro/serverless), banco de dados
+- Questão sugerida: "Devemos usar [opção A] vs [opção B] para [componente]?"
+- Cross-squad: @dev (DX), @devops (operação), @data-engineer (dados)
+- Exigir pré-mortem para cada decisão técnica crítica
+
+### Process Excellence (se --process-excellence ativo)
+Use o Otimizador para analisar fluxos de dados propostos:
+- Identificar gargalos potenciais no design (Theory of Constraints)
+- Value Stream Mapping do fluxo principal de dados
+
 {{LEARNINGS}}

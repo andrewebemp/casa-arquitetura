@@ -72,6 +72,23 @@ execute_phase() {
 # ============================================================================
 
 validate_output() {
+  # --- Squad Integration Hooks (run before file validation) ---
+
+  # Conselho Audit: Review decisions from phases 2-6
+  if [[ "$CONSELHO_GATES" == "true" ]]; then
+    run_conselho_gate \
+      "Auditoria das decisões tomadas nas fases 2-6. O PRD e a arquitetura são coerentes? Lições aprendidas?" \
+      "audit" || true
+  fi
+
+  # Process Excellence: Audit adherence + define baseline metrics
+  if [[ "$PROCESS_EXCELLENCE" == "true" ]]; then
+    run_process_excellence "auditor-de-processos" \
+      "Audite a aderência entre docs/prd.md e docs/architecture.md. Score de aderência 0-100." || true
+    run_process_excellence "analista-de-metricas" \
+      "Defina baseline de métricas de qualidade pré-desenvolvimento baseado nos requisitos do PRD." || true
+  fi
+
   local all_ok=true
 
   # --- Check docs/prd/ directory (sharded PRD) ---

@@ -71,6 +71,23 @@ validate_output() {
   # Verify docs/architecture.md was created and has content
   validate_file_created "docs/architecture.md" "architecture document" || return 1
 
+  # --- Squad Integration Hooks ---
+
+  # Conselho Gate: Architecture decisions (FULL mode - irreversible)
+  if [[ "$CONSELHO_GATES" == "true" ]]; then
+    if ! run_conselho_gate \
+      "As decisões arquiteturais em docs/architecture.md são sólidas? Avalie stack, padrões e trade-offs." \
+      "full"; then
+      log_warn "Conselho inconclusivo para arquitetura. Revisão humana recomendada."
+    fi
+  fi
+
+  # Process Excellence: Analyze data flow for bottlenecks
+  if [[ "$PROCESS_EXCELLENCE" == "true" ]]; then
+    run_process_excellence "otimizador-de-processos" \
+      "Analise o fluxo de dados proposto em docs/architecture.md. Identifique gargalos potenciais usando Theory of Constraints." || true
+  fi
+
   # Additional content checks
   local arch_path="${PROJECT_ROOT}/docs/architecture.md"
   local line_count

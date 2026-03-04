@@ -80,6 +80,8 @@ docs/
 └── framework/                  # Guias de dev (source-tree, tech-stack)
 
 squads/                         # Squads de agentes por domínio
+  ├── conselho/                 # Conselho Deliberativo
+  └── process-excellence/       # Process Excellence (8 agentes)
 ```
 <!-- AIOS-MANAGED-END: framework-structure -->
 
@@ -235,6 +237,27 @@ O Conselho pode convocar agentes de 3 fontes: AIOS Core, squads locais, e reposi
 Decisões são registradas em `squads/conselho/decisions/` para memória e aprendizado futuro.
 <!-- AIOS-MANAGED-END: conselho -->
 
+<!-- AIOS-MANAGED-START: process-excellence -->
+## Process Excellence
+
+Squad de otimização de processos com 8 agentes especializados baseados em mind clones de experts reais.
+Ativado via `/process-excellence/agents/orquestrador-de-processos` ou automaticamente com `--process-excellence`.
+
+### Key Agents
+- `/process-excellence/agents/orquestrador-de-processos` - Triage e delegação
+- `/process-excellence/agents/decompositor-de-tarefas` - Quebra tarefas em micro-steps (David Allen + Tiago Forte)
+- `/process-excellence/agents/otimizador-de-processos` - Theory of Constraints, VSM (Taiichi Ohno + Goldratt)
+- `/process-excellence/agents/auditor-de-processos` - Score de aderência 0-100 (ISO 9001/COSO)
+- `/process-excellence/agents/analista-de-metricas` - KPIs, Balanced Scorecard, OKRs
+- `/process-excellence/agents/documentador-sop` - Criação de SOPs e documentação
+- `/process-excellence/agents/gestor-de-mudanca` - Change management (Kotter + ADKAR)
+- `/process-excellence/agents/cacador-de-automacao` - Oportunidades de automação (RPA)
+
+### Autonomous Integration
+When `--process-excellence` flag is active, PE agents are invoked at phases 2, 5, 7, and 8.
+Functions `run_process_excellence()` in `common.sh` handle invocation and signal extraction.
+<!-- AIOS-MANAGED-END: process-excellence -->
+
 <!-- AIOS-MANAGED-START: autonomous-mode -->
 ## Autonomous Mode
 
@@ -264,6 +287,11 @@ window (zero compaction, maximum performance).
 - `bash .aios-core/scripts/autonomous-runner.sh --phases N,M,O` - Run multiple phases
 - `bash .aios-core/scripts/autonomous-runner.sh --phases all` - Run all phases
 - `bash .aios-core/scripts/autonomous-runner.sh --resume` - Resume interrupted run
+
+### Squad Integration Flags (opt-in)
+- `--conselho-gates` - Enable Conselho Deliberativo decision gates at critical phases (2, 5, 7)
+- `--process-excellence` - Enable Process Excellence hooks (decomposition, optimization, audit at phases 2, 5, 7, 8)
+- Both flags export env vars (`AIOS_CONSELHO_GATES`, `AIOS_PROCESS_EXCELLENCE`) consumed by `common.sh`
 <!-- AIOS-MANAGED-END: autonomous-mode -->
 
 ## Debugging
@@ -321,4 +349,4 @@ npm run trace -- workflow-name
 - Document breaking changes prominently
 
 ---
-*Synkra AIOS Claude Code Configuration v2.1*
+*Synkra AIOS Claude Code Configuration v2.2*

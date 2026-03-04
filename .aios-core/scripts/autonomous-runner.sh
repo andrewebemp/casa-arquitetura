@@ -46,6 +46,8 @@ RESUME=false
 PHASES=()
 SINGLE_PHASE=""
 SQUAD_MODE="premium"  # premium | core
+CONSELHO_GATES=false
+PROCESS_EXCELLENCE=false
 
 # All automatizable phases in order
 ALL_PHASES=(0 2 3 4 5 6 7 8 9)
@@ -102,6 +104,10 @@ Options:
   --squad-mode <premium|core>  Squad creation mode (default: premium)
                                premium = @squad-chief YOLO (6-phase workflow)
                                core    = @squad-creator (simple template)
+  --conselho-gates          Enable Conselho Deliberativo decision gates
+                            Invokes deliberation at critical decision points
+  --process-excellence      Enable Process Excellence integration
+                            Invokes decomposition, optimization, and audit agents
   --resume                  Resume from last saved state
   --help                    Show this help
 
@@ -174,6 +180,16 @@ parse_args() {
           exit 1
         fi
         shift 2
+        ;;
+      --conselho-gates)
+        CONSELHO_GATES=true
+        export AIOS_CONSELHO_GATES=true
+        shift
+        ;;
+      --process-excellence)
+        PROCESS_EXCELLENCE=true
+        export AIOS_PROCESS_EXCELLENCE=true
+        shift
         ;;
       --resume)
         RESUME=true

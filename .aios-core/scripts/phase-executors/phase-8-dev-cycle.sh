@@ -380,6 +380,12 @@ process_story() {
   update_state ".stories[\"${story_id}\"].status" '"in-progress"'
   update_state ".stories[\"${story_id}\"].started_at" "\"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\""
 
+  # --- Squad Integration: Decompose story before dev ---
+  if [[ "$PROCESS_EXCELLENCE" == "true" ]]; then
+    run_process_excellence "decompositor-de-tarefas" \
+      "Decomponha a story em ${story_path} em micro-tarefas ELI5 com critérios de conclusão, pré-requisitos e troubleshooting." || true
+  fi
+
   local attempt=0
   local qa_feedback=""
   local dev_output=""

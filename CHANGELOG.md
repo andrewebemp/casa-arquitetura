@@ -5,6 +5,37 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.6.0] - 2026-03-04
+
+### Adicionado
+- **Integração Squad Conselho Deliberativo no Autonomous Runner** — decision gates automáticos em fases críticas via flag `--conselho-gates`
+- **Integração Squad Process Excellence no Autonomous Runner** — hooks de decomposição, otimização e auditoria via flag `--process-excellence`
+- **8 slash commands do Process Excellence** — registrados em `.claude/commands/process-excellence/agents/` (orquestrador, decompositor, otimizador, auditor, documentador, analista, gestor, caçador)
+- Função `run_conselho_gate()` em `common.sh` — invoca Conselho com modos full/quick/audit, extrai confiança e gate automático (>=60% = aprovado)
+- Função `run_process_excellence()` em `common.sh` — invoca agentes PE por nome com verificação de sinais PE_COMPLETE/PE_FAILED
+- Squad Consultation Points em 6 phase prompts (fases 2, 5, 7, 8-dev, 8-story, 9) — orientações de quando e como consultar cada squad
+- Phase hooks em 4 executors (phase-2, phase-5, phase-7, phase-8-dev-cycle) — invocação automática opt-in dos squads
+
+### Atualizado
+- `autonomous-runner.sh`: flags `--conselho-gates` e `--process-excellence` com export de variáveis de ambiente
+- `common.sh`: variáveis CONSELHO_GATES, PROCESS_EXCELLENCE, paths de squad, e seções de integração
+- `phase-2-prd.sh`: Conselho FULL gate para escopo + PE Decompositor para épicos
+- `phase-5-architecture.sh`: Conselho FULL gate para decisões arquiteturais + PE Otimizador para fluxo de dados
+- `phase-7-validation.sh`: Conselho AUDIT para fases 2-6 + PE Auditor (aderência) + PE Analista (baseline métricas)
+- `phase-8-dev-cycle.sh`: PE Decompositor antes do loop de implementação por story
+- `package.json`: versão 1.4.0 -> 1.6.0
+- Documentação: README.md, CLAUDE.md, guia-pratico.md, passos.md atualizados
+
+## [1.5.0] - 2026-03-03
+
+### Adicionado
+- **Squad Creator Premium como default na Fase 4** do autonomous runner
+- Integração do squad-chief como executor padrão da fase 4 no modo autônomo
+
+### Atualizado
+- `phase-4-squads.sh`: Squad Creator Premium como opção default
+- README.md e documentação com referência à integração
+
 ## [1.4.0] - 2026-03-02
 
 ### Adicionado
@@ -110,6 +141,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Controle de versões com semantic versioning
 - Repositório privado no GitHub
 
+[1.6.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.0.0...v1.1.0
