@@ -1,0 +1,683 @@
+# ═══════════════════════════════════════════════════════════════
+# Workflow: Analise Completa de Processo
+# Ciclo completo de melhoria em 5 fases com checkpoints
+# ═══════════════════════════════════════════════════════════════
+
+workflow:
+  id: wf-analise-completa
+  name: "Analise Completa de Processo"
+  duration: "4-8 horas"
+  description: |
+    Ciclo completo de melhoria de processo em 5 fases:
+    Mapeamento -> Analise -> Redesenho -> Planejamento -> Entrega.
+    Cada fase tem checkpoint com aprovacao do usuario.
+    Aplicavel a processos de negocio, desenvolvimento e vida pessoal.
+    Combina Rummler-Brache (visao sistemica), Lean (desperdicios),
+    TOC (gargalos) e Kotter/ADKAR (gestao de mudanca).
+  best_for:
+    - "Processos criticos que precisam de mudanca significativa"
+    - "Analise profunda com metricas, auditoria e automacao"
+    - "Quando multiplas perspectivas sao necessarias"
+    - "Processos com alto volume, custo ou taxa de erro"
+  not_for:
+    - "Ajustes pontuais em processos simples (use wf-melhoria-rapida)"
+    - "Quando so precisa decompor uma tarefa (use wf-decomposicao)"
+    - "Processos em fase de concepcao (ainda nao existem)"
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 1: MAPEAMENTO
+# Objetivo: Mapear AS-IS e estabelecer baseline de metricas
+# ═══════════════════════════════════════════════════════════════
+
+phases:
+  - id: FASE-1
+    name: "MAPEAMENTO"
+    tier: 0
+    description: |
+      Mapear o processo atual (AS-IS) e estabelecer baseline de metricas.
+      Esta fase produz a fotografia completa do estado atual: fluxo,
+      atores, sistemas, tempos, volumes e pontos de dor. O baseline
+      de metricas serve como referencia para medir impacto das melhorias.
+    estimated_time: "1-2 horas"
+    prerequisite: "Processo definido pelo usuario com contexto minimo"
+
+    tasks:
+      - task_file: tasks/mapear-processo.md
+        task_id: PE-T-002
+        agent: "@otimizador-de-processos"
+        required: true
+        description: "Mapear fluxo AS-IS completo com atores, sistemas, tempos e pontos de dor"
+        output: "mapa-processo-as-is.md"
+        template: "templates/mapa-processo-tmpl.md"
+        elicit: true
+        elicit_fields:
+          - "Nome do processo"
+          - "Descricao geral (gatilho e resultado)"
+          - "Stakeholders/atores conhecidos"
+          - "Objetivo da analise (reduzir tempo, custo, erros)"
+        actions:
+          - "Identificar processo e escopo (trigger, fim, fronteiras)"
+          - "Listar todos os atores e sistemas envolvidos"
+          - "Mapear fluxo etapa por etapa (entrada, acao, saida, responsavel)"
+          - "Registrar decisoes/bifurcacoes e caminhos alternativos"
+          - "Documentar tempos medios e volumes por etapa"
+          - "Identificar handoffs e pontos de dor"
+          - "Criar diagrama visual do fluxo"
+
+      - task_file: tasks/definir-metricas.md
+        task_id: PE-T-006
+        agent: "@analista-de-metricas"
+        required: true
+        description: "Definir KPIs relevantes e medir baseline atual"
+        output: "baseline-metricas.md"
+        parallel_with: "mapear-processo.md"
+        actions:
+          - "Analisar objetivos do processo e da organizacao"
+          - "Selecionar KPIs relevantes (tempo, custo, qualidade, volume)"
+          - "Definir formula de calculo para cada KPI"
+          - "Medir baseline atual (valor de referencia)"
+          - "Propor metas iniciais (baseline, target, stretch)"
+          - "Definir frequencia de medicao e responsavel"
+
+    checkpoint:
+      criteria:
+        - "Processo mapeado com fluxo completo, atores, sistemas e tempos"
+        - "Baseline de metricas definido e medido para todos os KPIs"
+        - "Pontos de dor identificados e priorizados"
+        - "Diagrama visual do fluxo AS-IS criado"
+      human_review: true
+      message: |
+        FASE 1 CONCLUIDA: Mapeamento do estado atual (AS-IS).
+
+        Artefatos produzidos:
+        1. Mapa AS-IS completo do processo (fluxo, atores, sistemas, tempos)
+        2. Baseline de metricas com KPIs definidos
+
+        Revise o mapa e o baseline antes de prosseguir para a fase de analise.
+        Corrija imprecisoes agora -- este mapa sera a base de todo o diagnostico.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 2: ANALISE
+# Objetivo: Diagnostico profundo multi-perspectiva
+# ═══════════════════════════════════════════════════════════════
+
+  - id: FASE-2
+    name: "ANALISE"
+    tier: 1
+    depends_on: ["FASE-1"]
+    description: |
+      Analise profunda do processo sob tres perspectivas complementares:
+      auditoria de aderencia (conformidade e riscos), otimizacao (desperdicios
+      e gargalos via Lean/TOC), e automacao (oportunidades com ROI calculado).
+      O resultado e um diagnostico consolidado que integra as tres visoes.
+    estimated_time: "1-2 horas"
+    prerequisite: "Mapa AS-IS e baseline aprovados na FASE-1"
+
+    tasks:
+      - task_file: tasks/auditar-processo.md
+        task_id: PE-T-004
+        agent: "@auditor-de-processos"
+        required: true
+        description: "Auditar aderencia a padroes, identificar riscos e nao-conformidades"
+        output: "relatorio-auditoria.md"
+        template: "templates/relatorio-auditoria-tmpl.md"
+        input_from:
+          - "FASE-1:mapa-processo-as-is.md"
+          - "FASE-1:baseline-metricas.md"
+        actions:
+          - "Planejar escopo da auditoria (criterios de referencia)"
+          - "Comparar execucao real com documentacao/padroes"
+          - "Calcular score de aderencia por etapa e geral"
+          - "Classificar desvios por severidade (critico/maior/menor/observacao)"
+          - "Avaliar riscos (probabilidade x impacto)"
+          - "Gerar recomendacoes priorizadas"
+          - "Propor plano de acao corretiva"
+
+      - task_file: tasks/otimizar-processo.md
+        task_id: PE-T-003
+        agent: "@otimizador-de-processos"
+        required: true
+        description: "Identificar desperdicios (TIMWOODS), encontrar gargalo (TOC), analisar valor"
+        output: "analise-desperdicios.md"
+        input_from:
+          - "FASE-1:mapa-processo-as-is.md"
+          - "FASE-1:baseline-metricas.md"
+        actions:
+          - "Analisar cada etapa buscando os 8 desperdicios (TIMWOODS)"
+          - "Identificar gargalo principal via TOC (5 passos de focalizacao)"
+          - "Classificar etapas: agrega valor / necessaria / desperdicio"
+          - "Calcular percentual de tempo em atividades de valor"
+          - "Identificar etapas candidatas a eliminacao ou automacao"
+
+      - task_file: tasks/identificar-automacoes.md
+        task_id: PE-T-008
+        agent: "@cacador-de-automacao"
+        required: true
+        description: "Identificar oportunidades de automacao com ROI calculado"
+        output: "oportunidades-automacao.md"
+        template: "templates/relatorio-automacao-tmpl.md"
+        reference: "data/catalogo-automacoes.md"
+        input_from:
+          - "FASE-1:mapa-processo-as-is.md"
+        actions:
+          - "Varrer cada etapa buscando caracteristicas de automacao"
+          - "Classificar cada oportunidade por tipo (RPA, API, no-code, script, IA)"
+          - "Avaliar viabilidade tecnica (API, dados, seguranca, infra)"
+          - "Calcular ROI por oportunidade (economia vs custo)"
+          - "Priorizar pela matriz esforco x impacto"
+          - "Recomendar ferramenta especifica com alternativa"
+          - "Propor plano de implementacao em fases"
+
+    consolidation:
+      agent: "@orquestrador-de-processos"
+      description: "Integrar outputs de auditoria, otimizacao e automacao em diagnostico unico"
+      actions:
+        - "Cruzar achados de auditoria com desperdicios identificados"
+        - "Correlacionar riscos com oportunidades de automacao"
+        - "Criar ranking unificado de problemas por impacto"
+        - "Identificar quick wins (alta prioridade em todas as perspectivas)"
+        - "Gerar diagnostico consolidado"
+
+    checkpoint:
+      criteria:
+        - "Score de aderencia calculado com metodologia clara"
+        - "Desperdicios TIMWOODS identificados com evidencia do AS-IS"
+        - "Gargalo principal identificado com dados de suporte (TOC)"
+        - "Oportunidades de automacao mapeadas com ROI calculado"
+        - "Diagnostico consolidado integrando as 3 perspectivas"
+      human_review: true
+      message: |
+        FASE 2 CONCLUIDA: Diagnostico completo do processo.
+
+        Artefatos produzidos:
+        1. Relatorio de auditoria (aderencia, riscos, nao-conformidades)
+        2. Analise de desperdicios e gargalos (Lean + TOC)
+        3. Oportunidades de automacao com ROI
+
+        Revise o diagnostico antes de prosseguir para o redesenho.
+        Este e o momento de ajustar prioridades e direcao.
+      gate:
+        condition: "score_aderencia < 30"
+        action: "Alertar usuario -- processo com aderencia critica. Recomendar correcao urgente antes de redesenho."
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 3: REDESENHO
+# Objetivo: Propor TO-BE e decompor implementacao
+# ═══════════════════════════════════════════════════════════════
+
+  - id: FASE-3
+    name: "REDESENHO"
+    tier: 1
+    depends_on: ["FASE-2"]
+    description: |
+      Propor o processo TO-BE com base no diagnostico, detalhar automacoes
+      viaveis e quebrar a implementacao em micro-tarefas executaveis.
+      O resultado e uma proposta concreta e acionavel de melhoria.
+    estimated_time: "1-2 horas"
+    prerequisite: "Diagnostico aprovado na FASE-2"
+
+    tasks:
+      - task_file: tasks/otimizar-processo.md
+        task_id: PE-T-003
+        agent: "@otimizador-de-processos"
+        required: true
+        description: "Desenhar processo TO-BE com justificativa por mudanca"
+        output: "processo-to-be.md"
+        input_from:
+          - "FASE-1:mapa-processo-as-is.md"
+          - "FASE-2:analise-desperdicios.md"
+          - "FASE-2:relatorio-auditoria.md"
+          - "FASE-2:oportunidades-automacao.md"
+        actions:
+          - "Eliminar etapas que nao agregam valor"
+          - "Simplificar etapas complexas"
+          - "Paralelizar atividades independentes"
+          - "Incorporar automacoes aprovadas no fluxo"
+          - "Reduzir handoffs entre atores"
+          - "Documentar novo fluxo completo (TO-BE)"
+          - "Calcular impacto esperado (AS-IS vs TO-BE)"
+          - "Priorizar melhorias pela matriz impacto x esforco"
+
+      - task_file: tasks/identificar-automacoes.md
+        task_id: PE-T-008
+        agent: "@cacador-de-automacao"
+        required: false
+        description: "Detalhar automacoes viaveis com especificacao tecnica"
+        output: "detalhamento-automacoes.md"
+        input_from:
+          - "FASE-2:oportunidades-automacao.md"
+          - "FASE-3:processo-to-be.md"
+        actions:
+          - "Detalhar especificacao tecnica das automacoes priorizadas"
+          - "Definir integracao das automacoes no fluxo TO-BE"
+          - "Estimar esforco de implementacao por automacao"
+          - "Definir criterio de sucesso por automacao"
+          - "Mapear dependencias entre automacoes"
+
+      - task_file: tasks/decompor-tarefa.md
+        task_id: PE-T-001
+        agent: "@decompositor-de-tarefas"
+        required: true
+        description: "Quebrar implementacao das melhorias em micro-tarefas executaveis"
+        output: "micro-tarefas-implementacao.md"
+        template: "templates/micro-tarefa-tmpl.md"
+        input_from:
+          - "FASE-3:processo-to-be.md"
+          - "FASE-3:detalhamento-automacoes.md"
+        actions:
+          - "Identificar todas as melhorias a implementar"
+          - "Quebrar cada melhoria em blocos principais (WBS nivel 1)"
+          - "Decompor blocos em sub-tarefas (nivel 2)"
+          - "Detalhar micro-tarefas atomicas (nivel 3) com passo-a-passo"
+          - "Mapear dependencias entre micro-tarefas"
+          - "Identificar caminho critico"
+          - "Estimar tempo total de implementacao"
+          - "Validar que cada micro-tarefa e autocontida para iniciante"
+
+    checkpoint:
+      criteria:
+        - "Processo TO-BE desenhado com justificativa por mudanca"
+        - "Impacto esperado quantificado (comparativo AS-IS vs TO-BE)"
+        - "Automacoes detalhadas com especificacao tecnica"
+        - "Implementacao decomposta em micro-tarefas executaveis"
+        - "Caminho critico e dependencias mapeados"
+      human_review: true
+      message: |
+        FASE 3 CONCLUIDA: Proposta de redesenho do processo.
+
+        Artefatos produzidos:
+        1. Processo TO-BE com justificativa e impacto quantificado
+        2. Detalhamento tecnico das automacoes
+        3. Micro-tarefas de implementacao com dependencias
+
+        Aprove a proposta antes de planejar a gestao de mudanca.
+        Ajustes no TO-BE devem ser feitos agora.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 4: PLANEJAMENTO
+# Objetivo: Planejar adocao, documentar e definir metas
+# ═══════════════════════════════════════════════════════════════
+
+  - id: FASE-4
+    name: "PLANEJAMENTO"
+    tier: 2
+    depends_on: ["FASE-3"]
+    description: |
+      Planejar a adocao da mudanca (stakeholders, comunicacao, treinamento,
+      rollout), documentar o novo processo como SOP e definir metas com
+      dashboard de acompanhamento. Trata o lado humano com o mesmo rigor
+      do lado tecnico.
+    estimated_time: "1-2 horas"
+    prerequisite: "Proposta TO-BE aprovada na FASE-3"
+
+    tasks:
+      - task_file: tasks/planejar-mudanca.md
+        task_id: PE-T-007
+        agent: "@gestor-de-mudanca"
+        required: true
+        description: "Criar plano completo de gestao de mudanca (Kotter + ADKAR)"
+        output: "plano-mudanca.md"
+        template: "templates/plano-mudanca-tmpl.md"
+        input_from:
+          - "FASE-3:processo-to-be.md"
+          - "FASE-3:micro-tarefas-implementacao.md"
+        actions:
+          - "Mapear stakeholders (patrocinadores, impactados, resistentes)"
+          - "Avaliar impacto da mudanca por grupo"
+          - "Criar plano de comunicacao segmentado por publico"
+          - "Definir programa de treinamento (conteudo, formato, cronograma)"
+          - "Planejar estrategia de rollout (piloto, faseado, big bang)"
+          - "Definir mecanismos de reforco pos-mudanca"
+          - "Criar plano de contingencia para resistencia"
+          - "Estabelecer criterios de sucesso da adocao"
+
+      - task_file: tasks/criar-sop.md
+        task_id: PE-T-005
+        agent: "@documentador-sop"
+        required: true
+        description: "Criar SOPs do novo processo TO-BE"
+        output: "sop-novo-processo.md"
+        template: "templates/sop-tmpl.md"
+        input_from:
+          - "FASE-3:processo-to-be.md"
+          - "FASE-3:detalhamento-automacoes.md"
+        actions:
+          - "Estruturar SOP com escopo, publico e pre-requisitos"
+          - "Documentar passo-a-passo detalhado do novo processo"
+          - "Incluir troubleshooting por etapa"
+          - "Criar FAQ com duvidas previsiveis"
+          - "Adicionar fluxograma visual"
+          - "Incluir informacoes de contato e escalamento"
+          - "Versionar documento (v1.0)"
+
+      - task_file: tasks/definir-metricas.md
+        task_id: PE-T-006
+        agent: "@analista-de-metricas"
+        required: true
+        description: "Definir metas pos-melhoria e propor dashboard de acompanhamento"
+        output: "metas-dashboard.md"
+        input_from:
+          - "FASE-1:baseline-metricas.md"
+          - "FASE-3:processo-to-be.md"
+        actions:
+          - "Revisar KPIs do baseline com base no TO-BE"
+          - "Definir metas progressivas (30/60/90 dias)"
+          - "Calcular impacto esperado por KPI"
+          - "Propor layout de dashboard de acompanhamento"
+          - "Definir rituais de revisao (frequencia, participantes, acoes)"
+          - "Estabelecer alertas e thresholds para desvios"
+
+    checkpoint:
+      criteria:
+        - "Plano de mudanca completo (stakeholders, comunicacao, treinamento, rollout)"
+        - "SOPs do novo processo documentadas com troubleshooting e FAQ"
+        - "Metas definidas com progressao temporal (30/60/90 dias)"
+        - "Dashboard proposto com rituais de revisao"
+      human_review: true
+      message: |
+        FASE 4 CONCLUIDA: Planejamento da implementacao.
+
+        Artefatos produzidos:
+        1. Plano de gestao de mudanca (stakeholders, comunicacao, treinamento)
+        2. SOP do novo processo (passo-a-passo, troubleshooting, FAQ)
+        3. Metas e dashboard de acompanhamento
+
+        Revise toda a documentacao antes da consolidacao final.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 5: ENTREGA
+# Objetivo: Consolidar artefatos e entregar pacote final
+# ═══════════════════════════════════════════════════════════════
+
+  - id: FASE-5
+    name: "ENTREGA"
+    tier: 2
+    depends_on: ["FASE-4"]
+    description: |
+      Consolidar todos os artefatos das fases anteriores em um pacote
+      final coerente. Gerar resumo executivo para stakeholders e
+      definir proximos passos imediatos.
+    estimated_time: "30 minutos"
+    prerequisite: "Documentacao aprovada na FASE-4"
+
+    tasks:
+      - task_file: tasks/analise-completa.md
+        task_id: PE-T-009
+        agent: "@orquestrador-de-processos"
+        required: true
+        description: "Consolidar pacote final de entrega com resumo executivo"
+        output: "pacote-final.md"
+        input_from:
+          - "FASE-1:mapa-processo-as-is.md"
+          - "FASE-1:baseline-metricas.md"
+          - "FASE-2:relatorio-auditoria.md"
+          - "FASE-2:analise-desperdicios.md"
+          - "FASE-2:oportunidades-automacao.md"
+          - "FASE-3:processo-to-be.md"
+          - "FASE-3:detalhamento-automacoes.md"
+          - "FASE-3:micro-tarefas-implementacao.md"
+          - "FASE-4:plano-mudanca.md"
+          - "FASE-4:sop-novo-processo.md"
+          - "FASE-4:metas-dashboard.md"
+        actions:
+          - "Revisar coerencia entre todos os artefatos"
+          - "Verificar que nenhum artefato esta incompleto ou inconsistente"
+          - "Criar resumo executivo com:"
+          - "  - Situacao atual (AS-IS) em 3-5 pontos"
+          - "  - Diagnostico principal (problemas e oportunidades)"
+          - "  - Proposta de melhoria (TO-BE) com impacto quantificado"
+          - "  - Plano de implementacao (timeline, fases, responsaveis)"
+          - "  - Investimento vs retorno esperado"
+          - "  - Proximos passos imediatos"
+          - "Organizar artefatos em estrutura logica de entrega"
+          - "Numerar e indexar todos os documentos"
+
+    checkpoint:
+      criteria:
+        - "Todos os artefatos consolidados e coerentes entre si"
+        - "Resumo executivo gerado com linguagem acessivel"
+        - "Plano de implementacao claro com proximos passos"
+        - "Indice completo dos artefatos entregues"
+      human_review: true
+      message: |
+        ANALISE COMPLETA FINALIZADA.
+
+        Pacote de entrega pronto com todos os artefatos:
+        - Mapa AS-IS + Baseline de metricas
+        - Relatorio de auditoria + Analise de desperdicios
+        - Oportunidades de automacao com ROI
+        - Processo TO-BE + Micro-tarefas de implementacao
+        - Plano de mudanca + SOP + Metas e dashboard
+        - Resumo executivo
+
+        Revise o pacote final e defina os proximos passos.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# SINAIS DE COMUNICACAO
+# ═══════════════════════════════════════════════════════════════
+
+completion_signal: "<promise>ANALISE-COMPLETA:COMPLETE</promise>"
+checkpoint_signal: "<promise>CHECKPOINT:FASE-{N}</promise>"
+blocked_signal: "<promise>BLOCKED:{task_id}</promise>"
+
+# ═══════════════════════════════════════════════════════════════
+# OUTPUTS CONSOLIDADOS POR FASE
+# ═══════════════════════════════════════════════════════════════
+
+outputs:
+  mapeamento:
+    phase: FASE-1
+    artifacts:
+      - name: "Mapa AS-IS do processo"
+        file: "mapa-processo-as-is.md"
+        description: "Fluxo completo com atores, sistemas, tempos e pontos de dor"
+      - name: "Baseline de metricas"
+        file: "baseline-metricas.md"
+        description: "KPIs definidos com formula, baseline e metas iniciais"
+  diagnostico:
+    phase: FASE-2
+    artifacts:
+      - name: "Relatorio de auditoria"
+        file: "relatorio-auditoria.md"
+        description: "Score de aderencia, desvios classificados, riscos e plano corretivo"
+      - name: "Analise de desperdicios e gargalos"
+        file: "analise-desperdicios.md"
+        description: "TIMWOODS, gargalo TOC, analise de valor agregado"
+      - name: "Oportunidades de automacao"
+        file: "oportunidades-automacao.md"
+        description: "Catalogo de automacoes com tipo, viabilidade, ROI e priorizacao"
+  proposta:
+    phase: FASE-3
+    artifacts:
+      - name: "Processo TO-BE"
+        file: "processo-to-be.md"
+        description: "Processo redesenhado com justificativa e impacto quantificado"
+      - name: "Detalhamento de automacoes"
+        file: "detalhamento-automacoes.md"
+        description: "Especificacao tecnica das automacoes priorizadas"
+      - name: "Micro-tarefas de implementacao"
+        file: "micro-tarefas-implementacao.md"
+        description: "WBS completo com micro-tarefas, dependencias e caminho critico"
+  planejamento:
+    phase: FASE-4
+    artifacts:
+      - name: "Plano de gestao de mudanca"
+        file: "plano-mudanca.md"
+        description: "Stakeholders, comunicacao, treinamento, rollout, contingencia"
+      - name: "SOP do novo processo"
+        file: "sop-novo-processo.md"
+        description: "Passo-a-passo, troubleshooting, FAQ, fluxograma"
+      - name: "Metas e dashboard"
+        file: "metas-dashboard.md"
+        description: "Metas progressivas (30/60/90d), dashboard, rituais de revisao"
+  entrega:
+    phase: FASE-5
+    artifacts:
+      - name: "Pacote consolidado"
+        file: "pacote-final.md"
+        description: "Todos os artefatos consolidados com indice"
+      - name: "Resumo executivo"
+        file: "pacote-final.md#resumo-executivo"
+        description: "Sintese para stakeholders nao-tecnicos"
+
+# ═══════════════════════════════════════════════════════════════
+# AGENTES POR FASE
+# ═══════════════════════════════════════════════════════════════
+
+agents_by_phase:
+  FASE-1:
+    primary:
+      - agent: "@otimizador-de-processos"
+        task: "Mapeamento AS-IS"
+        task_file: "tasks/mapear-processo.md"
+      - agent: "@analista-de-metricas"
+        task: "Baseline de metricas"
+        task_file: "tasks/definir-metricas.md"
+  FASE-2:
+    primary:
+      - agent: "@auditor-de-processos"
+        task: "Auditoria de aderencia"
+        task_file: "tasks/auditar-processo.md"
+      - agent: "@otimizador-de-processos"
+        task: "Analise de desperdicios e gargalos"
+        task_file: "tasks/otimizar-processo.md"
+      - agent: "@cacador-de-automacao"
+        task: "Oportunidades de automacao"
+        task_file: "tasks/identificar-automacoes.md"
+    consolidation:
+      - agent: "@orquestrador-de-processos"
+        task: "Diagnostico consolidado"
+  FASE-3:
+    primary:
+      - agent: "@otimizador-de-processos"
+        task: "Desenho TO-BE"
+        task_file: "tasks/otimizar-processo.md"
+      - agent: "@decompositor-de-tarefas"
+        task: "Micro-tarefas de implementacao"
+        task_file: "tasks/decompor-tarefa.md"
+    secondary:
+      - agent: "@cacador-de-automacao"
+        task: "Detalhamento tecnico de automacoes"
+        task_file: "tasks/identificar-automacoes.md"
+  FASE-4:
+    primary:
+      - agent: "@gestor-de-mudanca"
+        task: "Plano de gestao de mudanca"
+        task_file: "tasks/planejar-mudanca.md"
+      - agent: "@documentador-sop"
+        task: "SOP do novo processo"
+        task_file: "tasks/criar-sop.md"
+      - agent: "@analista-de-metricas"
+        task: "Metas e dashboard"
+        task_file: "tasks/definir-metricas.md"
+  FASE-5:
+    primary:
+      - agent: "@orquestrador-de-processos"
+        task: "Consolidacao e entrega"
+        task_file: "tasks/analise-completa.md"
+
+# ═══════════════════════════════════════════════════════════════
+# CHECKLIST DE QUALIDADE POR FASE
+# ═══════════════════════════════════════════════════════════════
+
+quality_checklist:
+  Mapeamento:
+    - "[ ] Fluxo completo mapeado do inicio ao fim (incluindo excecoes)"
+    - "[ ] Todos os atores e sistemas identificados com responsabilidades"
+    - "[ ] Tempos medios registrados por etapa"
+    - "[ ] Volumes e frequencias documentados"
+    - "[ ] Pontos de dor identificados e priorizados"
+    - "[ ] Diagrama visual do fluxo criado"
+    - "[ ] Baseline de metricas definido com KPIs SMART"
+  Analise:
+    - "[ ] Score de aderencia calculado com metodologia explicita"
+    - "[ ] Desvios classificados por severidade (critico/maior/menor)"
+    - "[ ] Desperdicios TIMWOODS identificados com evidencia"
+    - "[ ] Gargalo principal identificado via TOC"
+    - "[ ] Analise de valor agregado por etapa"
+    - "[ ] Automacoes mapeadas com tipo, viabilidade e ROI"
+    - "[ ] Diagnostico consolidado integrando 3 perspectivas"
+  Redesenho:
+    - "[ ] Processo TO-BE desenhado com justificativa por mudanca"
+    - "[ ] Impacto quantificado (AS-IS vs TO-BE)"
+    - "[ ] Melhorias priorizadas pela matriz impacto x esforco"
+    - "[ ] Automacoes detalhadas com especificacao tecnica"
+    - "[ ] Micro-tarefas criadas com passo-a-passo para iniciante"
+    - "[ ] Dependencias mapeadas e caminho critico identificado"
+  Planejamento:
+    - "[ ] Stakeholders mapeados (patrocinadores, impactados, resistentes)"
+    - "[ ] Comunicacao planejada e segmentada por publico"
+    - "[ ] Treinamento definido (conteudo, formato, cronograma)"
+    - "[ ] Rollout planejado (piloto/faseado/big bang)"
+    - "[ ] SOPs criadas com troubleshooting e FAQ"
+    - "[ ] Metas progressivas definidas (30/60/90 dias)"
+    - "[ ] Dashboard proposto com rituais de revisao"
+  Entrega:
+    - "[ ] Todos os artefatos consolidados e coerentes"
+    - "[ ] Resumo executivo com linguagem acessivel"
+    - "[ ] Indice completo dos documentos"
+    - "[ ] Proximos passos imediatos definidos"
+
+# ═══════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════
+
+metadata:
+  version: "1.0.0"
+  framework: "Rummler-Brache + Lean + TOC + Kotter/ADKAR"
+  created: "2026-03-04"
+  squad: "process-excellence"
+  total_agents: 8
+  total_tasks: 10
+  total_phases: 5
+  estimated_artifacts: 11
+
+# ═══════════════════════════════════════════════════════════════
+# TRATAMENTO DE ERROS
+# ═══════════════════════════════════════════════════════════════
+
+error_handling:
+  on_phase_failure:
+    - log_error: true
+    - halt_workflow: true
+    - notify_user: true
+    - message: "Fase falhou. Revise o erro e decida se deseja repetir ou pular."
+  on_checkpoint_failure:
+    - return_to_previous_phase: false
+    - max_retries: 2
+    - escalate_to_user: true
+    - message: "Checkpoint nao passou. Ajustes necessarios antes de prosseguir."
+  on_task_failure:
+    - log_error: true
+    - continue_phase: false
+    - notify_user: true
+    - message: "Task falhou. Verifique se o input estava correto e tente novamente."
+  on_missing_input:
+    - action: "Solicitar informacao ao usuario antes de prosseguir"
+    - fallback: "Registrar premissa e continuar com estimativa (sinalizar incerteza)"
+
+# ═══════════════════════════════════════════════════════════════
+# MODOS ALTERNATIVOS (EXECUCAO PARCIAL)
+# ═══════════════════════════════════════════════════════════════
+
+partial_modes:
+  diagnostico_apenas:
+    phases: ["FASE-1", "FASE-2"]
+    description: "Apenas mapeamento e diagnostico, sem redesenho ou planejamento"
+    duration: "2-4 horas"
+    use_when: "Precisa entender o estado atual antes de decidir agir"
+  sem_mudanca:
+    phases: ["FASE-1", "FASE-2", "FASE-3"]
+    description: "Mapeamento, diagnostico e redesenho, sem plano de mudanca"
+    duration: "3-6 horas"
+    use_when: "Ja tem equipe de mudanca ou processo e pessoal"
+  sem_auditoria:
+    phases: ["FASE-1", "FASE-3", "FASE-4", "FASE-5"]
+    skip_tasks: ["auditar-processo.md"]
+    description: "Ciclo completo sem fase de auditoria formal"
+    duration: "3-6 horas"
+    use_when: "Processo novo ou sem padrao de referencia para auditar"

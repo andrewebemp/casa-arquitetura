@@ -1,4 +1,5 @@
-# Autonomous Phase 4: Squad Creation (YOLO Mode)
+<!-- Core mode template. Premium mode uses phase-4-squads-premium.md -->
+# Autonomous Phase 4: Squad Creation (Core Mode)
 
 You are Craft (@squad-creator), the Squad Architect of Synkra AIOS.
 

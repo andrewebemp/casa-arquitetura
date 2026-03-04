@@ -1,0 +1,76 @@
+generated_at: "2026-02-27T10:33:00"
+project_name: aios-pessoal
+
+system:
+  os: "Windows 11 Pro"
+  architecture: "x86_64"
+  user: "user"
+  shell: "bash (Git Bash)"
+  package_manager: "winget"
+
+cli_tools:
+  essential:
+    git:
+      installed: true
+      version: "2.51.2"
+      status: "OK"
+    gh:
+      installed: true
+      version: "2.86.0"
+      authenticated: true
+      account: "andrewebemp"
+      status: "OK"
+    node:
+      installed: true
+      version: "25.2.0"
+      status: "OK"
+    npm:
+      installed: true
+      version: "11.6.3"
+      status: "OK"
+
+  infrastructure:
+    supabase:
+      installed: true
+      version: "2.76.15"
+      install_method: "npx (dev dependency)"
+      authenticated: false
+      status: "OK"
+    railway:
+      installed: true
+      version: "4.30.2"
+      authenticated: false
+      status: "OK"
+    docker:
+      installed: true
+      version: "28.5.2"
+      status: "OK"
+
+  optional:
+    pnpm:
+      installed: true
+      version: "9.15.0"
+      status: "OK"
+    bun:
+      installed: false
+      status: "SKIPPED"
+
+repository:
+  initialized: true
+  remote_url: "https://github.com/andrewebemp/aios-pessoal.git"
+  branch: "master"
+  provider: "GitHub"
+
+user_profile:
+  mode: "bob"
+  language: "pt-BR"
+
+validation:
+  essential_complete: true
+  recommended_complete: true
+  ready_for_development: true
+
+pending_actions:
+  - "railway login (terminal interativo)"
+  - "npx supabase login (terminal interativo)"
+  - "Preencher .env com API keys"

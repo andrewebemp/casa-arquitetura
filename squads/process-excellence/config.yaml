@@ -1,0 +1,65 @@
+name: process-excellence
+version: 1.0.0
+tested: false
+updated_at: "2026-03-04"
+short-title: "Process Excellence"
+description: >-
+  Squad de excelência em processos com 8 agentes especializados:
+  Orquestrador de Processos (Geary Rummler — triagem via Matriz 9-Cell),
+  Decompositor de Tarefas (David Allen/Tiago Forte — micro-tarefas para iniciantes),
+  Otimizador de Processos (Taiichi Ohno/Goldratt — Lean, TOC, Six Sigma),
+  Auditor de Processos (ISO 9001/COSO — aderência e riscos),
+  Documentador SOP (Technical Writing — SOPs acessíveis),
+  Analista de Métricas (Kaplan & Norton — KPIs e dashboards),
+  Gestor de Mudança (Kotter/ADKAR — adoção humana),
+  Caçador de Automação (RPA/No-Code — identificar e priorizar automações).
+  Aplicável a processos de negócio, desenvolvimento, e vida pessoal.
+author: AIOS Team
+entry_agent: orquestrador-de-processos
+slashPrefix: processExcellence
+
+settings:
+  activation:
+    show_ecosystem_report: false
+    show_greeting: true
+    show_quick_commands: true
+
+modes:
+  completa:
+    phases: 5
+    description: "Ciclo completo: mapear → analisar → redesenhar → planejar → entregar"
+  rapida:
+    phases: 3
+    description: "Melhoria rápida: diagnosticar → propor → documentar"
+  decomposicao:
+    phases: 2
+    description: "Decomposição pura: entender → quebrar em micro-tarefas"
+  direto:
+    phases: 1
+    description: "Comando direto a um agente específico"
+
+agents:
+  - id: orquestrador-de-processos
+    tier: 1
+    role: "Orquestrador e triagem via Rummler 9-Cell"
+  - id: decompositor-de-tarefas
+    tier: 1
+    role: "Decomposição em micro-tarefas executáveis"
+  - id: otimizador-de-processos
+    tier: 1
+    role: "Análise e melhoria de processos"
+  - id: auditor-de-processos
+    tier: 2
+    role: "Auditoria de aderência e riscos"
+  - id: documentador-sop
+    tier: 2
+    role: "Criação de SOPs e documentação"
+  - id: analista-de-metricas
+    tier: 2
+    role: "Definição de KPIs e métricas"
+  - id: gestor-de-mudanca
+    tier: 2
+    role: "Gestão de mudança e adoção"
+  - id: cacador-de-automacao
+    tier: 2
+    role: "Identificação de automações e ROI"

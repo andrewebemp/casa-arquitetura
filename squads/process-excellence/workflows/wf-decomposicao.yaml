@@ -1,0 +1,279 @@
+# ═══════════════════════════════════════════════════════════════
+# Workflow: Decomposicao de Tarefa
+# Workflow focado em quebrar qualquer tarefa em micro-tarefas
+# ═══════════════════════════════════════════════════════════════
+
+workflow:
+  id: wf-decomposicao
+  name: "Decomposicao de Tarefa em Micro-Tarefas"
+  duration: "30 minutos - 1 hora"
+  description: |
+    Workflow focado exclusivamente em decomposicao de tarefas.
+    Recebe qualquer tarefa (negocio, dev, pessoal) e produz uma
+    lista de micro-tarefas executaveis por alguem que nunca fez antes.
+    Usa WBS (Work Breakdown Structure) e GTD (Getting Things Done)
+    para garantir que cada micro-tarefa seja uma "next action" clara.
+    Em 2 fases: entender o contexto e decompor em micro-tarefas.
+  best_for:
+    - "Quando so precisa quebrar uma tarefa em passos executaveis"
+    - "Tarefas complexas que parecem grandes demais para comecar"
+    - "Delegar tarefas para alguem sem experiencia"
+    - "Criar checklist de execucao para qualquer atividade"
+    - "Planejar implementacao de uma melhoria ja decidida"
+  not_for:
+    - "Quando precisa diagnosticar o processo antes (use wf-melhoria-rapida)"
+    - "Quando precisa de analise completa (use wf-analise-completa)"
+    - "Quando a tarefa ainda nao esta definida (precisa de escopo primeiro)"
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 1: ENTENDIMENTO
+# Objetivo: Elicitar contexto completo da tarefa
+# ═══════════════════════════════════════════════════════════════
+
+phases:
+  - id: FASE-1
+    name: "ENTENDIMENTO"
+    tier: 0
+    description: |
+      Coletar todas as informacoes necessarias para decompor a tarefa
+      com precisao. O decompositor elicita contexto: o que precisa ser
+      feito, quem vai executar, que recursos estao disponiveis, quais
+      as restricoes e se ja existe algo similar.
+    estimated_time: "10-20 minutos"
+    prerequisite: "Tarefa definida pelo usuario (pode ser vaga)"
+
+    tasks:
+      - task_file: tasks/decompor-tarefa.md
+        task_id: PE-T-001
+        agent: "@decompositor-de-tarefas"
+        required: true
+        description: "Elicitar contexto completo da tarefa a ser decomposta"
+        output: "contexto-tarefa.md"
+        elicit: true
+        elicit_fields:
+          - "O que precisa ser feito (resultado esperado)"
+          - "Quem vai executar (nivel de experiencia)"
+          - "Recursos e ferramentas disponiveis"
+          - "Restricoes (tempo, orcamento, tecnologia)"
+          - "Ja existe processo similar ou referencia"
+        scope: "steps_1_2"
+        actions:
+          - "Coletar descricao da tarefa e resultado esperado"
+          - "Identificar quem vai executar e nivel de experiencia"
+          - "Listar recursos e ferramentas disponiveis"
+          - "Mapear restricoes (tempo, orcamento, dependencias)"
+          - "Verificar se existe processo similar como referencia"
+          - "Definir limites da tarefa (incluido e excluido)"
+          - "Identificar entregas principais"
+          - "Registrar premissas"
+
+    checkpoint:
+      criteria:
+        - "Resultado esperado da tarefa esta claro"
+        - "Perfil do executor esta definido"
+        - "Restricoes e premissas estao registradas"
+        - "Escopo esta delimitado (incluido e excluido)"
+      human_review: true
+      message: |
+        FASE 1 CONCLUIDA: Entendimento da tarefa.
+
+        Contexto coletado:
+        - Resultado esperado definido
+        - Perfil do executor identificado
+        - Restricoes e premissas registradas
+        - Escopo delimitado
+
+        Confirme se o entendimento esta correto antes da decomposicao.
+        Correcoes agora evitam retrabalho nas micro-tarefas.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 2: DECOMPOSICAO
+# Objetivo: Gerar micro-tarefas completas e executaveis
+# ═══════════════════════════════════════════════════════════════
+
+  - id: FASE-2
+    name: "DECOMPOSICAO"
+    tier: 1
+    depends_on: ["FASE-1"]
+    description: |
+      Decompor a tarefa em micro-tarefas atomicas usando WBS
+      (Work Breakdown Structure) em 3 niveis e GTD para garantir
+      que cada item seja uma "next action" clara. Cada micro-tarefa
+      inclui passo-a-passo detalhado, ferramentas, tempo estimado,
+      criterio de conclusao e possiveis problemas.
+    estimated_time: "20-40 minutos"
+    prerequisite: "Contexto aprovado na FASE-1"
+
+    tasks:
+      - task_file: tasks/decompor-tarefa.md
+        task_id: PE-T-001
+        agent: "@decompositor-de-tarefas"
+        required: true
+        description: "Decompor via WBS e detalhar cada micro-tarefa"
+        output: "micro-tarefas-completas.md"
+        template: "templates/micro-tarefa-tmpl.md"
+        input_from:
+          - "FASE-1:contexto-tarefa.md"
+        scope: "steps_3_4_5_6"
+        actions:
+          - "Quebrar a tarefa em blocos principais (WBS nivel 1)"
+          - "Quebrar cada bloco em sub-tarefas (WBS nivel 2)"
+          - "Quebrar sub-tarefas em micro-tarefas atomicas (WBS nivel 3)"
+          - "Garantir que cada micro-tarefa e uma 'next action' clara (GTD)"
+          - "Para cada micro-tarefa, detalhar:"
+          - "  - Passo-a-passo (para iniciante, sem conhecimento implicito)"
+          - "  - Ferramentas e recursos necessarios"
+          - "  - Tempo estimado"
+          - "  - Criterio de conclusao (como saber que terminou)"
+          - "  - Possiveis problemas e solucoes"
+          - "Mapear dependencias entre micro-tarefas"
+          - "Identificar sequencia obrigatoria vs paralelizavel"
+          - "Identificar caminho critico"
+          - "Calcular tempo total estimado"
+          - "Criar diagrama de dependencias"
+          - "Validar que cada micro-tarefa e autocontida"
+          - "Verificar que um iniciante conseguiria executar"
+
+    checkpoint:
+      criteria:
+        - "Todas as micro-tarefas tem passo-a-passo detalhado"
+        - "Todas as micro-tarefas tem criterio de conclusao"
+        - "Dependencias entre micro-tarefas estao mapeadas"
+        - "Tempo total estimado esta calculado"
+        - "Nenhuma micro-tarefa requer conhecimento implicito"
+      human_review: true
+      message: |
+        DECOMPOSICAO FINALIZADA.
+
+        Artefatos produzidos:
+        1. Contexto da tarefa (escopo, executor, restricoes)
+        2. Micro-tarefas completas com:
+           - Passo-a-passo para iniciante
+           - Ferramentas e recursos
+           - Tempo estimado por micro-tarefa
+           - Criterio de conclusao
+           - Dependencias mapeadas
+           - Tempo total estimado
+
+        Revise as micro-tarefas e comece a execucao pela primeira da lista.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# SINAIS DE COMUNICACAO
+# ═══════════════════════════════════════════════════════════════
+
+completion_signal: "<promise>DECOMPOSICAO:COMPLETE</promise>"
+checkpoint_signal: "<promise>CHECKPOINT:FASE-{N}</promise>"
+blocked_signal: "<promise>BLOCKED:{task_id}</promise>"
+
+# ═══════════════════════════════════════════════════════════════
+# OUTPUTS CONSOLIDADOS
+# ═══════════════════════════════════════════════════════════════
+
+outputs:
+  entendimento:
+    phase: FASE-1
+    artifacts:
+      - name: "Contexto da tarefa"
+        file: "contexto-tarefa.md"
+        description: "Escopo, executor, recursos, restricoes e premissas"
+  decomposicao:
+    phase: FASE-2
+    artifacts:
+      - name: "Micro-tarefas completas"
+        file: "micro-tarefas-completas.md"
+        description: "Lista ordenada com passo-a-passo, dependencias e tempo total"
+
+# ═══════════════════════════════════════════════════════════════
+# AGENTES POR FASE
+# ═══════════════════════════════════════════════════════════════
+
+agents_by_phase:
+  FASE-1:
+    primary:
+      - agent: "@decompositor-de-tarefas"
+        task: "Elicitacao de contexto"
+        task_file: "tasks/decompor-tarefa.md"
+  FASE-2:
+    primary:
+      - agent: "@decompositor-de-tarefas"
+        task: "Decomposicao WBS + detalhamento"
+        task_file: "tasks/decompor-tarefa.md"
+
+# ═══════════════════════════════════════════════════════════════
+# CHECKLIST DE QUALIDADE
+# ═══════════════════════════════════════════════════════════════
+
+quality_checklist:
+  Entendimento:
+    - "[ ] Resultado esperado esta claro e especifico"
+    - "[ ] Perfil do executor identificado (experiencia)"
+    - "[ ] Recursos disponiveis listados"
+    - "[ ] Restricoes documentadas"
+    - "[ ] Escopo delimitado (incluido e excluido)"
+  Decomposicao:
+    - "[ ] WBS com 3 niveis (blocos, sub-tarefas, micro-tarefas)"
+    - "[ ] Cada micro-tarefa tem passo-a-passo para iniciante"
+    - "[ ] Cada micro-tarefa tem criterio de conclusao"
+    - "[ ] Cada micro-tarefa tem tempo estimado"
+    - "[ ] Dependencias mapeadas com diagrama"
+    - "[ ] Caminho critico identificado"
+    - "[ ] Tempo total calculado"
+    - "[ ] Nenhum conhecimento implicito necessario"
+
+# ═══════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════
+
+metadata:
+  version: "1.0.0"
+  framework: "WBS + GTD (David Allen / Tiago Forte)"
+  created: "2026-03-04"
+  squad: "process-excellence"
+  total_agents: 1
+  total_tasks: 2
+  total_phases: 2
+  estimated_artifacts: 2
+
+# ═══════════════════════════════════════════════════════════════
+# TRATAMENTO DE ERROS
+# ═══════════════════════════════════════════════════════════════
+
+error_handling:
+  on_phase_failure:
+    - log_error: true
+    - halt_workflow: true
+    - notify_user: true
+    - message: "Fase falhou. Revise e tente novamente."
+  on_task_too_large:
+    - action: "Sugerir divisao da tarefa em sub-projetos"
+    - threshold: "Mais de 30 micro-tarefas geradas"
+    - message: "Tarefa muito grande. Recomendo dividir em fases menores."
+  on_vague_input:
+    - action: "Fazer perguntas adicionais ao usuario"
+    - max_rounds: 3
+    - fallback: "Registrar premissas e prosseguir sinalizando incerteza"
+  on_missing_context:
+    - action: "Assumir perfil iniciante e sinalizar"
+    - message: "Sem informacao sobre o executor, assumindo nivel iniciante."
+
+# ═══════════════════════════════════════════════════════════════
+# HANDOFF PARA OUTROS WORKFLOWS
+# ═══════════════════════════════════════════════════════════════
+
+handoff:
+  to_sop:
+    trigger: "Micro-tarefas aprovadas e usuario quer documentar como SOP"
+    workflow: null
+    task_file: "tasks/criar-sop.md"
+    agent: "@documentador-sop"
+    message: "Deseja criar uma SOP com base nestas micro-tarefas?"
+  to_melhoria_rapida:
+    trigger: "Durante a decomposicao, identifica-se que o processo precisa de melhoria"
+    workflow: "wf-melhoria-rapida"
+    message: "Esta tarefa parece ter um problema de processo. Recomendo rodar uma melhoria rapida antes."
+  to_analise_completa:
+    trigger: "Tarefa envolve processo complexo com multiplos stakeholders"
+    workflow: "wf-analise-completa"
+    message: "Esta tarefa faz parte de um processo complexo. Recomendo uma analise completa."

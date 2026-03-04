@@ -45,6 +45,7 @@ VERBOSE=false
 RESUME=false
 PHASES=()
 SINGLE_PHASE=""
+SQUAD_MODE="premium"  # premium | core
 
 # All automatizable phases in order
 ALL_PHASES=(0 2 3 4 5 6 7 8 9)
@@ -98,6 +99,9 @@ Options:
   --skip-on-fail            Skip failed phase instead of stopping
   --dry-run                 Show what would happen without executing
   --verbose                 Detailed output
+  --squad-mode <premium|core>  Squad creation mode (default: premium)
+                               premium = @squad-chief YOLO (6-phase workflow)
+                               core    = @squad-creator (simple template)
   --resume                  Resume from last saved state
   --help                    Show this help
 
@@ -162,6 +166,14 @@ parse_args() {
         VERBOSE=true
         export AIOS_VERBOSE=true
         shift
+        ;;
+      --squad-mode)
+        SQUAD_MODE="$2"
+        if [[ "$SQUAD_MODE" != "premium" && "$SQUAD_MODE" != "core" ]]; then
+          log_error "Invalid squad mode: $SQUAD_MODE (must be 'premium' or 'core')"
+          exit 1
+        fi
+        shift 2
         ;;
       --resume)
         RESUME=true
@@ -290,6 +302,7 @@ run_phase() {
       export AIOS_VERBOSE="$VERBOSE"
       export AIOS_MAX_RETRIES="$MAX_RETRIES"
       export PROJECT_ROOT="$PROJECT_ROOT"
+      export SQUAD_MODE="$SQUAD_MODE"
       cd "$PROJECT_ROOT"
       bash "$executor"
     ); then
@@ -356,6 +369,7 @@ main() {
   log_info "Max retries per phase: $MAX_RETRIES"
   [[ "$PAUSE_BETWEEN" == true ]] && log_info "Pause between phases: enabled"
   [[ "$SKIP_ON_FAIL" == true ]] && log_info "Skip on fail: enabled"
+  log_info "Squad mode: $SQUAD_MODE"
   [[ "$DRY_RUN" == true ]] && log_warn "DRY RUN MODE - no changes will be made"
   echo ""
 

@@ -1,0 +1,356 @@
+# ═══════════════════════════════════════════════════════════════
+# Workflow: Melhoria Rapida de Processo
+# Ciclo enxuto de melhoria em 3 fases
+# ═══════════════════════════════════════════════════════════════
+
+workflow:
+  id: wf-melhoria-rapida
+  name: "Melhoria Rapida de Processo"
+  duration: "1-2 horas"
+  description: |
+    Ciclo enxuto de melhoria de processo em 3 fases:
+    Diagnostico Rapido -> Proposta -> Documentacao.
+    Ideal para processos simples ou ajustes pontuais onde nao e
+    necessario o rigor completo de auditoria, gestao de mudanca
+    ou analise de automacao. O otimizador faz mapeamento e analise
+    num unico passo, propoe TO-BE, e o documentador registra como SOP.
+  best_for:
+    - "Ajustes pontuais em processos existentes"
+    - "Processos simples com poucos atores"
+    - "Melhorias incrementais de baixo risco"
+    - "Quando ja se conhece o problema e precisa da solucao"
+    - "Processos pessoais ou de equipe pequena"
+  not_for:
+    - "Processos criticos com multiplos stakeholders (use wf-analise-completa)"
+    - "Quando precisa de auditoria formal ou metricas detalhadas"
+    - "Mudancas que afetam muitas pessoas (precisam de gestao de mudanca)"
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 1: DIAGNOSTICO RAPIDO
+# Objetivo: Mapear e analisar num unico passo
+# ═══════════════════════════════════════════════════════════════
+
+phases:
+  - id: FASE-1
+    name: "DIAGNOSTICO RAPIDO"
+    tier: 0
+    description: |
+      Mapeamento e analise combinados num unico passo. O otimizador
+      mapeia o AS-IS de forma simplificada e ja identifica os principais
+      desperdicios, gargalos e oportunidades de melhoria. Foco em
+      velocidade sem perder profundidade nos pontos criticos.
+    estimated_time: "30-60 minutos"
+    prerequisite: "Processo definido pelo usuario"
+
+    tasks:
+      - task_file: tasks/mapear-processo.md
+        task_id: PE-T-002
+        agent: "@otimizador-de-processos"
+        required: true
+        description: "Mapear AS-IS simplificado e identificar problemas principais"
+        output: "diagnostico-rapido.md"
+        template: "templates/mapa-processo-tmpl.md"
+        elicit: true
+        elicit_fields:
+          - "Nome do processo"
+          - "Descricao (o que faz, quando, por quem)"
+          - "Qual o problema principal ou incomodo"
+          - "Resultado desejado"
+        actions:
+          - "Mapear fluxo AS-IS de forma simplificada (etapas principais)"
+          - "Identificar atores e sistemas envolvidos"
+          - "Estimar tempos por etapa (nao precisa ser exato)"
+          - "Identificar os 2-3 maiores pontos de dor"
+          - "Buscar desperdicios obvios (TIMWOODS simplificado)"
+          - "Identificar gargalo principal"
+          - "Registrar observacoes e oportunidades de melhoria"
+
+      - task_file: tasks/otimizar-processo.md
+        task_id: PE-T-003
+        agent: "@otimizador-de-processos"
+        required: true
+        description: "Analisar desperdicios e gargalos no AS-IS mapeado"
+        output: "analise-rapida.md"
+        input_from:
+          - "FASE-1:diagnostico-rapido.md"
+        actions:
+          - "Classificar cada etapa: agrega valor / necessaria / desperdicio"
+          - "Identificar etapas candidatas a eliminacao ou simplificacao"
+          - "Calcular percentual estimado de tempo desperdicado"
+          - "Priorizar problemas por impacto"
+          - "Identificar quick wins (melhoria facil e rapida)"
+
+    checkpoint:
+      criteria:
+        - "Fluxo AS-IS mapeado com etapas principais"
+        - "Problemas principais identificados e priorizados"
+        - "Quick wins identificados"
+      human_review: true
+      message: |
+        FASE 1 CONCLUIDA: Diagnostico rapido.
+
+        Artefatos produzidos:
+        1. Mapa AS-IS simplificado com pontos de dor
+        2. Analise rapida com desperdicios e quick wins
+
+        Confirme se o diagnostico esta correto antes de prosseguir.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 2: PROPOSTA
+# Objetivo: Desenhar TO-BE e decompor implementacao
+# ═══════════════════════════════════════════════════════════════
+
+  - id: FASE-2
+    name: "PROPOSTA"
+    tier: 1
+    depends_on: ["FASE-1"]
+    description: |
+      Propor o processo melhorado (TO-BE) e quebrar a implementacao
+      em micro-tarefas executaveis. Foco em solucoes praticas e
+      implementaveis rapidamente.
+    estimated_time: "20-40 minutos"
+    prerequisite: "Diagnostico rapido aprovado na FASE-1"
+
+    tasks:
+      - task_file: tasks/otimizar-processo.md
+        task_id: PE-T-003
+        agent: "@otimizador-de-processos"
+        required: true
+        description: "Desenhar processo TO-BE com melhorias priorizadas"
+        output: "proposta-to-be.md"
+        input_from:
+          - "FASE-1:diagnostico-rapido.md"
+          - "FASE-1:analise-rapida.md"
+        actions:
+          - "Eliminar etapas que nao agregam valor"
+          - "Simplificar etapas complexas"
+          - "Paralelizar onde possivel"
+          - "Propor automacoes simples (se aplicavel)"
+          - "Documentar novo fluxo TO-BE"
+          - "Estimar impacto (reducao de tempo, erros, custo)"
+          - "Listar melhorias em ordem de prioridade"
+
+      - task_file: tasks/decompor-tarefa.md
+        task_id: PE-T-001
+        agent: "@decompositor-de-tarefas"
+        required: true
+        description: "Quebrar melhorias em micro-tarefas executaveis"
+        output: "micro-tarefas.md"
+        template: "templates/micro-tarefa-tmpl.md"
+        input_from:
+          - "FASE-2:proposta-to-be.md"
+        actions:
+          - "Listar todas as melhorias a implementar"
+          - "Quebrar cada melhoria em micro-tarefas atomicas"
+          - "Detalhar passo-a-passo para cada micro-tarefa"
+          - "Estimar tempo por micro-tarefa"
+          - "Ordenar por dependencia e prioridade"
+          - "Validar que cada micro-tarefa e autocontida"
+
+    checkpoint:
+      criteria:
+        - "Processo TO-BE desenhado com justificativa"
+        - "Impacto estimado (antes vs depois)"
+        - "Micro-tarefas criadas com passo-a-passo"
+        - "Ordem de implementacao definida"
+      human_review: true
+      message: |
+        FASE 2 CONCLUIDA: Proposta de melhoria.
+
+        Artefatos produzidos:
+        1. Processo TO-BE com impacto estimado
+        2. Micro-tarefas de implementacao ordenadas
+
+        Aprove a proposta antes de documentar.
+        Ajustes no TO-BE devem ser feitos agora.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# FASE 3: DOCUMENTACAO
+# Objetivo: Criar/atualizar SOP do novo processo
+# ═══════════════════════════════════════════════════════════════
+
+  - id: FASE-3
+    name: "DOCUMENTACAO"
+    tier: 1
+    depends_on: ["FASE-2"]
+    description: |
+      Documentar o processo melhorado como SOP (Standard Operating
+      Procedure) clara e acessivel. Se ja existe SOP, atualizar com
+      as mudancas aprovadas.
+    estimated_time: "15-30 minutos"
+    prerequisite: "Proposta TO-BE aprovada na FASE-2"
+
+    tasks:
+      - task_file: tasks/criar-sop.md
+        task_id: PE-T-005
+        agent: "@documentador-sop"
+        required: true
+        description: "Criar ou atualizar SOP do processo melhorado"
+        output: "sop-processo.md"
+        template: "templates/sop-tmpl.md"
+        input_from:
+          - "FASE-2:proposta-to-be.md"
+          - "FASE-2:micro-tarefas.md"
+        actions:
+          - "Estruturar SOP com escopo e publico-alvo"
+          - "Documentar passo-a-passo do novo processo"
+          - "Incluir dicas e troubleshooting por etapa"
+          - "Criar FAQ com duvidas previsiveis"
+          - "Adicionar fluxograma visual simplificado"
+          - "Versionar documento"
+
+    checkpoint:
+      criteria:
+        - "SOP criada com passo-a-passo claro"
+        - "Troubleshooting incluido"
+        - "Documento acessivel para o publico-alvo"
+      human_review: true
+      message: |
+        MELHORIA RAPIDA FINALIZADA.
+
+        Artefatos produzidos:
+        1. Diagnostico rapido (AS-IS + problemas)
+        2. Proposta TO-BE com micro-tarefas
+        3. SOP do novo processo
+
+        Revise a SOP e comece a implementacao pelas micro-tarefas.
+      gate: null
+
+# ═══════════════════════════════════════════════════════════════
+# SINAIS DE COMUNICACAO
+# ═══════════════════════════════════════════════════════════════
+
+completion_signal: "<promise>MELHORIA-RAPIDA:COMPLETE</promise>"
+checkpoint_signal: "<promise>CHECKPOINT:FASE-{N}</promise>"
+blocked_signal: "<promise>BLOCKED:{task_id}</promise>"
+
+# ═══════════════════════════════════════════════════════════════
+# OUTPUTS CONSOLIDADOS
+# ═══════════════════════════════════════════════════════════════
+
+outputs:
+  diagnostico:
+    phase: FASE-1
+    artifacts:
+      - name: "Diagnostico rapido"
+        file: "diagnostico-rapido.md"
+        description: "Mapa AS-IS simplificado com pontos de dor e oportunidades"
+      - name: "Analise rapida"
+        file: "analise-rapida.md"
+        description: "Desperdicios, gargalos e quick wins identificados"
+  proposta:
+    phase: FASE-2
+    artifacts:
+      - name: "Proposta TO-BE"
+        file: "proposta-to-be.md"
+        description: "Processo redesenhado com impacto estimado"
+      - name: "Micro-tarefas"
+        file: "micro-tarefas.md"
+        description: "Implementacao decomposta em passos executaveis"
+  documentacao:
+    phase: FASE-3
+    artifacts:
+      - name: "SOP do processo"
+        file: "sop-processo.md"
+        description: "Procedimento operacional padrao do processo melhorado"
+
+# ═══════════════════════════════════════════════════════════════
+# AGENTES POR FASE
+# ═══════════════════════════════════════════════════════════════
+
+agents_by_phase:
+  FASE-1:
+    primary:
+      - agent: "@otimizador-de-processos"
+        task: "Mapeamento e analise rapida"
+        task_files:
+          - "tasks/mapear-processo.md"
+          - "tasks/otimizar-processo.md"
+  FASE-2:
+    primary:
+      - agent: "@otimizador-de-processos"
+        task: "Desenho TO-BE"
+        task_file: "tasks/otimizar-processo.md"
+      - agent: "@decompositor-de-tarefas"
+        task: "Micro-tarefas"
+        task_file: "tasks/decompor-tarefa.md"
+  FASE-3:
+    primary:
+      - agent: "@documentador-sop"
+        task: "SOP"
+        task_file: "tasks/criar-sop.md"
+
+# ═══════════════════════════════════════════════════════════════
+# CHECKLIST DE QUALIDADE
+# ═══════════════════════════════════════════════════════════════
+
+quality_checklist:
+  Diagnostico:
+    - "[ ] Fluxo AS-IS mapeado (etapas principais)"
+    - "[ ] Atores e sistemas identificados"
+    - "[ ] Pontos de dor priorizados"
+    - "[ ] Quick wins identificados"
+    - "[ ] Gargalo principal identificado"
+  Proposta:
+    - "[ ] TO-BE desenhado com justificativa"
+    - "[ ] Impacto estimado (antes vs depois)"
+    - "[ ] Melhorias priorizadas"
+    - "[ ] Micro-tarefas com passo-a-passo"
+    - "[ ] Ordem de implementacao definida"
+  Documentacao:
+    - "[ ] SOP com passo-a-passo claro"
+    - "[ ] Troubleshooting incluido"
+    - "[ ] FAQ criado"
+    - "[ ] Fluxograma visual"
+
+# ═══════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════
+
+metadata:
+  version: "1.0.0"
+  framework: "Lean simplificado + GTD"
+  created: "2026-03-04"
+  squad: "process-excellence"
+  total_agents: 3
+  total_tasks: 4
+  total_phases: 3
+  estimated_artifacts: 5
+
+# ═══════════════════════════════════════════════════════════════
+# TRATAMENTO DE ERROS
+# ═══════════════════════════════════════════════════════════════
+
+error_handling:
+  on_phase_failure:
+    - log_error: true
+    - halt_workflow: true
+    - notify_user: true
+    - message: "Fase falhou. Revise e tente novamente."
+  on_checkpoint_failure:
+    - return_to_previous_phase: false
+    - max_retries: 2
+    - escalate_to_user: true
+  on_missing_input:
+    - action: "Solicitar informacao ao usuario"
+    - fallback: "Registrar premissa e prosseguir sinalizando incerteza"
+
+# ═══════════════════════════════════════════════════════════════
+# ESCALAMENTO PARA ANALISE COMPLETA
+# ═══════════════════════════════════════════════════════════════
+
+escalation:
+  trigger_conditions:
+    - "Processo mais complexo do que o esperado (mais de 10 etapas)"
+    - "Multiplos stakeholders com interesses conflitantes"
+    - "Necessidade de auditoria formal"
+    - "Mudanca afeta mais de 5 pessoas"
+    - "Risco alto identificado durante diagnostico"
+  escalate_to: "wf-analise-completa"
+  message: |
+    Este processo e mais complexo do que o esperado para uma melhoria rapida.
+    Recomendo escalar para a Analise Completa (wf-analise-completa) que inclui
+    auditoria, metricas detalhadas, gestao de mudanca e mais agentes especializados.
+    Deseja escalar?

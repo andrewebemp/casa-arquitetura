@@ -1,4 +1,6 @@
-const execa = require('execa');
+const { execFile } = require('child_process');
+const { promisify } = require('util');
+const execFileAsync = promisify(execFile);
 const fs = require('fs').promises;
 const fsSync = require('fs');
 const path = require('path');
@@ -299,9 +301,11 @@ class ProjectStatusLoader {
    */
   async isGitRepository() {
     try {
-      await execa('git', ['rev-parse', '--is-inside-work-tree'], {
+      // ACT-11: Reuse cached value from constructor if available
+      if (this._isGitRepo) return true;
+      await execFileAsync('git', ['rev-parse', '--is-inside-work-tree'], {
         cwd: this.rootPath,
-        stderr: 'ignore',
+        timeout: 5000,
       });
       return true;
     } catch (error) {
@@ -317,15 +321,17 @@ class ProjectStatusLoader {
   async getGitBranch() {
     try {
       // Try modern git command first (git >= 2.22)
-      const { stdout } = await execa('git', ['branch', '--show-current'], {
+      const { stdout } = await execFileAsync('git', ['branch', '--show-current'], {
         cwd: this.rootPath,
+        timeout: 5000,
       });
       return stdout.trim();
     } catch (error) {
       // Fallback for older git versions
       try {
-        const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+        const { stdout } = await execFileAsync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
           cwd: this.rootPath,
+          timeout: 5000,
         });
         return stdout.trim();
       } catch (fallbackError) {
@@ -341,8 +347,9 @@ class ProjectStatusLoader {
    */
   async getModifiedFiles() {
     try {
-      const { stdout } = await execa('git', ['status', '--porcelain'], {
+      const { stdout } = await execFileAsync('git', ['status', '--porcelain'], {
         cwd: this.rootPath,
+        timeout: 10000,
       });
 
       if (!stdout) return { files: [], totalCount: 0 };
@@ -372,11 +379,12 @@ class ProjectStatusLoader {
    */
   async getRecentCommits() {
     try {
-      const { stdout } = await execa(
+      const { stdout } = await execFileAsync(
         'git',
         ['log', `-${this.maxRecentCommits}`, '--oneline', '--no-decorate'],
         {
           cwd: this.rootPath,
+          timeout: 5000,
         }
       );
 

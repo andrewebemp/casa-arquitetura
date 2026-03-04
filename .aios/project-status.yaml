@@ -1,0 +1,19 @@
+status:
+  branch: master
+  modifiedFiles:
+    - .aios-core/development/scripts/agent-config-loader.js
+    - .aios-core/infrastructure/scripts/project-status-loader.js
+    - .aios-core/package.json
+    - package.json
+    - .aios-core/package-lock.json
+  modifiedFilesTotalCount: 13
+  recentCommits:
+    - 'docs: integrate brownfield option across all user documentation v1.2.0'
+    - 'docs: update all project documentation and bump to v1.1.0'
+  currentEpic: null
+  currentStory: null
+  lastUpdate: '2026-02-27T14:02:17.193Z'
+  isGitRepo: true
+timestamp: 1772200937195
+ttl: 60
+gitFingerprint: 1772198593229.7249:1772200230727.9224
