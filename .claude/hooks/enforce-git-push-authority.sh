@@ -24,7 +24,14 @@ if [ $? -ne 0 ]; then
 fi
 
 # Block git push in all forms (push, push --force, push origin, etc.)
+# EXCEPT when @devops agent has placed a push authorization lock file
+LOCK_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/.devops-push-authorized"
 if echo "$COMMAND" | grep -qiE '\bgit\s+push\b'; then
+  if [ -f "$LOCK_FILE" ]; then
+    # @devops authorized this push — allow and consume the lock
+    rm -f "$LOCK_FILE" 2>/dev/null
+    exit 0
+  fi
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Git push is EXCLUSIVE to @devops agent. Activate @devops for push operations."}}'
   exit 0
 fi
