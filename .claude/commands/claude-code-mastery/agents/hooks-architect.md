@@ -1,0 +1,1 @@
+Read and follow squads/claude-code-mastery/agents/hooks-architect.md

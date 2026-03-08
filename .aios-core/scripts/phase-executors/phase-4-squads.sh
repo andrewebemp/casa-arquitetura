@@ -44,7 +44,7 @@ else
 fi
 
 # Pre-existing squads to exclude from new squad validation
-PREEXISTING_SQUADS="squad-creator|conselho|process-excellence"
+PREEXISTING_SQUADS="squad-creator|conselho|process-excellence|claude-code-mastery"
 
 # ============================================================================
 #                          PRECONDITIONS
