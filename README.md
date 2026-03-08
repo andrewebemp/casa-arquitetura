@@ -24,6 +24,7 @@ Um meta-framework que orquestra **12 agentes de IA especializados** para transfo
 | Squad Creator | `@squad-creator` (Craft) | Cria squads de agentes por dominio | `/AIOS/agents/squad-creator` |
 | Conselheiro-Mor | `@conselheiro-mor` | Conselho Deliberativo (analise de decisoes) | `/conselho/agents/conselheiro-mor` |
 | Orquestrador PE | `@orquestrador-pe` | Process Excellence (otimizacao de processos) | `/process-excellence/agents/orquestrador-de-processos` |
+| Claude Mastery Chief | `@claude-mastery-chief` (Orion) | Claude Code Mastery (8 agentes Claude Code) | `/claude-code-mastery/agents/claude-mastery-chief` |
 
 ## Fluxo de Desenvolvimento (10 Fases)
 
@@ -220,6 +221,60 @@ Pontos de integracao:
 - **Fase 7 (Validacao):** Auditor mede aderencia PRD-Arquitetura (0-100) + Analista define baseline de metricas
 - **Fase 8 (Dev):** Decompositor gera micro-tarefas ELI5 antes de cada story
 
+## Claude Code Mastery
+
+Squad de 8 agentes especializados em Claude Code — hooks, MCP, skills, configuracao, orquestracao multi-agente e CI/CD.
+
+### Agentes
+
+| Agente | Slash Command | Papel |
+|--------|---------------|-------|
+| Claude Mastery Chief | `/claude-code-mastery/agents/claude-mastery-chief` | Tier 0 orchestrator/router |
+| Hooks Architect | `/claude-code-mastery/agents/hooks-architect` | 17 tipos de hook events |
+| MCP Integrator | `/claude-code-mastery/agents/mcp-integrator` | MCP servers, Docker MCP |
+| Swarm Orchestrator | `/claude-code-mastery/agents/swarm-orchestrator` | Orquestracao multi-agente |
+| Config Engineer | `/claude-code-mastery/agents/config-engineer` | Settings, permissions, CLAUDE.md |
+| Skill Craftsman | `/claude-code-mastery/agents/skill-craftsman` | Slash commands, skills, plugins |
+| Project Integrator | `/claude-code-mastery/agents/project-integrator` | CI/CD, GitHub Actions |
+| Roadmap Sentinel | `/claude-code-mastery/agents/roadmap-sentinel` | Roadmap, changelog, versioning |
+
+## Synapse Session Engine
+
+Motor de injecao de contexto que enriquece cada prompt com regras relevantes do framework. Opera em 8 camadas (L0-L7), com L0-L2 e L5 ativos por default.
+
+- **L0 (Constitution):** Principios inviolaveis
+- **L1 (Global):** Regras globais do projeto
+- **L2 (Agent):** Contexto do agente ativo
+- **L5 (Squad):** Descobre e injeta regras dos squads instalados
+
+Manifests de squad em `squads/*/.synapse/manifest` sao descobertos automaticamente.
+
+## Graph Dashboard
+
+Ferramenta CLI para visualizacao de progresso do projeto:
+
+```bash
+node bin/aios-graph.js --stats    # Estatisticas do projeto
+node bin/aios-graph.js --help     # Uso completo
+npm run graph                      # Atalho via package.json
+```
+
+Formatos de saida: ASCII tree, JSON, DOT (Graphviz), Mermaid, HTML.
+
+## Governance Hooks
+
+7 hooks de governanca protegem a integridade do projeto:
+
+| Hook | Evento | O que faz |
+|------|--------|-----------|
+| mind-clone-governance | Write/Edit | Protege DNA de agentes persona |
+| enforce-architecture-first | Write/Edit | Garante que arquitetura precede implementacao |
+| enforce-git-push-authority | Bash | Apenas @devops pode fazer git push |
+| read-protection | Read | Protege arquivos sensiveis |
+| write-path-validation | Write/Edit | Valida paths de escrita |
+| sql-governance | Bash | Governa operacoes SQL |
+| slug-validation | Bash | Valida slugs e nomes |
+
 ## Modo Autonomo
 
 Execucao automatizada de fases do AIOS com dois modos de execucao:
@@ -272,47 +327,50 @@ Ambos os modos compartilham o mesmo estado em `plan/autonomous-state.json` e lea
 .aios-core/                         # Framework core (NAO edite diretamente)
   ├── constitution.md               # Constituicao (6 principios inviolaveis)
   ├── core-config.yaml              # Configuracao do framework
-  ├── user-guide.md                 # Handbook completo do usuario
   ├── core/
-  │   ├── execution/                # Story parser, engine de execucao
+  │   ├── execution/                # BOB Build Orchestrator (12 arquivos)
+  │   ├── synapse/                  # Synapse Session Engine (35 arquivos, 8 layers)
+  │   ├── ids/                      # Incremental Decision System + gates G1-G4
+  │   ├── code-intel/               # Code Intel (14 arquivos, registry-backed)
+  │   ├── graph-dashboard/          # Graph Dashboard CLI (12 arquivos)
+  │   ├── memory/                   # GotchasMemory (captura auto de erros)
   │   ├── quality-gates/            # Quality gates automaticos
-  │   ├── utils/                    # 70+ utilitarios
-  │   └── docs/                     # Documentacao tecnica do core
+  │   └── utils/                    # 70+ utilitarios
+  ├── hooks/unified/                # Unified hook system (Claude + Gemini)
+  ├── data/
+  │   ├── entity-registry.yaml      # 305 entidades catalogadas (gerado)
+  │   └── tech-presets/             # Presets de tecnologia
   ├── development/
   │   ├── agents/                   # 12 definicoes de agentes
   │   ├── tasks/                    # 115+ tarefas executaveis
-  │   ├── templates/                # Templates de documentos
-  │   ├── workflows/                # Workflows multi-step
-  │   ├── checklists/               # Checklists de validacao
-  │   └── data/                     # Frameworks de decisao e qualidade
-  ├── data/
-  │   ├── technical-preferences.md  # Preferencias de tech stack
-  │   └── tech-presets/             # Presets de tecnologia (Next.js, etc)
+  │   └── workflows/                # Workflows multi-step
   ├── scripts/
   │   ├── autonomous-runner.sh      # Orquestrador autonomo (Ralph Pattern)
-  │   ├── phase-executors/          # Executores por fase (0-9)
-  │   ├── pm.sh                     # Process manager para agentes
-  │   └── update-aios.sh            # Script de atualizacao do framework
+  │   └── phase-executors/          # Executores por fase (0-9)
   └── templates/
       └── phase-prompts/            # Prompts por fase
 
+.synapse/                           # Synapse domain files (contexto por agente)
+  ├── manifest                      # 12 agent triggers + 3 workflow triggers
+  ├── constitution                  # L0 principios
+  ├── agent-*                       # 12 domain files de agentes
+  ├── sessions/                     # Sessoes Synapse
+  └── cache/                        # Cache L5 (TTL 60s)
+
 .claude/                            # Integracao Claude Code
   ├── CLAUDE.md                     # Regras e configuracao do Claude Code
+  ├── hooks/                        # 11 hooks (7 governance + 2 synapse + 2 precompact)
   ├── commands/AIOS/agents/         # Slash commands dos 12 agentes core
   ├── commands/conselho/agents/     # Slash commands do Conselho Deliberativo
-  ├── commands/process-excellence/agents/ # Slash commands do Process Excellence (8 agentes)
+  ├── commands/process-excellence/agents/ # Slash commands do Process Excellence
+  ├── commands/claude-code-mastery/agents/ # Slash commands do Claude Code Mastery (8)
   └── rules/                        # Regras MCP
 
-docs/                               # Documentacao do projeto (gerada pelos agentes)
-  ├── stories/                      # Stories de desenvolvimento
-  ├── prd/                          # PRD fragmentado por epico
-  ├── architecture/                 # Arquitetura fragmentada
-  └── framework/                    # Guias de dev (source-tree, tech-stack, coding-standards)
-
 squads/                             # Squads de agentes por dominio
-  ├── conselho/                     # Conselho Deliberativo (analise de decisoes)
-  ├── process-excellence/           # Process Excellence (otimizacao de processos)
-  └── squad-creator/                # Squad Creator Premium (meta-squad)
+  ├── conselho/                     # Conselho Deliberativo (4 agentes)
+  ├── process-excellence/           # Process Excellence (8 agentes)
+  ├── squad-creator/                # Squad Creator Premium (3 agentes)
+  └── claude-code-mastery/          # Claude Code Mastery (8 agentes)
 
 guia-pratico.md                     # Guia rapido simplificado (PT-BR)
 passos.md                           # Workflow completo das 10 fases (PT-BR)

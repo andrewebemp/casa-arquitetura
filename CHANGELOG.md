@@ -5,6 +5,28 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.7.0] - 2026-03-08
+
+### Adicionado
+- **Synapse Session Engine** — pipeline de injecao de contexto com 8 layers (L0-L2+L5 ativos). 35 arquivos core, manifests de dominio, squad discovery automatico via L5
+- **7 hooks de governanca** — mind-clone-governance, enforce-architecture-first, enforce-git-push-authority, read-protection, write-path-validation, sql-governance, slug-validation
+- **Precompact session digest** — hook PreCompact para captura de conhecimento antes de compactacao de contexto
+- **Graph Dashboard** (`aios-graph` CLI) — visualizacao de progresso em ASCII tree, JSON, DOT, Mermaid e HTML. Entry point em `bin/aios-graph.js`
+- **Code Intel** — enrichment de contexto de codigo baseado em entity registry. 14 arquivos com providers, helpers e hook-runtime
+- **IDS Enhancement** — gates G1-G4 (epic-creation, story-creation, story-validation, dev-context), FrameworkGovernor, circuit-breaker, layer-classifier, registry-healer
+- **Entity Registry generator** — script `generate-entity-registry.js` que cataloga 305 entidades automaticamente
+- **Squad claude-code-mastery** — 8 agentes especializados em Claude Code (hooks-architect, mcp-integrator, swarm-orchestrator, config-engineer, skill-craftsman, project-integrator, roadmap-sentinel)
+- **GotchasMemory state files** — `.aios/gotchas.json` e `.aios/gotchas.md` para captura automatica de padroes de erro
+- **Release Automation** — `scripts/release.sh` para release completo, validacao de docs obrigatorios em `version-bump.js`
+
+### Aprimorado
+- **IDS <-> Conselho** — gate advisory para decisoes CREATE de alto impacto (>30%), `run_ids_conselho_gate()` em common.sh
+- **BOB <-> Conselho/PE** — merge gate advisory antes de merge, decomposicao PE na fase plan
+- **Squad Creator Premium** — enforcement via mind-clone-governance hook
+- **Todos os squads** descobriveis via Synapse L5 (manifest + rules)
+- **claude-code-mastery** registrado no Conselho cross-squad e em PREEXISTING_SQUADS
+- **Gotchas Memory** integrada no template `{{LEARNINGS}}` do autonomous runner
+
 ## [1.6.0] - 2026-03-04
 
 ### Adicionado
@@ -141,6 +163,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Controle de versões com semantic versioning
 - Repositório privado no GitHub
 
+[1.7.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.3.0...v1.4.0

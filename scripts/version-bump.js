@@ -182,6 +182,25 @@ function updateVersionInfo(newVersion) {
   fs.writeFileSync(versionInfoPath, JSON.stringify(info, null, 2));
 }
 
+function validateDocsUpdated() {
+  const docsFiles = ['README.md', 'guia-pratico.md', '.claude/CLAUDE.md', 'CHANGELOG.md'];
+  const changedFiles = exec('git diff --cached --name-only').split('\n').filter(Boolean);
+
+  const missingDocs = docsFiles.filter(doc => !changedFiles.includes(doc));
+
+  if (missingDocs.length > 0) {
+    console.warn('\n\u26a0\ufe0f  Documentos NAO atualizados neste release:');
+    missingDocs.forEach(doc => console.warn(`   - ${doc}`));
+    console.warn('\n   Considere atualizar antes de finalizar o release.');
+    console.warn('   Use --force para ignorar este aviso.\n');
+
+    if (!process.argv.includes('--force')) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // --- Main ---
 
 function main() {
@@ -255,6 +274,9 @@ function main() {
 
   // Update version-info.json if exists
   updateVersionInfo(newVersion);
+
+  // Validate docs updated (advisory)
+  validateDocsUpdated();
 
   // Git operations
   console.log(`\n📌 Para finalizar a release, execute:`);

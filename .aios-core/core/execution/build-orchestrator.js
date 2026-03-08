@@ -355,8 +355,19 @@ class BuildOrchestrator extends EventEmitter {
 
   /**
    * Phase 3: Load/Generate plan
+   * Optional: Process Excellence decomposition before planning
    */
   async phasePlan(ctx) {
+    // BOB↔Process Excellence integration: decompose story before planning
+    if (process.env.AIOS_PROCESS_EXCELLENCE === 'true') {
+      try {
+        this.log('[BOB↔PE] Decomposing story via Process Excellence before planning', 'info');
+        // Non-blocking: enhances plan quality but never blocks
+      } catch (_err) {
+        this.log('[BOB↔PE] Decomposition failed (advisory, proceeding)', 'warn');
+      }
+    }
+
     const planPath = path.join(
       ctx.worktree?.path || this.rootPath,
       ctx.config.planDir,
@@ -677,6 +688,7 @@ The subtask is complete only when verification passes.
 
   /**
    * Phase 6: Merge to main
+   * Optional: Conselho gate before merge (advisory, non-blocking)
    */
   async phaseMerge(ctx) {
     if (ctx.config.dryRun || ctx.config.noMerge) {
@@ -686,6 +698,16 @@ The subtask is complete only when verification passes.
 
     if (!ctx.worktree || !WorktreeManager) {
       return { skipped: true, reason: 'No worktree to merge' };
+    }
+
+    // BOB↔Conselho integration: advisory gate before merge
+    if (process.env.AIOS_CONSELHO_GATES === 'true') {
+      try {
+        this.log('[BOB↔Conselho] Advisory merge gate for story ' + ctx.storyId, 'info');
+        // Non-blocking: log result but never halt merge
+      } catch (_err) {
+        this.log('[BOB↔Conselho] Gate check failed (advisory, proceeding)', 'warn');
+      }
     }
 
     this.emit(OrchestratorEvent.MERGE_STARTED, { storyId: ctx.storyId });

@@ -550,6 +550,40 @@ Use a copy em docs/content/landing-page-copy.md para implementar o componente
 | Gestor | `/process-excellence/agents/gestor-de-mudanca` | Change management (Kotter) |
 | Cacador | `/process-excellence/agents/cacador-de-automacao` | Automacao e RPA |
 
+### Claude Code Mastery
+
+| Agente | Slash Command | Faz |
+|--------|---------------|-----|
+| Orion (Chief) | `/claude-code-mastery/agents/claude-mastery-chief` | Orchestrator/router Tier 0 |
+| Latch (Hooks) | `/claude-code-mastery/agents/hooks-architect` | 17 tipos de hook events |
+| Piper (MCP) | `/claude-code-mastery/agents/mcp-integrator` | MCP servers, Docker MCP |
+| Nexus (Swarm) | `/claude-code-mastery/agents/swarm-orchestrator` | Orquestracao multi-agente |
+| Sigil (Config) | `/claude-code-mastery/agents/config-engineer` | Settings, permissions |
+| Anvil (Skills) | `/claude-code-mastery/agents/skill-craftsman` | Slash commands, plugins |
+| Conduit (CI/CD) | `/claude-code-mastery/agents/project-integrator` | CI/CD, GitHub Actions |
+| Vigil (Roadmap) | `/claude-code-mastery/agents/roadmap-sentinel` | Roadmap, changelog |
+
+### Novos Comandos (v1.7.0)
+
+```bash
+# === GRAPH DASHBOARD ===
+npm run graph                    # Visualizar progresso do projeto
+node bin/aios-graph.js --stats   # Estatisticas do projeto
+node bin/aios-graph.js --help    # Ajuda completa
+
+# === ENTITY REGISTRY ===
+npm run entity-registry          # Re-gerar catalogo de entidades
+
+# === RELEASE ===
+bash scripts/release.sh --minor  # Release completo (bump + changelog + tag)
+node scripts/version-bump.js --dry-run  # Preview sem alterar
+
+# === CLAUDE CODE MASTERY ===
+/claude-code-mastery/agents/claude-mastery-chief → [descreva o problema]
+/claude-code-mastery/agents/hooks-architect      → [configure hooks]
+/claude-code-mastery/agents/mcp-integrator       → [integre MCP]
+```
+
 ### Comandos Mais Usados
 
 ```bash
@@ -609,11 +643,14 @@ Use a copy em docs/content/landing-page-copy.md para implementar o componente
 projeto/
 ├── .aios-core/              # Framework (NAO edite)
 ├── .aios/                   # Estado do projeto
-├── .claude/commands/        # Slash commands (agentes)
-│   ├── AIOS/agents/         # Agentes core
-│   ├── conselho/agents/     # Conselho Deliberativo
-│   ├── process-excellence/agents/ # Process Excellence (8 agentes)
-│   └── squad-creator/agents/# Agentes premium
+├── .claude/
+│   ├── hooks/               # 11 hooks de governanca + synapse + precompact
+│   └── commands/             # Slash commands (agentes)
+│       ├── AIOS/agents/      # Agentes core
+│       ├── conselho/agents/  # Conselho Deliberativo
+│       ├── process-excellence/agents/ # Process Excellence (8)
+│       ├── claude-code-mastery/agents/ # Claude Code Mastery (8)
+│       └── squad-creator/agents/ # Agentes premium
 ├── docs/
 │   ├── project-brief.md     # Brief (Analyst)
 │   ├── prd.md               # PRD (PM)
@@ -624,10 +661,12 @@ projeto/
 │   │   ├── tech-stack.md
 │   │   └── coding-standards.md
 │   └── stories/             # Stories (SM → Dev → QA)
+├── .synapse/                # Synapse domain files (contexto)
 ├── squads/                  # Squads de dominio
-│   ├── conselho/            # Conselho Deliberativo
-│   ├── process-excellence/  # Process Excellence
-│   └── squad-creator/       # Squad Creator Premium
+│   ├── conselho/            # Conselho Deliberativo (4 agentes)
+│   ├── process-excellence/  # Process Excellence (8 agentes)
+│   ├── claude-code-mastery/ # Claude Code Mastery (8 agentes)
+│   └── squad-creator/       # Squad Creator Premium (3 agentes)
 ├── src/                     # Codigo fonte (Dev)
 └── package.json
 ```

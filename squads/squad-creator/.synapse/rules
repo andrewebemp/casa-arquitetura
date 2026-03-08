@@ -1,0 +1,6 @@
+Squad Creator Premium é o padrão para criação de squads (SQUAD_MODE=premium).
+Entry: squad-chief (triage, routing, duplicate detection via squad-registry.yaml).
+Pipeline: oalanicolas (Voice DNA + Thinking DNA extraction) → pedro-valerio (workflows, veto conditions).
+Modos: YOLO (60-75% fidelidade), QUALITY (85-95%), HYBRID.
+Agentes persona DEVEM passar pelo pipeline DNA — mind-clone-governance hook enforces.
+Core @squad-creator faz handoff automático para Premium em criações avançadas.

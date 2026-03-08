@@ -1,0 +1,6 @@
+O Conselho Deliberativo analisa decisões com rigor multi-perspectiva.
+Ative via *deliberar (full), *quick (reversível), ou *audit (pós-decisão).
+Decisões são registradas em squads/conselho/decisions/ para memória futura.
+Cross-squad: pode consultar qualquer agente AIOS, local ou externo via consulta-cross-squad.yaml.
+Sinal de saída: CONSELHO_CONFIDENCE=XX + CONSELHO_APPROVED ou CONSELHO_INCONCLUSIVE.
+Confiança < 60% = INCONCLUSIVE — nunca re-rodar o conselho, escalar para humano.

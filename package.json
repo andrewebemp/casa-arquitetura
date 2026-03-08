@@ -1,15 +1,20 @@
 {
   "name": "aios-pessoal",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Fork personalizado do Synkra AIOS - AI-Orchestrated System para desenvolvimento full-stack",
   "private": true,
+  "bin": {
+    "aios-graph": "bin/aios-graph.js"
+  },
   "scripts": {
     "postinstall": "cd .aios-core && npm install",
     "test": "npm run test --prefix .aios-core",
     "lint": "npm run lint --prefix .aios-core",
     "typecheck": "npm run typecheck --prefix .aios-core",
     "build": "npm run build --prefix .aios-core",
-    "version:bump": "node scripts/version-bump.js"
+    "version:bump": "node scripts/version-bump.js",
+    "graph": "node bin/aios-graph.js",
+    "entity-registry": "node scripts/generate-entity-registry.js"
   },
   "repository": {
     "type": "git",

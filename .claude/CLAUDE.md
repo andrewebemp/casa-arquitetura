@@ -54,9 +54,15 @@ When an agent is active:
 ├── core-config.yaml            # Configuração do framework
 ├── user-guide.md               # Handbook completo
 ├── core/
-│   ├── execution/              # Story parser, engine
+│   ├── execution/              # BOB Build Orchestrator (12 arquivos)
+│   ├── synapse/                # Synapse Session Engine (35 arquivos)
+│   ├── ids/                    # IDS + gates G1-G4 + FrameworkGovernor
+│   ├── code-intel/             # Code Intel (14 arquivos)
+│   ├── graph-dashboard/        # Graph Dashboard CLI (12 arquivos)
+│   ├── memory/                 # GotchasMemory
 │   ├── quality-gates/          # Quality gates automáticos
 │   └── utils/                  # 70+ utilitários
+├── hooks/unified/              # Unified hook system
 ├── development/
 │   ├── agents/                 # 12 definições de agentes
 │   ├── tasks/                  # 115+ tarefas executáveis
@@ -65,6 +71,7 @@ When an agent is active:
 │   ├── checklists/             # Checklists de validação
 │   └── data/                   # Frameworks de decisão
 ├── data/
+│   ├── entity-registry.yaml   # 305 entidades catalogadas
 │   └── tech-presets/           # Presets de tecnologia
 ├── scripts/
 │   ├── autonomous-runner.sh    # Orquestrador autônomo
@@ -80,8 +87,10 @@ docs/
 └── framework/                  # Guias de dev (source-tree, tech-stack)
 
 squads/                         # Squads de agentes por domínio
-  ├── conselho/                 # Conselho Deliberativo
-  └── process-excellence/       # Process Excellence (8 agentes)
+  ├── conselho/                 # Conselho Deliberativo (4 agentes)
+  ├── process-excellence/       # Process Excellence (8 agentes)
+  ├── claude-code-mastery/      # Claude Code Mastery (8 agentes)
+  └── squad-creator/            # Squad Creator Premium (3 agentes)
 ```
 <!-- AIOS-MANAGED-END: framework-structure -->
 
@@ -293,6 +302,87 @@ window (zero compaction, maximum performance).
 - `--process-excellence` - Enable Process Excellence hooks (decomposition, optimization, audit at phases 2, 5, 7, 8)
 - Both flags export env vars (`AIOS_CONSELHO_GATES`, `AIOS_PROCESS_EXCELLENCE`) consumed by `common.sh`
 <!-- AIOS-MANAGED-END: autonomous-mode -->
+
+<!-- AIOS-MANAGED-START: synapse-engine -->
+## Synapse Session Engine
+
+Context injection pipeline with 8 layers (L0-L7). Active layers: L0 (Constitution), L1 (Global), L2 (Agent), L5 (Squad).
+
+### Key Files
+- `.aios-core/core/synapse/engine.js` - Main engine (DEFAULT_ACTIVE_LAYERS = [0, 1, 2, 5])
+- `.aios-core/core/synapse/runtime/hook-runtime.js` - Hook entry point
+- `.aios-core/core/synapse/layers/l5-squad.js` - Squad discovery (60s cache)
+- `.synapse/manifest` - Root manifest with agent/workflow triggers
+- `squads/*/.synapse/manifest` - Per-squad manifests (KEY=VALUE format)
+
+### Manifest Format
+```
+{DOMAIN}_STATE=active
+{DOMAIN}_RECALL=keyword1,keyword2,keyword3
+{DOMAIN}_AGENT_TRIGGER=agent-id
+```
+
+### Hooks
+- `UserPromptSubmit`: synapse-wrapper.cjs -> synapse-engine.cjs (context injection)
+- `PreCompact`: precompact-wrapper.cjs -> precompact-session-digest.cjs (session digest)
+<!-- AIOS-MANAGED-END: synapse-engine -->
+
+<!-- AIOS-MANAGED-START: governance-hooks -->
+## Governance Hooks
+
+7 PreToolUse hooks protect project integrity:
+- `mind-clone-governance.py` (Write|Edit) - Protects agent DNA files
+- `enforce-architecture-first.py` (Write|Edit) - Architecture before implementation
+- `enforce-git-push-authority.sh` (Bash) - Only @devops can push
+- `read-protection.py` (Read) - Protects sensitive files
+- `write-path-validation.py` (Write|Edit) - Validates write paths
+- `sql-governance.py` (Bash) - SQL operation governance
+- `slug-validation.py` (Bash) - Slug and naming validation
+<!-- AIOS-MANAGED-END: governance-hooks -->
+
+<!-- AIOS-MANAGED-START: graph-dashboard -->
+## Graph Dashboard
+
+CLI tool for project observability:
+```bash
+node bin/aios-graph.js --stats    # Project statistics
+node bin/aios-graph.js --help     # Full usage
+npm run graph                      # Package.json shortcut
+```
+Output formats: ASCII tree, JSON, DOT, Mermaid, HTML.
+<!-- AIOS-MANAGED-END: graph-dashboard -->
+
+<!-- AIOS-MANAGED-START: claude-code-mastery -->
+## Claude Code Mastery Squad
+
+8 specialized agents for Claude Code expertise:
+- `/claude-code-mastery/agents/claude-mastery-chief` - Orchestrator (Orion)
+- `/claude-code-mastery/agents/hooks-architect` - Hook events (Latch)
+- `/claude-code-mastery/agents/mcp-integrator` - MCP servers (Piper)
+- `/claude-code-mastery/agents/swarm-orchestrator` - Multi-agent (Nexus)
+- `/claude-code-mastery/agents/config-engineer` - Settings (Sigil)
+- `/claude-code-mastery/agents/skill-craftsman` - Skills (Anvil)
+- `/claude-code-mastery/agents/project-integrator` - CI/CD (Conduit)
+- `/claude-code-mastery/agents/roadmap-sentinel` - Roadmap (Vigil)
+<!-- AIOS-MANAGED-END: claude-code-mastery -->
+
+<!-- AIOS-MANAGED-START: release-protocol -->
+### Release Protocol (OBRIGATORIO)
+
+Apos QUALQUER alteracao relevante (insercao, edicao ou exclusao de funcionalidades):
+
+1. Atualizar documentacao obrigatoria:
+   - `CHANGELOG.md` (via version-bump.js ou manual)
+   - `README.md` (tabela de agentes, estrutura, funcionalidades)
+   - `guia-pratico.md` (cartao de referencia, comandos)
+   - `.claude/CLAUDE.md` (secoes AIOS-MANAGED afetadas)
+2. Commitar com conventional commits
+3. Executar `bash scripts/release.sh` ou manualmente:
+   - `node scripts/version-bump.js`
+   - `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+   - `git push && git push --tags`
+4. Criar GitHub Release: `gh release create vX.Y.Z --title "vX.Y.Z" --notes-from-tag`
+<!-- AIOS-MANAGED-END: release-protocol -->
 
 ## Debugging
 

@@ -428,13 +428,28 @@ build_prompt() {
     learnings="$(read_learnings)"
   fi
 
-  if [[ -n "$learnings" ]]; then
-    local learnings_section
-    learnings_section="## Previous Learnings
+  # Inject gotchas memory alongside learnings
+  local gotchas_content=""
+  local gotchas_file="${PROJECT_ROOT}/.aios/gotchas.md"
+  if [[ -f "$gotchas_file" ]]; then
+    gotchas_content="$(cat "$gotchas_file" 2>/dev/null || true)"
+  fi
+
+  if [[ -n "$learnings" || -n "$gotchas_content" ]]; then
+    local learnings_section="## Previous Learnings
 
 The following learnings were accumulated from previous phases. Use them to improve quality:
 
 ${learnings}"
+
+    if [[ -n "$gotchas_content" ]]; then
+      learnings_section="${learnings_section}
+
+## Known Gotchas (Auto-captured)
+
+${gotchas_content}"
+    fi
+
     content="${content//\{\{LEARNINGS\}\}/${learnings_section}}"
   else
     content="${content//\{\{LEARNINGS\}\}/}"
@@ -549,6 +564,42 @@ IMPORTANTE:
   fi
 
   log_success "✅ Conselho aprovou (confiança: ${confidence}%)"
+  return 0
+}
+
+# ============================================================================
+#                    IDS + CONSELHO INTEGRATION
+# ============================================================================
+
+# Invoke Conselho in quick mode when IDS detects a high-impact CREATE decision.
+# This adds human-AI deliberation for significant creation decisions.
+#
+# Usage: run_ids_conselho_gate "entity_type" "entity_name" impact_percent
+# Returns: 0 (always — advisory only, never blocks pipeline)
+run_ids_conselho_gate() {
+  local entity_type="$1"
+  local entity_name="$2"
+  local impact="${3:-0}"
+
+  # Only trigger for high-impact decisions (>30%)
+  if [[ "$impact" -le 30 ]]; then
+    return 0
+  fi
+
+  # Only trigger if Conselho gates are enabled
+  if [[ "$CONSELHO_GATES" != "true" ]]; then
+    log_debug "IDS→Conselho gate: disabled, skipping"
+    return 0
+  fi
+
+  log_info "🔗 IDS→Conselho: high-impact CREATE detected (${entity_type}: ${entity_name}, impact: ${impact}%)"
+
+  run_conselho_gate \
+    "IDS detectou criação de alto impacto: ${entity_type} '${entity_name}' (impacto estimado: ${impact}%). Avaliar se esta criação deve prosseguir considerando possíveis duplicatas e impacto na arquitetura." \
+    "quick" || {
+    log_warn "IDS→Conselho: INCONCLUSIVE, logging warning but proceeding (advisory)"
+  }
+
   return 0
 }
 

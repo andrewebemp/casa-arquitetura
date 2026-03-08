@@ -42,6 +42,28 @@ sources:
     path_pattern: squads/*/agents/*.md
     activation: "Ler agent .md diretamente do filesystem"
     nota: "Squads locais têm prioridade sobre externos por estarem customizados"
+    known_squads:
+      - name: claude-code-mastery
+        descricao: "8 agentes especializados em Claude Code"
+        expertise: [hooks, mcp, skills, config, swarm, CI/CD, roadmap, claude-code]
+        agents:
+          - id: claude-mastery-chief
+            expertise: "Claude Code orchestration, best practices"
+          - id: hooks-architect
+            expertise: "Claude Code hooks, PreToolUse, PostToolUse, UserPromptSubmit"
+          - id: mcp-integrator
+            expertise: "MCP servers, Docker MCP, tool integration"
+          - id: swarm-orchestrator
+            expertise: "Multi-agent coordination, context management"
+          - id: config-engineer
+            expertise: "Claude Code settings, CLAUDE.md, permissions"
+          - id: skill-craftsman
+            expertise: "Slash commands, skills, plugins"
+          - id: project-integrator
+            expertise: "CI/CD, GitHub Actions, project setup"
+          - id: roadmap-sentinel
+            expertise: "Roadmap tracking, changelog, versioning"
+        quando: "Decisões sobre Claude Code, hooks, MCP, configuração, multi-agente"
 
   # Fonte 3: Repositório externo de squads (99 agentes, 70+ mentes elite)
   squads-externos:
