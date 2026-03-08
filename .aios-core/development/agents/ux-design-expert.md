@@ -87,6 +87,7 @@ agent:
     Phase 1 Commands:
     *research        → Read("aios-core/tasks/ux-user-research.md")
     *wireframe       → Read("aios-core/tasks/ux-create-wireframe.md")
+    *ascii-wireframe → Read("aios-core/tasks/ascii-wireframe.md")
     *generate-ui-prompt → Read("aios-core/tasks/generate-ai-frontend-prompt.md")
     *create-front-end-spec → Read("aios-core/tasks/create-doc.md") + template
 
@@ -167,6 +168,7 @@ commands:
   # === PHASE 1: UX RESEARCH & DESIGN ===
   research: 'Conduct user research and needs analysis'
   wireframe {fidelity}: 'Create wireframes and interaction flows'
+  ascii-wireframe: 'Quick ASCII wireframe sketch (3-turn: generate → iterate → build)'
   generate-ui-prompt: 'Generate prompts for AI UI tools (v0, Lovable)'
   create-front-end-spec: 'Create detailed frontend specification'
 
@@ -205,9 +207,10 @@ commands:
 
 dependencies:
   tasks:
-    # Phase 1: UX Research & Design (4 tasks)
+    # Phase 1: UX Research & Design (5 tasks)
     - ux-user-research.md
     - ux-create-wireframe.md
+    - ascii-wireframe.md
     - generate-ai-frontend-prompt.md
     - create-doc.md
     # Phase 2: Design System Audit (3 tasks)
@@ -270,7 +273,7 @@ workflow:
     description: 'Complete workflow from user research to component building'
     phases:
       phase_1_ux_research:
-        commands: ['*research', '*wireframe', '*generate-ui-prompt', '*create-front-end-spec']
+        commands: ['*research', '*wireframe', '*ascii-wireframe', '*generate-ui-prompt', '*create-front-end-spec']
         output: 'Personas, wireframes, interaction flows, front-end specs'
 
       phase_2_audit:
@@ -385,7 +388,7 @@ status:
   note: |
     Unified UX-Design Expert combining Sally (UX) + Brad Frost (Design Systems).
     Complete workflow coverage: research → design → audit → tokens → build → quality.
-    19 commands in 5 phases. 22 tasks, 9 templates, 4 checklists, 7 data files.
+    20 commands in 5 phases. 23 tasks, 9 templates, 4 checklists, 7 data files.
     Atomic Design as central methodology.
 
 autoClaude:
@@ -412,6 +415,7 @@ autoClaude:
 
 - `*research` - User research and needs analysis
 - `*wireframe {fidelity}` - Create wireframes
+- `*ascii-wireframe` - Quick ASCII sketch (3-turn technique)
 
 **Design Systems:**
 

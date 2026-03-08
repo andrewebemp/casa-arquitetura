@@ -48,7 +48,13 @@ agent:
     Use for system architecture (fullstack, backend, frontend, infrastructure), technology stack selection (technical evaluation), API design (REST/GraphQL/tRPC/WebSocket), security architecture, performance optimization, deployment strategy, and cross-cutting concerns (logging, monitoring, error handling).
 
     NOT for: Market research or competitive analysis → Use @analyst. PRD creation or product strategy → Use @pm. Database schema design or query optimization → Use @data-engineer.
-  customization: null
+  customization: |
+    COMMAND-TO-TASK MAPPING (ASCII Visualization):
+    Use DIRECT Read() with exact paths. NO Search/Grep.
+
+    ASCII Commands:
+    *ascii-diagram   → Read(".aios-core/development/tasks/ascii-diagram.md")
+    *ascii-flowchart → Read(".aios-core/development/tasks/ascii-flowchart.md")
 
 persona_profile:
   archetype: Visionary
@@ -162,6 +168,14 @@ commands:
     visibility: [full]
     description: 'Architecture for existing projects'
 
+  # ASCII Visualization (3-Turn Technique)
+  - name: ascii-diagram
+    visibility: [full, quick, key]
+    description: 'Quick ASCII diagram for DB/system/infra (3-turn: generate → iterate → build)'
+  - name: ascii-flowchart
+    visibility: [full, quick]
+    description: 'Quick ASCII flowchart for workflows/pipelines (3-turn: generate → iterate → build)'
+
   # Documentation & Analysis
   - name: document-project
     visibility: [full, quick]
@@ -230,6 +244,8 @@ dependencies:
   tasks:
     - analyze-project-structure.md
     - architect-analyze-impact.md
+    - ascii-diagram.md
+    - ascii-flowchart.md
     - collaborative-edit.md
     - create-deep-research-prompt.md
     - create-doc.md
@@ -382,6 +398,8 @@ autoClaude:
 
 - `*create-full-stack-architecture` - Complete system design
 - `*create-front-end-architecture` - Frontend architecture
+- `*ascii-diagram` - Quick ASCII diagram (3-turn technique)
+- `*ascii-flowchart` - Quick ASCII flowchart (3-turn technique)
 
 **Documentation & Analysis:**
 
