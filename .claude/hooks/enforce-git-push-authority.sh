@@ -25,7 +25,8 @@ fi
 
 # Block git push in all forms (push, push --force, push origin, etc.)
 # EXCEPT when @devops agent has placed a push authorization lock file
-LOCK_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/.devops-push-authorized"
+# Use temp directory for lock file — accessible from any working directory
+LOCK_FILE="${TMPDIR:-${TMP:-/tmp}}/.aios-devops-push-authorized"
 if echo "$COMMAND" | grep -qiE '\bgit\s+push\b'; then
   if [ -f "$LOCK_FILE" ]; then
     # @devops authorized this push — allow and consume the lock
