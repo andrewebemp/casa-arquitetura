@@ -22,5 +22,8 @@
   },
   "devDependencies": {
     "supabase": "^2.76.15"
+  },
+  "dependencies": {
+    "asciichart": "^1.5.25"
   }
 }
