@@ -295,7 +295,7 @@ export interface Database {
           id: string;
           project_id: string;
           version_id: string | null;
-          type: 'initial' | 'refinement' | 'style_change' | 'segmentation' | 'diagnostic' | 'upscale';
+          type: 'initial' | 'refinement' | 'style_change' | 'segmentation' | 'diagnostic' | 'upscale' | 'lighting_enhancement';
           status: 'queued' | 'processing' | 'completed' | 'failed' | 'canceled';
           priority: number;
           input_params: Record<string, unknown>;
@@ -313,7 +313,7 @@ export interface Database {
           id?: string;
           project_id: string;
           version_id?: string | null;
-          type: 'initial' | 'refinement' | 'style_change' | 'segmentation' | 'diagnostic' | 'upscale';
+          type: 'initial' | 'refinement' | 'style_change' | 'segmentation' | 'diagnostic' | 'upscale' | 'lighting_enhancement';
           status?: string;
           priority?: number;
           input_params?: Record<string, unknown>;

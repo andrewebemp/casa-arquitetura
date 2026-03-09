@@ -96,6 +96,22 @@ interface InpaintResult {
   };
 }
 
+interface EnhanceLightingInput {
+  image_url: string;
+  mode: 'auto' | 'natural' | 'warm';
+  prompt?: string;
+}
+
+interface EnhanceLightingResult {
+  result_image_url: string;
+  metadata: {
+    model: string;
+    inference_time_ms: number;
+    provider: string;
+    lighting_mode: string;
+  };
+}
+
 interface PipelineClientOptions {
   baseUrl?: string;
   apiKey?: string;
@@ -273,6 +289,28 @@ export const aiPipelineClient = {
     }
 
     return response.json() as Promise<InpaintResult>;
+  },
+
+  /**
+   * Story 3.2: IC-Light V2 lighting enhancement via ai-pipeline.
+   */
+  async enhanceLighting(input: EnhanceLightingInput): Promise<EnhanceLightingResult> {
+    const url = `${this._baseUrl}/enhance-lighting`;
+    logger.info({ url, mode: input.mode }, 'AI Pipeline: IC-Light lighting enhancement');
+
+    const response = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: this._headers(),
+      body: JSON.stringify(input),
+      timeoutMs: this._timeoutMs,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`AI Pipeline lighting enhancement failed (${response.status}): ${errorBody}`);
+    }
+
+    return response.json() as Promise<EnhanceLightingResult>;
   },
 
   /**

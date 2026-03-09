@@ -8,6 +8,7 @@ import { stylesRegistry } from './staging-styles.registry';
 import { enqueueRenderJob } from '../queue/render.queue';
 import { renderEvents } from '../queue/render.events';
 import { redisHealthCheck } from '../lib/redis';
+import { lightingAnalysis } from './lighting-analysis';
 import type { DecorStyle, SubscriptionTier, Database } from '@decorai/shared';
 
 type RenderJobRow = Database['public']['Tables']['render_jobs']['Row'];
@@ -88,6 +89,9 @@ export const stagingService = {
     // Compute photo hash for depth map caching
     const photoHash = computePhotoHash(fileBuffer);
 
+    // AC4 (Story 3.2): Analyze brightness for lighting suggestion
+    const lightingAssessment = lightingAnalysis.analyzeFromBuffer(fileBuffer);
+
     // Create render job in DB
     const { data, error } = await supabaseAdmin
       .from('render_jobs')
@@ -132,11 +136,22 @@ export const stagingService = {
       quota.tier,
     );
 
+    // AC4 (Story 3.2): Include lighting suggestion if severely underexposed
+    const lightingSuggestion = lightingAssessment.brightness_score < 40
+      ? {
+        needs_enhancement: true,
+        brightness_score: lightingAssessment.brightness_score,
+        recommended_mode: 'auto' as const,
+        message: 'Sua foto parece estar escura. Recomendamos melhorar a iluminacao antes de gerar o staging para melhores resultados.',
+      }
+      : undefined;
+
     return {
       job_id: job.id,
       status: job.status,
       style_id: styleId,
       resolution,
+      lighting_suggestion: lightingSuggestion,
     };
   },
 

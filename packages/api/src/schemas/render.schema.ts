@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const RENDER_JOB_TYPES = ['initial', 'refinement', 'style_change', 'segmentation', 'diagnostic', 'upscale'] as const;
+const RENDER_JOB_TYPES = ['initial', 'refinement', 'style_change', 'segmentation', 'diagnostic', 'upscale', 'lighting_enhancement'] as const;
 
 export const generateRenderSchema = z.object({
   type: z.enum(RENDER_JOB_TYPES, { message: 'Tipo de render invalido' }).default('initial'),

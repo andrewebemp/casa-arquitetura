@@ -7,6 +7,7 @@ import { aiPipelineClient } from '../lib/ai-pipeline.client';
 import { processRefinementJob } from './refinement.handler';
 import { processStagingJob } from './staging.handler';
 import { processSegmentationJob } from './segmentation.handler';
+import { processLightingJob } from './lighting.handler';
 import type { RenderJobData } from './render.queue';
 
 const updateJobStatus = async (
@@ -104,6 +105,8 @@ export const startRenderWorker = (): Worker<RenderJobData> => {
         await processStagingJob(job);
       } else if (job.data.type === 'segmentation') {
         await processSegmentationJob(job);
+      } else if (job.data.type === 'lighting_enhancement') {
+        await processLightingJob(job);
       } else {
         await processRenderJob(job);
       }
