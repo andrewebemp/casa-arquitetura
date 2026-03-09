@@ -8,6 +8,7 @@ import {
   PlusCircle,
   User,
   CreditCard,
+  Shield,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -21,6 +22,7 @@ const navItems = [
   { href: '/projects/new', label: 'Novo Projeto', icon: PlusCircle },
   { href: '/profile', label: 'Meu Perfil', icon: User },
   { href: '/subscription', label: 'Assinatura', icon: CreditCard },
+  { href: '/privacidade', label: 'Privacidade', icon: Shield },
 ];
 
 export function Sidebar({ open, onClose }: SidebarProps) {

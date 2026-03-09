@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PublicSlider } from './public-slider';
+import { AiDisclaimer } from '@/components/atoms/AiDisclaimer';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
 
@@ -156,9 +157,7 @@ export default async function PublicSharePage({ params }: PageProps) {
       </div>
 
       {/* Disclaimer */}
-      <p className="mt-3 text-center text-xs text-gray-400">
-        Imagem ilustrativa gerada por IA
-      </p>
+      <AiDisclaimer className="mt-3 text-center" />
 
       {/* CTA */}
       <div className="mt-8 text-center">

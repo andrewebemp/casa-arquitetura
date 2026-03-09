@@ -26,6 +26,7 @@ import type { SliderData } from '@/services/share-service';
 import type { EditingTool } from '@/hooks/use-editing-store';
 import type { SegmentResult, DetectObjectResponse } from '@/services/editing-service';
 import type { NormalizedCoords } from '@/components/molecules/ImageCanvas';
+import { AiDisclaimer } from '@/components/atoms/AiDisclaimer';
 import { Loader2, X } from 'lucide-react';
 
 export default function ProjectWorkspacePage() {
@@ -429,12 +430,13 @@ export default function ProjectWorkspacePage() {
               <X className="h-5 w-5" />
             </button>
           </div>
-          <div className="flex flex-1 items-center justify-center p-4">
+          <div className="flex flex-1 flex-col items-center justify-center p-4">
             <BeforeAfterSlider
               beforeUrl={sliderData.original_url}
               afterUrl={sliderData.rendered_url}
               className="max-h-full max-w-full rounded-lg"
             />
+            <AiDisclaimer className="mt-2 text-center text-white/60" />
           </div>
         </div>
       )}

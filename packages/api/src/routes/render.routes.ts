@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { authMiddleware } from '../middleware/auth.middleware';
+import { requireLgpdConsent } from '../middleware/lgpd-consent.middleware';
 import { validate } from '../middleware/validation.middleware';
 import {
   generateRenderSchema,
@@ -24,6 +25,7 @@ export async function renderRoutes(server: FastifyInstance): Promise<void> {
     {
       preHandler: [
         authMiddleware,
+        requireLgpdConsent,
         validate({ params: projectIdParamsSchema, body: generateRenderSchema }),
       ],
     },

@@ -13,7 +13,9 @@ export interface Database {
           avatar_url: string | null;
           preferred_style: string | null;
           lgpd_consent_at: string | null;
+          lgpd_consent_version: string | null;
           training_opt_in: boolean;
+          deleted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -23,7 +25,9 @@ export interface Database {
           avatar_url?: string | null;
           preferred_style?: string | null;
           lgpd_consent_at?: string | null;
+          lgpd_consent_version?: string | null;
           training_opt_in?: boolean;
+          deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -33,8 +37,37 @@ export interface Database {
           avatar_url?: string | null;
           preferred_style?: string | null;
           lgpd_consent_at?: string | null;
+          lgpd_consent_version?: string | null;
           training_opt_in?: boolean;
+          deleted_at?: string | null;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      user_data_exports: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: 'pending' | 'processing' | 'completed' | 'failed';
+          requested_at: string;
+          completed_at: string | null;
+          download_url: string | null;
+          expires_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status?: string;
+          requested_at?: string;
+          completed_at?: string | null;
+          download_url?: string | null;
+          expires_at?: string | null;
+        };
+        Update: {
+          status?: string;
+          completed_at?: string | null;
+          download_url?: string | null;
+          expires_at?: string | null;
         };
         Relationships: [];
       };

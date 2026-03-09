@@ -23,11 +23,11 @@ describe('Migration files', () => {
       .sort();
   });
 
-  it('has exactly 14 migration files', () => {
-    expect(migrationFiles).toHaveLength(14);
+  it('has exactly 15 migration files', () => {
+    expect(migrationFiles).toHaveLength(15);
   });
 
-  it('files are ordered sequentially 001-014', () => {
+  it('files are ordered sequentially 001-015', () => {
     const expected = [
       '001_extensions.sql',
       '002_user_profiles.sql',
@@ -43,6 +43,7 @@ describe('Migration files', () => {
       '012_triggers.sql',
       '013_handle_new_user.sql',
       '014_webhook_events.sql',
+      '015_lgpd_compliance.sql',
     ];
     expect(migrationFiles).toEqual(expected);
   });
@@ -61,7 +62,7 @@ describe('001_extensions', () => {
   });
 });
 
-describe('Table creation — all 11 tables', () => {
+describe('Table creation — all 12 tables', () => {
   let allSql: string;
   beforeAll(() => { allSql = allMigrationsSql(); });
 
@@ -77,15 +78,16 @@ describe('Table creation — all 11 tables', () => {
     'render_jobs',
     'share_links',
     'webhook_events',
+    'user_data_exports',
   ];
 
   it.each(tables)('creates table %s', (table) => {
     expect(allSql).toContain(`CREATE TABLE ${table}`);
   });
 
-  it('all 11 tables are created', () => {
+  it('all 12 tables are created', () => {
     const createTableMatches = allSql.match(/CREATE TABLE \w+/g) || [];
-    expect(createTableMatches.length).toBe(11);
+    expect(createTableMatches.length).toBe(12);
   });
 });
 

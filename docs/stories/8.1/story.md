@@ -1,6 +1,6 @@
 # Story 8.1 - LGPD Compliance: Consent Flow, Politica de Dados e Disclaimer de IA
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a user of DecorAI Brasil, I want to give explicit consent for image processing and understand how my data is used, so that the platform complies with LGPD (Lei Geral de Protecao de Dados) and I can trust that my images and personal data are handled transparently.
@@ -49,21 +49,27 @@ As a user of DecorAI Brasil, I want to give explicit consent for image processin
 - Story 4.2 (Share UI) — disclaimer on public pages
 
 ## Tasks
-- [ ] Task 1: Create Supabase migration adding `lgpd_consent_at`, `lgpd_consent_version`, `training_opt_in` columns to `profiles` table with RLS policies
-- [ ] Task 2: Implement `POST /users/me/consent` and `GET /users/me/consent` API endpoints for granting/viewing/revoking LGPD consent
-- [ ] Task 3: Implement `requireLgpdConsent` Fastify middleware and apply to image upload, render generation, and editing routes
-- [ ] Task 4: Implement `GET /users/me/data-export` endpoint that aggregates and returns user data as JSON
-- [ ] Task 5: Implement `DELETE /users/me` endpoint with soft-delete, Stripe cancellation, and storage cleanup scheduling
-- [ ] Task 6: Update signup UI (email/password and Google OAuth) to include mandatory LGPD consent checkbox with link to privacy policy
-- [ ] Task 7: Create Settings > Privacy page with consent status, training opt-in toggle, data export button, and account deletion flow
-- [ ] Task 8: Create reusable `<AiDisclaimer />` component and integrate into all render display points (project view, dashboard, share page, before/after slider)
-- [ ] Task 9: Write unit tests for consent API, middleware, data export, and account deletion
-- [ ] Task 10: Write integration tests for signup consent flow and disclaimer visibility
+- [x] Task 1: Create Supabase migration adding `lgpd_consent_at`, `lgpd_consent_version`, `training_opt_in` columns to `profiles` table with RLS policies
+- [x] Task 2: Implement `POST /users/me/consent` and `GET /users/me/consent` API endpoints for granting/viewing/revoking LGPD consent
+- [x] Task 3: Implement `requireLgpdConsent` Fastify middleware and apply to image upload, render generation, and editing routes
+- [x] Task 4: Implement `GET /users/me/data-export` endpoint that aggregates and returns user data as JSON
+- [x] Task 5: Implement `DELETE /users/me` endpoint with soft-delete, Stripe cancellation, and storage cleanup scheduling
+- [x] Task 6: Update signup UI (email/password and Google OAuth) to include mandatory LGPD consent checkbox with link to privacy policy
+- [x] Task 7: Create Settings > Privacy page with consent status, training opt-in toggle, data export button, and account deletion flow
+- [x] Task 8: Create reusable `<AiDisclaimer />` component and integrate into all render display points (project view, dashboard, share page, before/after slider)
+- [x] Task 9: Write unit tests for consent API, middleware, data export, and account deletion
+- [x] Task 10: Write integration tests for signup consent flow and disclaimer visibility
 
 ## Dev Agent Record
 ### Implementation Plan
+All tasks implemented across backend (API services, routes, middleware, migration) and frontend (signup consent, privacy page, AiDisclaimer component).
+
 ### Debug Log
+- Fixed 40 failing tests: route tests missing consentService mock, account-deletion test double-call issue, diagnostic-result test multiple element match
+- All 646 tests pass, lint clean, typecheck clean
+
 ### Change Log
+- 2026-03-09: Fixed test failures for LGPD consent middleware integration across route tests
 
 ## Testing
 - Unit tests for consent CRUD operations
@@ -76,3 +82,42 @@ As a user of DecorAI Brasil, I want to give explicit consent for image processin
 - Visual test: Privacy settings page with all controls
 
 ## File List
+- `supabase/migrations/015_lgpd_compliance.sql` — Migration adding LGPD columns and user_data_exports table
+- `packages/api/src/services/consent.service.ts` — Consent CRUD service
+- `packages/api/src/services/data-export.service.ts` — User data export service
+- `packages/api/src/services/account-deletion.service.ts` — Soft-delete account service
+- `packages/api/src/routes/consent.routes.ts` — Consent, data export, account deletion routes
+- `packages/api/src/schemas/consent.schema.ts` — Zod schemas for consent endpoints
+- `packages/api/src/middleware/lgpd-consent.middleware.ts` — requireLgpdConsent middleware
+- `packages/api/src/server.ts` — Register consent routes
+- `packages/api/src/routes/render.routes.ts` — Added requireLgpdConsent preHandler
+- `packages/api/src/routes/lighting.routes.ts` — Added requireLgpdConsent preHandler
+- `packages/api/src/routes/object-removal.routes.ts` — Added requireLgpdConsent preHandler
+- `packages/api/src/routes/segmentation.routes.ts` — Added requireLgpdConsent preHandler
+- `packages/api/src/routes/staging.routes.ts` — Added requireLgpdConsent preHandler
+- `packages/shared/src/types/database.types.ts` — Added user_data_exports table type, LGPD fields
+- `packages/shared/src/types/user.ts` — Added lgpd_consent_at, lgpd_consent_version, training_opt_in, deleted_at
+- `packages/web/src/app/(auth)/signup/page.tsx` — LGPD consent checkbox on registration
+- `packages/web/src/app/(dashboard)/privacidade/page.tsx` — Privacy settings page
+- `packages/web/src/app/(dashboard)/settings/privacy/page.tsx` — Alternative privacy settings page
+- `packages/web/src/components/atoms/AiDisclaimer.tsx` — Reusable AI disclaimer component
+- `packages/web/src/components/molecules/BeforeAfterSlider.tsx` — Integrated AiDisclaimer overlay
+- `packages/web/src/components/molecules/RenderViewer.tsx` — Integrated AiDisclaimer overlay
+- `packages/web/src/app/compartilhar/[token]/page.tsx` — Integrated AiDisclaimer inline
+- `packages/web/src/app/(dashboard)/projects/[id]/page.tsx` — Integrated AiDisclaimer overlay
+- `packages/web/src/components/sidebar.tsx` — Added Privacidade nav link
+- `packages/api/src/__tests__/consent.routes.test.ts` — Unit tests for consent routes
+- `packages/api/src/__tests__/consent.service.test.ts` — Unit tests for consent service
+- `packages/api/src/__tests__/data-export.service.test.ts` — Unit tests for data export
+- `packages/api/src/__tests__/account-deletion.service.test.ts` — Unit tests for account deletion
+- `packages/api/src/__tests__/lgpd-consent.middleware.test.ts` — Unit tests for consent middleware
+- `packages/api/src/__tests__/lgpd-integration.test.ts` — Integration tests
+- `packages/api/src/__tests__/render.routes.test.ts` — Added consentService mock
+- `packages/api/src/__tests__/lighting.routes.test.ts` — Added consentService mock
+- `packages/api/src/__tests__/object-removal.routes.test.ts` — Added consentService mock
+- `packages/api/src/__tests__/staging.routes.test.ts` — Added consentService mock
+- `packages/api/src/__tests__/segmentation.routes.test.ts` — Added consentService mock
+- `packages/web/src/__tests__/atoms/ai-disclaimer.test.tsx` — AiDisclaimer component tests
+- `packages/web/src/__tests__/organisms/diagnostic-result.test.tsx` — Fixed multiple element assertion
+- `packages/web/src/__tests__/signup-page.test.tsx` — Signup consent flow tests
+- `packages/shared/src/__tests__/migrations.test.ts` — Updated migration count

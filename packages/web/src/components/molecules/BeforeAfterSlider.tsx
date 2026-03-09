@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { AiDisclaimer } from '@/components/atoms/AiDisclaimer';
 
 interface BeforeAfterSliderProps {
   beforeUrl: string;
@@ -113,6 +114,9 @@ export function BeforeAfterSlider({
       <span className="absolute right-3 top-3 rounded bg-black/60 px-2 py-1 text-xs font-semibold text-white">
         {afterLabel}
       </span>
+
+      {/* AI Disclaimer */}
+      <AiDisclaimer variant="overlay" className="bottom-3 left-3" />
 
       {/* Handle */}
       <div

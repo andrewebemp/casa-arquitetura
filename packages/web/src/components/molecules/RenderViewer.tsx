@@ -6,8 +6,8 @@ import {
   GitCompare,
   Share2,
   History,
-  X,
 } from 'lucide-react';
+import { AiDisclaimer } from '@/components/atoms/AiDisclaimer';
 
 interface RenderViewerProps {
   imageUrl: string | null;
@@ -52,9 +52,7 @@ export function RenderViewer({
           </div>
         )}
 
-        <span className="absolute bottom-3 left-3 rounded bg-black/50 px-2 py-1 text-xs text-white/80">
-          Imagem ilustrativa gerada por IA
-        </span>
+        <AiDisclaimer variant="overlay" />
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">

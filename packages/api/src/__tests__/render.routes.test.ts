@@ -40,6 +40,12 @@ vi.mock('../services/render.service', () => ({
   },
 }));
 
+vi.mock('../services/consent.service', () => ({
+  consentService: {
+    hasConsent: vi.fn().mockResolvedValue(true),
+  },
+}));
+
 import { renderRoutes } from '../routes/render.routes';
 import { errorHandler } from '../middleware/error-handler';
 import { renderService } from '../services/render.service';

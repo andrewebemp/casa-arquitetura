@@ -38,6 +38,12 @@ vi.mock('../services/object-removal.service', () => ({
   },
 }));
 
+vi.mock('../services/consent.service', () => ({
+  consentService: {
+    hasConsent: vi.fn().mockResolvedValue(true),
+  },
+}));
+
 import { objectRemovalRoutes } from '../routes/object-removal.routes';
 import { errorHandler } from '../middleware/error-handler';
 import { supabaseAdmin } from '../lib/supabase';

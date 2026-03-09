@@ -41,6 +41,12 @@ vi.mock('../services/staging.service', () => ({
   },
 }));
 
+vi.mock('../services/consent.service', () => ({
+  consentService: {
+    hasConsent: vi.fn().mockResolvedValue(true),
+  },
+}));
+
 import { stagingRoutes, stagingStylesRoutes } from '../routes/staging.routes';
 import { errorHandler } from '../middleware/error-handler';
 import { stagingService } from '../services/staging.service';
