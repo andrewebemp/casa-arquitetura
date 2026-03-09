@@ -18,6 +18,7 @@ import { stagingRoutes, stagingStylesRoutes } from './routes/staging.routes';
 import { segmentationRoutes } from './routes/segmentation.routes';
 import { lightingRoutes } from './routes/lighting.routes';
 import { objectRemovalRoutes } from './routes/object-removal.routes';
+import { shareLinkRoutes, publicShareRoutes } from './routes/share-link.routes';
 
 const server = Fastify({ logger: false });
 
@@ -61,6 +62,8 @@ server.register(stagingRoutes, { prefix: '/api/projects' });
 server.register(segmentationRoutes, { prefix: '/api/projects' });
 server.register(lightingRoutes, { prefix: '/api/projects' });
 server.register(objectRemovalRoutes, { prefix: '/api/projects' });
+server.register(shareLinkRoutes, { prefix: '/api/projects' });
+server.register(publicShareRoutes, { prefix: '/api/share' });
 server.register(subscriptionRoutes, { prefix: '/subscriptions' });
 server.register(webhookRoutes, { prefix: '/webhooks' });
 
