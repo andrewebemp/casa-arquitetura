@@ -57,6 +57,45 @@ interface HealthResult {
   }>;
 }
 
+interface SegmentInput {
+  image_url: string;
+  mode: 'point' | 'box' | 'auto';
+  point?: { x: number; y: number };
+  box?: { x: number; y: number; width: number; height: number };
+}
+
+interface SegmentResultItem {
+  segment_id: string;
+  label: string;
+  mask_url: string;
+  polygon: Array<{ x: number; y: number }>;
+  bounding_box: { x: number; y: number; width: number; height: number };
+  confidence: number;
+}
+
+interface SegmentResponse {
+  segments: SegmentResultItem[];
+  provider: string;
+  inference_time_ms: number;
+}
+
+interface InpaintInput {
+  image_url: string;
+  mask_url: string;
+  prompt: string;
+  negative_prompt: string;
+  depth_map_url?: string;
+}
+
+interface InpaintResult {
+  result_image_url: string;
+  metadata: {
+    model: string;
+    inference_time_ms: number;
+    provider: string;
+  };
+}
+
 interface PipelineClientOptions {
   baseUrl?: string;
   apiKey?: string;
@@ -184,6 +223,56 @@ export const aiPipelineClient = {
     }
 
     return response.json() as Promise<GenerationResult>;
+  },
+
+  /**
+   * Story 3.1: SAM 2 segmentation via fal.ai/Replicate.
+   */
+  async segment(input: SegmentInput): Promise<SegmentResponse> {
+    const url = `${this._baseUrl}/segment`;
+    logger.info({ url, mode: input.mode }, 'AI Pipeline: SAM segmentation');
+
+    const response = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: this._headers(),
+      body: JSON.stringify(input),
+      timeoutMs: this._timeoutMs,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`AI Pipeline segmentation failed (${response.status}): ${errorBody}`);
+    }
+
+    return response.json() as Promise<SegmentResponse>;
+  },
+
+  /**
+   * Story 3.1: SDXL inpainting with mask for material swap.
+   */
+  async inpaint(input: InpaintInput): Promise<InpaintResult> {
+    const url = `${this._baseUrl}/inpaint`;
+    logger.info({ url }, 'AI Pipeline: inpainting with mask');
+
+    const response = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: this._headers(),
+      body: JSON.stringify({
+        image_url: input.image_url,
+        mask_url: input.mask_url,
+        prompt: input.prompt,
+        negative_prompt: input.negative_prompt,
+        depth_map_url: input.depth_map_url,
+      }),
+      timeoutMs: this._timeoutMs,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`AI Pipeline inpainting failed (${response.status}): ${errorBody}`);
+    }
+
+    return response.json() as Promise<InpaintResult>;
   },
 
   /**

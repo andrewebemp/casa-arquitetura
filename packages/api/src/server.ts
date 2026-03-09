@@ -15,6 +15,7 @@ import { webhookRoutes } from './routes/webhook.routes';
 import { chatRoutes } from './routes/chat.routes';
 import { versionRoutes } from './routes/version.routes';
 import { stagingRoutes, stagingStylesRoutes } from './routes/staging.routes';
+import { segmentationRoutes } from './routes/segmentation.routes';
 
 const server = Fastify({ logger: false });
 
@@ -55,6 +56,7 @@ server.register(versionRoutes, { prefix: '/projects' });
 server.register(renderRoutes);
 server.register(stagingStylesRoutes, { prefix: '/api/staging' });
 server.register(stagingRoutes, { prefix: '/api/projects' });
+server.register(segmentationRoutes, { prefix: '/api/projects' });
 server.register(subscriptionRoutes, { prefix: '/subscriptions' });
 server.register(webhookRoutes, { prefix: '/webhooks' });
 
