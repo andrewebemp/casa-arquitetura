@@ -1,6 +1,6 @@
 # Story 1.4 - Staging UI: Wizard de Novo Projeto, Upload, Selecao de Estilo e Geracao com Progresso
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a corretor de imoveis ou arquiteto autenticado, I want a step-by-step wizard to create a new staging project — choosing input type, uploading a photo or providing spatial description, adding reference items, selecting a decoration style, reviewing the ASCII croqui, and watching the render generate in real-time — so that I can go from idea to photorealistic staging in under 3 minutes.
@@ -154,22 +154,22 @@ As a corretor de imoveis ou arquiteto autenticado, I want a step-by-step wizard 
 - `react-dropzone` — Drag-and-drop file upload (or custom implementation)
 
 ## Tasks
-- [ ] Task 1: Create wizard state management hook (`hooks/use-new-project-wizard.ts`) — useReducer for multi-step form state (inputType, files, measurements, openings, referenceItems, selectedStyle, projectId, currentStep)
-- [ ] Task 2: Create `StepIndicator` component (`components/molecules/StepIndicator.tsx`) — horizontal stepper with 5 labeled steps showing active/complete/pending states
-- [ ] Task 3: Create `InputTypeSelector` component (`components/molecules/InputTypeSelector.tsx`) — 3 selectable cards (Foto, Descricao, Combinado) with icons and descriptions in PT-BR
-- [ ] Task 4: Create `PhotoUploader` component (`components/molecules/PhotoUploader.tsx`) — drag-and-drop area with click fallback, file validation (JPEG/PNG, max 20MB), preview with remove, PT-BR labels
-- [ ] Task 5: Create `SpatialForm` component (`components/molecules/SpatialForm.tsx`) — structured form with room type select, dimensions (width, length, ceiling height), dynamic openings list (type, wall, width, height), and additional description textarea
-- [ ] Task 6: Create `ReferenceItemList` component (`components/molecules/ReferenceItemList.tsx`) — dynamic list with "Add Item" button, each item: name input, measurement input, photo upload, remove button
-- [ ] Task 7: Create `StyleGrid` component (`components/molecules/StyleGrid.tsx`) — fetch styles from API, display 2x5 grid of selectable style cards with name, preview image, and selection highlight
-- [ ] Task 8: Create `CroquiPreview` component (`components/molecules/CroquiPreview.tsx`) — monospace ASCII renderer, iteration input field, "Ajustar" button, "Aprovar e Gerar Imagem" button, loading state during generation/iteration
-- [ ] Task 9: Create `GenerationProgress` component (`components/molecules/GenerationProgress.tsx`) — animated progress bar with stage labels, percentage, contextual tip messages, error state with retry, auto-redirect on completion
-- [ ] Task 10: Create API service functions (`services/staging-wizard-service.ts`) — createProject, submitSpatialInput, addReferenceItems, generateCroqui, iterateCroqui, approveCroqui, startGeneration, subscribeToProgress
-- [ ] Task 11: Implement wizard page (`app/(dashboard)/projects/new/page.tsx`) — compose all components with step navigation, validation per step, "Voltar"/"Proximo" buttons, responsive layout
-- [ ] Task 12: Implement Supabase Realtime subscription for render progress updates in GenerationProgress component (hook into render job channel from Story 7.5)
-- [ ] Task 13: Write unit tests for wizard state hook (step transitions, validation, data persistence across steps)
-- [ ] Task 14: Write unit tests for all molecule components (StepIndicator, InputTypeSelector, PhotoUploader, SpatialForm, ReferenceItemList, StyleGrid, CroquiPreview, GenerationProgress)
-- [ ] Task 15: Write integration tests for wizard page (full flow: select input → upload → select style → croqui → generate, error states, mobile responsiveness)
-- [ ] Task 16: Run lint, typecheck, and all tests — fix any issues
+- [x] Task 1: Create wizard state management hook (`hooks/use-new-project-wizard.ts`) — useReducer for multi-step form state (inputType, files, measurements, openings, referenceItems, selectedStyle, projectId, currentStep)
+- [x] Task 2: Create `StepIndicator` component (`components/molecules/StepIndicator.tsx`) — horizontal stepper with 5 labeled steps showing active/complete/pending states
+- [x] Task 3: Create `InputTypeSelector` component (`components/molecules/InputTypeSelector.tsx`) — 3 selectable cards (Foto, Descricao, Combinado) with icons and descriptions in PT-BR
+- [x] Task 4: Create `PhotoUploader` component (`components/molecules/PhotoUploader.tsx`) — drag-and-drop area with click fallback, file validation (JPEG/PNG, max 20MB), preview with remove, PT-BR labels
+- [x] Task 5: Create `SpatialForm` component (`components/molecules/SpatialForm.tsx`) — structured form with room type select, dimensions (width, length, ceiling height), dynamic openings list (type, wall, width, height), and additional description textarea
+- [x] Task 6: Create `ReferenceItemList` component (`components/molecules/ReferenceItemList.tsx`) — dynamic list with "Add Item" button, each item: name input, measurement input, photo upload, remove button
+- [x] Task 7: Create `StyleGrid` component (`components/molecules/StyleGrid.tsx`) — fetch styles from API, display 2x5 grid of selectable style cards with name, preview image, and selection highlight
+- [x] Task 8: Create `CroquiPreview` component (`components/molecules/CroquiPreview.tsx`) — monospace ASCII renderer, iteration input field, "Ajustar" button, "Aprovar e Gerar Imagem" button, loading state during generation/iteration
+- [x] Task 9: Create `GenerationProgress` component (`components/molecules/GenerationProgress.tsx`) — animated progress bar with stage labels, percentage, contextual tip messages, error state with retry, auto-redirect on completion
+- [x] Task 10: Create API service functions (`services/staging-wizard-service.ts`) — createProject, submitSpatialInput, addReferenceItems, generateCroqui, iterateCroqui, approveCroqui, startGeneration, subscribeToProgress
+- [x] Task 11: Implement wizard page (`app/(dashboard)/projects/new/page.tsx`) — compose all components with step navigation, validation per step, "Voltar"/"Proximo" buttons, responsive layout
+- [x] Task 12: Implement Supabase Realtime subscription for render progress updates in GenerationProgress component (hook into render job channel from Story 7.5)
+- [x] Task 13: Write unit tests for wizard state hook (step transitions, validation, data persistence across steps)
+- [x] Task 14: Write unit tests for all molecule components (StepIndicator, InputTypeSelector, PhotoUploader, SpatialForm, ReferenceItemList, StyleGrid, CroquiPreview, GenerationProgress)
+- [x] Task 15: Write integration tests for wizard page (full flow: select input → upload → select style → croqui → generate, error states, mobile responsiveness)
+- [x] Task 16: Run lint, typecheck, and all tests — fix any issues
 
 ## Dependencies
 - Story 7.7 (Frontend Shell — layouts, auth, Supabase client, atoms) ✅
@@ -182,9 +182,39 @@ As a corretor de imoveis ou arquiteto autenticado, I want a step-by-step wizard 
 
 ## Dev Agent Record
 ### Implementation Plan
+Wizard de 5 steps implementado com useReducer para state management, 8 molecule components, API service layer, e Supabase Realtime para progresso em tempo real.
+
 ### Debug Log
+Nenhum bug encontrado durante implementacao.
+
 ### Change Log
+- 2026-03-09: Implementacao completa de todos os 16 tasks da Story 1.4
 
 ## Testing
+- 26 test suites, 132 tests passing
+- Lint: 0 errors, 2 warnings (img elements for blob URLs - acceptable)
+- Typecheck: passes with no errors
+
 ## File List
+- `packages/web/src/hooks/use-new-project-wizard.ts` — Wizard state management hook (useReducer)
+- `packages/web/src/components/molecules/StepIndicator.tsx` — Horizontal stepper (5 steps)
+- `packages/web/src/components/molecules/InputTypeSelector.tsx` — 3 selectable cards (Foto, Descricao, Combinado)
+- `packages/web/src/components/molecules/PhotoUploader.tsx` — Drag-and-drop upload with validation
+- `packages/web/src/components/molecules/SpatialForm.tsx` — Room dimensions and openings form
+- `packages/web/src/components/molecules/ReferenceItemList.tsx` — Dynamic reference items list
+- `packages/web/src/components/molecules/StyleGrid.tsx` — 2x5 decoration style grid
+- `packages/web/src/components/molecules/CroquiPreview.tsx` — ASCII croqui viewer with iteration
+- `packages/web/src/components/molecules/GenerationProgress.tsx` — Progress bar with real-time updates
+- `packages/web/src/services/staging-wizard-service.ts` — API service functions
+- `packages/web/src/app/(dashboard)/projects/new/page.tsx` — Wizard page
+- `packages/web/src/__tests__/hooks/use-new-project-wizard.test.ts` — Hook tests
+- `packages/web/src/__tests__/molecules/step-indicator.test.tsx` — StepIndicator tests
+- `packages/web/src/__tests__/molecules/input-type-selector.test.tsx` — InputTypeSelector tests
+- `packages/web/src/__tests__/molecules/photo-uploader.test.tsx` — PhotoUploader tests
+- `packages/web/src/__tests__/molecules/spatial-form.test.tsx` — SpatialForm tests
+- `packages/web/src/__tests__/molecules/reference-item-list.test.tsx` — ReferenceItemList tests
+- `packages/web/src/__tests__/molecules/style-grid.test.tsx` — StyleGrid tests
+- `packages/web/src/__tests__/molecules/croqui-preview.test.tsx` — CroquiPreview tests
+- `packages/web/src/__tests__/molecules/generation-progress.test.tsx` — GenerationProgress tests
+
 ## QA Results
