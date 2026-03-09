@@ -93,3 +93,10 @@ Story 7.4 (Project CRUD API e Upload de Imagens) completed in 2 attempt(s).
 
 ---
 
+
+### [phase-8] - 2026-03-09T12:59:21Z
+
+Story 6.2 (User Profile API: Favoritos, Preferencias e Historico) completed in 1 attempt(s).
+
+---
+

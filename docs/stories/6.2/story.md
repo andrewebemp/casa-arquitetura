@@ -112,3 +112,59 @@ interface UserProfile {
 - `packages/api/src/__tests__/project.service.test.ts` — add favorite filter service tests (2 new tests), fix mockChain for thenable chains
 
 ## QA Results
+
+### Verdict: PASS
+
+**Reviewed by:** Quinn (@qa) — 2026-03-09
+
+#### Phase 1: Code Quality — PASS
+- Clean, readable code following established service/route/schema pattern
+- No code smells or anti-patterns
+- Consistent naming, error handling, and response format
+
+#### Phase 2: Test Coverage — PASS
+- 23 tests added/modified (7 service + 12 route + 4 project tests)
+- Edge cases covered: null fields, empty strings, max length, invalid enum values
+- Error paths tested: supabase errors, null data, auth failures
+- Total suite: 181 tests passing across 17 files
+
+#### Phase 3: Acceptance Criteria — PASS (7/7)
+- [x] GET /profile returns full user profile (display_name, avatar_url, preferred_style, lgpd_consent_at, training_opt_in, created_at, updated_at)
+- [x] PATCH /profile updates only provided fields (dynamic updateData with undefined checks)
+- [x] PATCH /profile with invalid preferred_style returns 400 (Zod enum validation)
+- [x] GET /projects?favorite=true returns only favorited projects (filter added to schema + service)
+- [x] PATCH /projects/:id with is_favorite=true marks project as favorite (via Story 7.4 — confirmed working)
+- [x] RLS prevents cross-user access (createUserClient with accessToken enforces isolation)
+- [x] Unauthenticated requests return 401 (authMiddleware on both endpoints)
+
+#### Phase 4: Regressions — PASS
+- All 181 existing tests pass
+- Changes to project.schema.ts and project.service.ts are additive (new optional field)
+
+#### Phase 5: Performance — PASS
+- Single query per operation, no N+1
+- Cursor-based pagination maintained
+
+#### Phase 6: Security — PASS
+- Input validation via Zod schemas
+- Parameterized queries via Supabase client
+- RLS enforced via createUserClient(accessToken)
+- Auth middleware on all profile routes
+- LGPD: user can only access own profile
+
+#### Phase 7: Documentation — PASS
+- Story file complete: all tasks checked, file list accurate, change log updated
+
+#### Phase 8: Technical Debt — PASS
+- No shortcuts or hacks, follows established patterns
+
+#### Phase 9: Architecture — PASS
+- Proper separation: schema → service → routes
+- Profile routes registered separately from project routes
+
+#### Phase 10: Accessibility — N/A (API-only story)
+
+#### Quality Gates
+- `npm run lint` — PASS (0 errors)
+- `npm run typecheck` — PASS (0 errors)
+- `npm test` — PASS (181 tests, 17 files)
