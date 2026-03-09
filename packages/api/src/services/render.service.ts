@@ -5,7 +5,7 @@ import { quotaService } from './quota.service';
 import { enqueueRenderJob, removeQueueJob } from '../queue/render.queue';
 import { renderEvents } from '../queue/render.events';
 import { redisHealthCheck } from '../lib/redis';
-import type { Database, RenderJobType } from '@decorai/shared';
+import type { Database, RenderJobType, SubscriptionTier } from '@decorai/shared';
 
 type RenderJobRow = Database['public']['Tables']['render_jobs']['Row'];
 
@@ -205,5 +205,31 @@ export const renderService = {
     await renderEvents.broadcast({ jobId, status: 'canceled' });
 
     return { id: jobId, status: 'canceled' };
+  },
+
+  /**
+   * AC-6: Resolve the correct image URL based on current tier.
+   * Free tier → processed_image_url (with watermark + disclaimer)
+   * Paid tier → original_image_url (with disclaimer only, no watermark)
+   * Disclaimer remains on all images regardless of tier.
+   */
+  resolveImageUrl(
+    outputParams: Record<string, unknown> | null,
+    currentTier: SubscriptionTier,
+  ): string | null {
+    if (!outputParams) return null;
+
+    const originalUrl = outputParams.original_image_url as string | undefined;
+    const processedUrl = outputParams.processed_image_url as string | undefined;
+    const resultUrl = outputParams.result_image_url as string | undefined;
+
+    if (currentTier === 'free') {
+      // Free tier: use processed (watermark + disclaimer) if available
+      return processedUrl ?? resultUrl ?? null;
+    }
+
+    // Paid tier: use original (no watermark), disclaimer will still be present
+    // via the processed pipeline, but without the watermark overlay
+    return originalUrl ?? resultUrl ?? null;
   },
 };

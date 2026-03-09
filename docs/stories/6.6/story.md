@@ -134,6 +134,7 @@ As a DecorAI platform operator, I want the system to automatically apply a visib
 - `packages/api/src/queue/post-processing.handler.ts` (new)
 - `packages/api/src/queue/render.worker.ts` (modified)
 - `packages/api/src/services/share-link.service.ts` (modified)
+- `packages/api/src/services/render.service.ts` (modified)
 - `packages/shared/src/types/render-job.ts` (modified)
 - `packages/shared/src/types/index.ts` (modified)
 - `packages/api/src/__tests__/image-post-processing.service.test.ts` (new)
