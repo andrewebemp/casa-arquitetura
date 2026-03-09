@@ -4,6 +4,7 @@ import { supabaseAdmin } from '../lib/supabase';
 import { renderEvents } from './render.events';
 import { logger } from '../lib/logger';
 import { aiPipelineClient } from '../lib/ai-pipeline.client';
+import { processRefinementJob } from './refinement.handler';
 import type { RenderJobData } from './render.queue';
 
 const updateJobStatus = async (
@@ -93,7 +94,11 @@ export const startRenderWorker = (): Worker<RenderJobData> => {
     'render',
     async (job) => {
       logger.info({ jobId: job.data.jobId, type: job.data.type }, 'Processing render job');
-      await processRenderJob(job);
+      if (job.data.type === 'refinement') {
+        await processRefinementJob(job);
+      } else {
+        await processRenderJob(job);
+      }
     },
     {
       connection: getRedisClient(),

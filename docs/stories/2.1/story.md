@@ -1,6 +1,6 @@
 # Story 2.1 - Chat de Refinamento API: NLU, Operacoes e Historico de Versoes
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a user, I want to send natural language commands in Brazilian Portuguese to refine my room render (e.g., "tira o tapete", "muda o piso para madeira clara") and receive an updated version without re-uploading or regenerating the full scene, so that I can iteratively perfect my design through conversation.
@@ -16,19 +16,19 @@ As a user, I want to send natural language commands in Brazilian Portuguese to r
 - Given each refinement iteration, when the AI pipeline processes the job, then it applies only the requested changes (partial edit via inpainting/segmentation) without altering unrelated elements, completing in under 15 seconds for simple operations (NFR target)
 
 ## Tasks
-- [ ] Task 1: Create `ChatModule` Fastify plugin with route registration (`/projects/:id/chat`, `/projects/:id/chat/history`)
-- [ ] Task 2: Implement Claude API integration for NLU — parse Portuguese commands into structured operations array using Anthropic SDK with system prompt for DecorAI domain
-- [ ] Task 3: Implement `POST /projects/:id/chat` endpoint — validate project ownership, call Claude NLU, save `chat_messages` row with operations, enqueue BullMQ refinement job, broadcast "refining" via Supabase Realtime, return 202
-- [ ] Task 4: Implement `GET /projects/:id/chat/history` endpoint — fetch all messages for project with pagination (cursor-based), ordered by created_at ASC
-- [ ] Task 5: Create `VersionModule` Fastify plugin with version routes (`/projects/:id/versions`, `/projects/:id/versions/:versionId`, `/projects/:id/versions/:versionId/revert`)
-- [ ] Task 6: Implement `GET /projects/:id/versions` endpoint — list all versions for a project ordered by version_number
-- [ ] Task 7: Implement `GET /projects/:id/versions/:versionId` endpoint — get single version with metadata
-- [ ] Task 8: Implement `POST /projects/:id/versions/:versionId/revert` endpoint — create new version copying the target version's image, increment version_number
-- [ ] Task 9: Create BullMQ job handler for refinement jobs — receive operations, dispatch to AI pipeline, on completion create new project_version, update chat_message.version_id, broadcast "ready"
-- [ ] Task 10: Implement Supabase Realtime integration — broadcast job status changes (refining, progress, ready, error) on project channel
-- [ ] Task 11: Write unit tests for NLU operation extraction (mock Claude API responses)
-- [ ] Task 12: Write integration tests for all chat and version endpoints (CRUD, auth, edge cases)
-- [ ] Task 13: Write integration tests for BullMQ refinement job flow (enqueue, process, version creation)
+- [x] Task 1: Create `ChatModule` Fastify plugin with route registration (`/projects/:id/chat`, `/projects/:id/chat/history`)
+- [x] Task 2: Implement Claude API integration for NLU — parse Portuguese commands into structured operations array using Anthropic SDK with system prompt for DecorAI domain
+- [x] Task 3: Implement `POST /projects/:id/chat` endpoint — validate project ownership, call Claude NLU, save `chat_messages` row with operations, enqueue BullMQ refinement job, broadcast "refining" via Supabase Realtime, return 202
+- [x] Task 4: Implement `GET /projects/:id/chat/history` endpoint — fetch all messages for project with pagination (cursor-based), ordered by created_at ASC
+- [x] Task 5: Create `VersionModule` Fastify plugin with version routes (`/projects/:id/versions`, `/projects/:id/versions/:versionId`, `/projects/:id/versions/:versionId/revert`)
+- [x] Task 6: Implement `GET /projects/:id/versions` endpoint — list all versions for a project ordered by version_number
+- [x] Task 7: Implement `GET /projects/:id/versions/:versionId` endpoint — get single version with metadata
+- [x] Task 8: Implement `POST /projects/:id/versions/:versionId/revert` endpoint — create new version copying the target version's image, increment version_number
+- [x] Task 9: Create BullMQ job handler for refinement jobs — receive operations, dispatch to AI pipeline, on completion create new project_version, update chat_message.version_id, broadcast "ready"
+- [x] Task 10: Implement Supabase Realtime integration — broadcast job status changes (refining, progress, ready, error) on project channel
+- [x] Task 11: Write unit tests for NLU operation extraction (mock Claude API responses)
+- [x] Task 12: Write integration tests for all chat and version endpoints (CRUD, auth, edge cases)
+- [x] Task 13: Write integration tests for BullMQ refinement job flow (enqueue, process, version creation)
 
 ## Dependencies
 - Story 7.2 — Database schema (`chat_messages`, `project_versions` tables)
@@ -59,8 +59,13 @@ As a user, I want to send natural language commands in Brazilian Portuguese to r
 
 ## Dev Agent Record
 ### Implementation Plan
+Followed flat service architecture pattern: schemas, services, routes, queue handler.
+
 ### Debug Log
+- Fixed test mocks: Supabase query builder chain needs `.then()` for thenable await support on array queries.
+
 ### Change Log
+- 2026-03-09: Implemented all 13 tasks for Story 2.1
 
 ## Testing
 - Unit tests for NLU operation extraction with various PT-BR commands
@@ -70,5 +75,23 @@ As a user, I want to send natural language commands in Brazilian Portuguese to r
 - Edge case tests: empty message, malformed operations, concurrent refinements
 
 ## File List
+- `packages/api/src/schemas/chat.schema.ts` (new) - Zod schemas for chat endpoints
+- `packages/api/src/schemas/version.schema.ts` (new) - Zod schemas for version endpoints
+- `packages/api/src/services/chat.service.ts` (new) - Claude NLU + chat message service
+- `packages/api/src/services/version.service.ts` (new) - Version CRUD + revert service
+- `packages/api/src/routes/chat.routes.ts` (new) - Chat Fastify route plugin
+- `packages/api/src/routes/version.routes.ts` (new) - Version Fastify route plugin
+- `packages/api/src/queue/chat.events.ts` (new) - Supabase Realtime broadcaster for chat
+- `packages/api/src/queue/refinement.handler.ts` (new) - BullMQ refinement job handler
+- `packages/api/src/queue/render.worker.ts` (modified) - Added refinement job routing
+- `packages/api/src/server.ts` (modified) - Registered chat and version routes
+- `packages/api/src/__tests__/chat.service.test.ts` (new) - 13 unit/integration tests
+- `packages/api/src/__tests__/version.service.test.ts` (new) - 7 unit/integration tests
+- `packages/api/src/__tests__/chat.routes.test.ts` (new) - 13 route integration tests
+- `packages/api/src/__tests__/version.routes.test.ts` (new) - 15 route integration tests
+- `packages/api/src/__tests__/refinement.handler.test.ts` (new) - 2 integration tests
 
 ## QA Results
+- `npm run lint` — PASS (0 errors)
+- `npm run typecheck` — PASS (0 errors)
+- `npm test` — 36 test files, 349 tests passed

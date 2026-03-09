@@ -12,6 +12,8 @@ import { croquiRoutes } from './routes/croqui.routes';
 import { renderRoutes } from './routes/render.routes';
 import { subscriptionRoutes } from './routes/subscription.routes';
 import { webhookRoutes } from './routes/webhook.routes';
+import { chatRoutes } from './routes/chat.routes';
+import { versionRoutes } from './routes/version.routes';
 
 const server = Fastify({ logger: false });
 
@@ -47,6 +49,8 @@ server.register(projectRoutes, { prefix: '/projects' });
 server.register(spatialRoutes, { prefix: '/projects' });
 server.register(referenceRoutes, { prefix: '/projects' });
 server.register(croquiRoutes, { prefix: '/projects' });
+server.register(chatRoutes, { prefix: '/projects' });
+server.register(versionRoutes, { prefix: '/projects' });
 server.register(renderRoutes);
 server.register(subscriptionRoutes, { prefix: '/subscriptions' });
 server.register(webhookRoutes, { prefix: '/webhooks' });
