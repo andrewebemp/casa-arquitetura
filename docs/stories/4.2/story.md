@@ -1,6 +1,6 @@
 # Story 4.2 - Before/After Slider UI, Modal de Compartilhamento e Pagina Publica de Share
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a corretor de imoveis ou arquiteto, I want an interactive before/after slider to visually compare the original photo with the AI-decorated version, share the result via a public link (WhatsApp, Instagram, email) with a modal that generates and manages share links, and have a public share page with proper OG metadata so recipients can see the slider without logging in — so that I can effectively present staging results to clients and increase property engagement.
@@ -132,20 +132,20 @@ As a corretor de imoveis ou arquiteto, I want an interactive before/after slider
 - **Clipboard**: Use `navigator.clipboard.writeText()` with fallback for older browsers.
 
 ## Tasks
-- [ ] Task 1: Create share service functions (`services/share-service.ts`) — getSliderData, createShareLink, getShareLinks, deleteShareLink, getPublicShareData
-- [ ] Task 2: Create `BeforeAfterSlider` component (`components/molecules/BeforeAfterSlider.tsx`) — dual-image overlay with draggable vertical divider, ANTES/DEPOIS labels, mouse + touch support, responsive aspect ratio
-- [ ] Task 3: Create `SocialShareButtons` component (`components/molecules/SocialShareButtons.tsx`) — WhatsApp (wa.me link), Email (mailto), Copy Link (clipboard API with feedback toast)
-- [ ] Task 4: Create `ShareLinkList` component (`components/molecules/ShareLinkList.tsx`) — list of share links with URL, view count, expiration, delete with confirmation
-- [ ] Task 5: Create `ShareModal` component (`components/organisms/ShareModal.tsx`) — compose mini slider preview, share link display, SocialShareButtons, ShareLinkList, watermark tier warning
-- [ ] Task 6: Integrate slider and share modal into workspace toolbar — enable [Comparar] button to activate slider overlay on canvas, enable [Compartilhar] button to open ShareModal (replacing "Em breve" placeholders from Story 2.2)
-- [ ] Task 7: Create public share page (`app/compartilhar/[token]/page.tsx`) — SSR with `generateMetadata` for OG tags, BeforeAfterSlider, project info, CTA, disclaimer, error states (expired/invalid)
-- [ ] Task 8: Create public share layout (`app/compartilhar/layout.tsx`) — public header with logo (no auth), footer with disclaimer
-- [ ] Task 9: Write unit tests for BeforeAfterSlider (drag interaction, touch support, position state, label visibility)
-- [ ] Task 10: Write unit tests for ShareModal (link generation, copy to clipboard, social buttons, link management)
-- [ ] Task 11: Write unit tests for SocialShareButtons (WhatsApp URL format, email mailto format, clipboard feedback)
-- [ ] Task 12: Write integration tests for workspace toolbar integration (slider activation, share modal opening)
-- [ ] Task 13: Write integration tests for public share page (SSR rendering, OG meta tags, expired link, invalid link, CTA)
-- [ ] Task 14: Run lint, typecheck, and all tests — fix any issues
+- [x] Task 1: Create share service functions (`services/share-service.ts`) — getSliderData, createShareLink, getShareLinks, deleteShareLink, getPublicShareData
+- [x] Task 2: Create `BeforeAfterSlider` component (`components/molecules/BeforeAfterSlider.tsx`) — dual-image overlay with draggable vertical divider, ANTES/DEPOIS labels, mouse + touch support, responsive aspect ratio
+- [x] Task 3: Create `SocialShareButtons` component (`components/molecules/SocialShareButtons.tsx`) — WhatsApp (wa.me link), Email (mailto), Copy Link (clipboard API with feedback toast)
+- [x] Task 4: Create `ShareLinkList` component (`components/molecules/ShareLinkList.tsx`) — list of share links with URL, view count, expiration, delete with confirmation
+- [x] Task 5: Create `ShareModal` component (`components/organisms/ShareModal.tsx`) — compose mini slider preview, share link display, SocialShareButtons, ShareLinkList, watermark tier warning
+- [x] Task 6: Integrate slider and share modal into workspace toolbar — enable [Comparar] button to activate slider overlay on canvas, enable [Compartilhar] button to open ShareModal (replacing "Em breve" placeholders from Story 2.2)
+- [x] Task 7: Create public share page (`app/compartilhar/[token]/page.tsx`) — SSR with `generateMetadata` for OG tags, BeforeAfterSlider, project info, CTA, disclaimer, error states (expired/invalid)
+- [x] Task 8: Create public share layout (`app/compartilhar/layout.tsx`) — public header with logo (no auth), footer with disclaimer
+- [x] Task 9: Write unit tests for BeforeAfterSlider (drag interaction, touch support, position state, label visibility)
+- [x] Task 10: Write unit tests for ShareModal (link generation, copy to clipboard, social buttons, link management)
+- [x] Task 11: Write unit tests for SocialShareButtons (WhatsApp URL format, email mailto format, clipboard feedback)
+- [x] Task 12: Write integration tests for workspace toolbar integration (slider activation, share modal opening)
+- [x] Task 13: Write integration tests for public share page (SSR rendering, OG meta tags, expired link, invalid link, CTA)
+- [x] Task 14: Run lint, typecheck, and all tests — fix any issues
 
 ## Dependencies
 - Story 7.7 (Frontend Shell — layouts, auth, atoms) — Done
@@ -156,9 +156,38 @@ As a corretor de imoveis ou arquiteto, I want an interactive before/after slider
 
 ## Dev Agent Record
 ### Implementation Plan
+All components (Tasks 1-8) were already implemented from prior phases. This session focused on writing comprehensive tests (Tasks 9-14) and ensuring all quality gates pass.
+
 ### Debug Log
+- Fixed BeforeAfterSlider tests: mocked `setPointerCapture` and `getBoundingClientRect` on Element.prototype for jsdom compatibility
+- Fixed SocialShareButtons tests: used `Object.defineProperty` for clipboard mock, verified UI state change instead of mock call
+- Fixed ShareModal test: used specific aria-label selector instead of ambiguous text match
+- Fixed workspace integration tests: used role/aria-label selectors to avoid duplicate text matches
+
 ### Change Log
+- 2026-03-09: Wrote all unit and integration tests (Tasks 9-14), fixed quality gate issues
 
 ## Testing
+- `npm run lint` — 0 errors (6 warnings for `<img>` vs `<Image />`, pre-existing)
+- `npm run typecheck` — passes
+- `npm test` — 47 suites, 282 tests, all passing
+
 ## File List
+- `packages/web/src/services/share-service.ts` — Share service functions (Task 1)
+- `packages/web/src/components/molecules/BeforeAfterSlider.tsx` — Slider component (Task 2)
+- `packages/web/src/components/molecules/SocialShareButtons.tsx` — Social share buttons (Task 3)
+- `packages/web/src/components/molecules/ShareLinkList.tsx` — Share link list (Task 4)
+- `packages/web/src/components/organisms/ShareModal.tsx` — Share modal (Task 5)
+- `packages/web/src/components/molecules/RenderViewer.tsx` — Toolbar integration (Task 6)
+- `packages/web/src/app/(dashboard)/projects/[id]/page.tsx` — Workspace integration (Task 6)
+- `packages/web/src/app/compartilhar/[token]/page.tsx` — Public share page SSR (Task 7)
+- `packages/web/src/app/compartilhar/[token]/public-slider.tsx` — Client slider wrapper (Task 7)
+- `packages/web/src/app/compartilhar/layout.tsx` — Public share layout (Task 8)
+- `packages/web/src/__tests__/molecules/before-after-slider.test.tsx` — Slider tests (Task 9)
+- `packages/web/src/__tests__/organisms/share-modal.test.tsx` — ShareModal tests (Task 10)
+- `packages/web/src/__tests__/molecules/social-share-buttons.test.tsx` — Social buttons tests (Task 11)
+- `packages/web/src/__tests__/molecules/share-link-list.test.tsx` — ShareLinkList tests (Task 11)
+- `packages/web/src/__tests__/workspace-toolbar-integration.test.tsx` — Toolbar integration tests (Task 12)
+- `packages/web/src/__tests__/public-share-page.test.tsx` — Public page tests (Task 13)
+
 ## QA Results

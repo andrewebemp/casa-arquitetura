@@ -5,10 +5,14 @@ import { useParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ProjectVersion } from '@decorai/shared';
 import { RenderViewer } from '@/components/molecules/RenderViewer';
+import { BeforeAfterSlider } from '@/components/molecules/BeforeAfterSlider';
 import { ChatPanel } from '@/components/organisms/ChatPanel';
 import { VersionTimeline } from '@/components/organisms/VersionTimeline';
+import { ShareModal } from '@/components/organisms/ShareModal';
 import { getVersions } from '@/services/chat-service';
-import { Loader2 } from 'lucide-react';
+import { getSliderData } from '@/services/share-service';
+import type { SliderData } from '@/services/share-service';
+import { Loader2, X } from 'lucide-react';
 
 export default function ProjectWorkspacePage() {
   const params = useParams();
@@ -17,10 +21,18 @@ export default function ProjectWorkspacePage() {
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [previewVersion, setPreviewVersion] = useState<ProjectVersion | null>(null);
+  const [sliderOpen, setSliderOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const { data: versions = [], isLoading } = useQuery({
     queryKey: ['versions', projectId],
     queryFn: () => getVersions(projectId),
+  });
+
+  const { data: sliderData } = useQuery<SliderData>({
+    queryKey: ['slider-data', projectId, previewVersion?.id],
+    queryFn: () => getSliderData(projectId, previewVersion?.id),
+    enabled: sliderOpen || shareOpen,
   });
 
   const latestVersion = versions.length > 0 ? versions[0] : null;
@@ -50,6 +62,14 @@ export default function ProjectWorkspacePage() {
     queryClient.invalidateQueries({ queryKey: ['versions', projectId] });
   }, [queryClient, projectId]);
 
+  const handleCompare = useCallback(() => {
+    setSliderOpen(true);
+  }, []);
+
+  const handleShare = useCallback(() => {
+    setShareOpen(true);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -65,6 +85,8 @@ export default function ProjectWorkspacePage() {
         <RenderViewer
           imageUrl={currentImageUrl}
           onToggleHistory={() => setHistoryOpen(!historyOpen)}
+          onCompare={handleCompare}
+          onShare={handleShare}
         />
       </div>
 
@@ -85,6 +107,44 @@ export default function ProjectWorkspacePage() {
         onClose={() => setHistoryOpen(false)}
         onPreview={handleVersionPreview}
         onReverted={handleReverted}
+      />
+
+      {/* Before/After Slider Overlay */}
+      {sliderOpen && sliderData && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black/90">
+          <div className="flex items-center justify-between px-4 py-3">
+            <h2 className="text-sm font-semibold text-white">
+              Comparar Antes/Depois
+            </h2>
+            <button
+              type="button"
+              onClick={() => setSliderOpen(false)}
+              className="rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white"
+              aria-label="Fechar comparacao"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="flex flex-1 items-center justify-center p-4">
+            <BeforeAfterSlider
+              beforeUrl={sliderData.original_url}
+              afterUrl={sliderData.rendered_url}
+              className="max-h-full max-w-full rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        projectId={projectId}
+        projectName={sliderData?.project_name ?? 'Projeto'}
+        beforeUrl={sliderData?.original_url ?? ''}
+        afterUrl={sliderData?.rendered_url ?? currentImageUrl ?? ''}
+        versionId={displayVersion?.id}
+        isFreeTier={false}
       />
     </div>
   );
