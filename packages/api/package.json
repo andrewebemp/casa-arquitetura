@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@decorai/shared": "workspace:*",
+    "@fastify/multipart": "^8.3.1",
     "@supabase/supabase-js": "^2.98.0",
     "envalid": "^8.1.1",
     "fastify": "^4.28.0",

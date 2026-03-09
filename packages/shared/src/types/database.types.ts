@@ -36,6 +36,7 @@ export interface Database {
           training_opt_in?: boolean;
           updated_at?: string;
         };
+        Relationships: [];
       };
       projects: {
         Row: {
@@ -73,6 +74,7 @@ export interface Database {
           original_image_url?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       project_versions: {
         Row: {
@@ -85,6 +87,7 @@ export interface Database {
           refinement_command: string | null;
           quality_scores: Record<string, unknown>;
           metadata: Record<string, unknown>;
+          render_url: string | null;
           created_at: string;
         };
         Insert: {
@@ -97,6 +100,7 @@ export interface Database {
           refinement_command?: string | null;
           quality_scores?: Record<string, unknown>;
           metadata?: Record<string, unknown>;
+          render_url?: string | null;
           created_at?: string;
         };
         Update: {
@@ -106,7 +110,9 @@ export interface Database {
           refinement_command?: string | null;
           quality_scores?: Record<string, unknown>;
           metadata?: Record<string, unknown>;
+          render_url?: string | null;
         };
+        Relationships: [];
       };
       spatial_inputs: {
         Row: {
@@ -142,6 +148,7 @@ export interface Database {
           photo_interpretation?: Record<string, unknown> | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       reference_items: {
         Row: {
@@ -180,6 +187,7 @@ export interface Database {
           color?: string | null;
           position_description?: string | null;
         };
+        Relationships: [];
       };
       chat_messages: {
         Row: {
@@ -205,6 +213,7 @@ export interface Database {
           operations?: Record<string, unknown> | null;
           version_id?: string | null;
         };
+        Relationships: [];
       };
       subscriptions: {
         Row: {
@@ -249,6 +258,7 @@ export interface Database {
           current_period_end?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       diagnostics: {
         Row: {
@@ -275,6 +285,7 @@ export interface Database {
           analysis?: Record<string, unknown>;
           session_token?: string | null;
         };
+        Relationships: [];
       };
       render_jobs: {
         Row: {
@@ -327,6 +338,7 @@ export interface Database {
           started_at?: string | null;
           completed_at?: string | null;
         };
+        Relationships: [];
       };
       share_links: {
         Row: {
@@ -354,10 +366,12 @@ export interface Database {
           expires_at?: string | null;
           view_count?: number;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }

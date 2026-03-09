@@ -58,3 +58,17 @@ Story 7.3 (Supabase Client, Auth Middleware e Infraestrutura da API) FAILED afte
 
 ---
 
+
+### [phase-8] - 2026-03-09T12:20:08Z
+
+Story 6.1 (Auth Routes: Signup, Login, Google OAuth e Sessao) completed in 1 attempt(s).
+
+---
+
+
+### [phase-8] - 2026-03-09T12:24:06Z
+
+Story 6.1 (Auth Routes: Signup, Login, Google OAuth e Sessao) FAILED after 3 attempts. Last QA feedback: 
+
+---
+

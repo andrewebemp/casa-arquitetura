@@ -187,3 +187,78 @@ Followed existing patterns from Story 7.4 (project.service, project.routes, stor
 - [x] `packages/api/src/__tests__/reference.routes.test.ts` (created - 10 tests)
 
 ## QA Results
+
+### Verdict: CONCERNS
+
+**Reviewed by:** Quinn (@qa)
+**Date:** 2026-03-09
+
+### Quality Gates
+| Gate | Result |
+|------|--------|
+| `npm run lint` | PASS |
+| `npm run typecheck` | PASS |
+| `npm test` (Story 1.1 tests) | PASS (50/50) |
+| `npm test` (full suite) | 4 pre-existing failures in Story 7.4 tests |
+
+### Phase 1: Code Quality — PASS
+- Clean, well-structured code following existing patterns (auth.routes, auth.service)
+- Proper use of AppError with descriptive error codes and messages
+- Consistent naming conventions across schemas, services, and routes
+- Good separation between spatial and reference concerns
+
+### Phase 2: Test Coverage — PASS
+- 50 tests total: 8 spatial service, 20 reference service, 12 spatial routes, 10 reference routes
+- All Story 1.1 tests passing
+- Covers success paths, error paths, validation, auth, and edge cases
+- Magic bytes validation tested for JPEG/PNG
+- Storage cleanup on delete tested
+
+### Phase 3: Acceptance Criteria — PASS with notes
+| AC | Status | Notes |
+|----|--------|-------|
+| AC-01: Create/Update Spatial Input | PASS | Upsert pattern correctly implemented |
+| AC-02: Get Spatial Input | PASS | Returns 404 for missing data or unauthorized access |
+| AC-03: Create Reference Item | PASS | Multipart upload with image validation and storage |
+| AC-04: List Reference Items | PASS | Ordered by created_at ASC |
+| AC-05: Get Reference Item | PASS | Fresh signed URL generation on read |
+| AC-06: Delete Reference Item | PASS | Storage cleanup (fire-and-forget pattern) |
+| AC-07: Input Validation | PASS | Zod schemas with positive numbers, enum types, max lengths |
+| AC-08: Test Coverage | PASS | 50 tests, all passing |
+
+### Phase 4: Regressions — CONCERNS
+- 4 pre-existing test failures in `project.routes.test.ts` (POST /projects/:id/upload — returns 404)
+- 1 pre-existing test suite failure in `project.service.test.ts` (vi.mock hoisting error)
+- These are from Story 7.4, NOT introduced by Story 1.1
+- Story 1.1 does not modify project routes or service
+
+### Phase 5: Performance — PASS
+- No N+1 queries; each endpoint does 2-3 DB queries max
+- Signed URLs with 1-hour expiry avoid repeated storage calls
+- Storage cleanup uses fire-and-forget pattern (non-blocking)
+
+### Phase 6: Security — PASS
+- All endpoints require auth (authMiddleware)
+- RLS enforced via createUserClient (user-scoped Supabase client)
+- Project ownership verified before all operations
+- File validation: mime type check + magic bytes verification
+- File size capped at 10MB
+- UUID validation on all route params
+
+### Phase 7: Documentation — PASS
+- Story file fully updated with tasks checked, file list complete
+- Dev agent record includes implementation plan, debug log, and changelog
+- API endpoint table documented in Technical Notes
+
+### Phase 8: Technical Debt — CONCERNS
+- `reference.service.ts:146` stores signed URL in `image_url` column. Signed URLs expire (1h). Consider storing the storage path instead and generating signed URLs on read.
+- `spatial.service.ts:35-37` uses `as Record<string, unknown>` type casting for JSONB fields — acceptable for Supabase SDK but could be typed more precisely
+- `reference.routes.ts:44` uses `as { value: string }` cast for multipart fields — minor type safety gap
+
+### Phase 9: Architecture — PASS
+- Follows established patterns from auth and project routes
+- Proper separation: schemas → services → routes
+- Middleware chain: authMiddleware → validate → handler
+- Uses createUserClient for RLS-respecting queries
+
+### Phase 10: Accessibility — N/A (API only)

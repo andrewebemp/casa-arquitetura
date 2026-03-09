@@ -330,7 +330,6 @@ describe('referenceService', () => {
           return mockChain({ data: mockItem, error: null });
         }
         // delete chain
-        const chain = mockChain({ data: null, error: null });
         const deleteChain: Record<string, unknown> = {};
         deleteChain.delete = vi.fn().mockReturnValue(deleteChain);
         deleteChain.eq = vi.fn().mockReturnValue(deleteChain);
