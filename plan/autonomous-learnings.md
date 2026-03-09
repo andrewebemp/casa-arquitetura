@@ -121,3 +121,17 @@ Story 7.5 (Render Job Queue, Quota Check e Progresso em Tempo Real) completed in
 
 ---
 
+
+### [phase-8] - 2026-03-09T13:45:13Z
+
+Story 6.3 (Subscription & Payment API: Stripe Integration, Tier Management e Webhooks) completed in 3 attempt(s).
+
+---
+
+
+### [phase-8] - 2026-03-09T13:47:32Z
+
+Story 7.6 (AI Pipeline Core: SDXL Generation, Depth Estimation e Style Extraction) FAILED after 3 attempts. Last QA feedback: 
+
+---
+
