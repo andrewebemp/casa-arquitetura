@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { env } from './config/env';
 import { logger } from './lib/logger';
 import { errorHandler } from './middleware/error-handler';
+import { authRoutes } from './routes/auth.routes';
 
 const server = Fastify({ logger: false });
 
@@ -24,6 +25,8 @@ server.addHook('onRequest', async (request, reply) => {
 server.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
+
+server.register(authRoutes, { prefix: '/auth' });
 
 const start = async () => {
   try {
