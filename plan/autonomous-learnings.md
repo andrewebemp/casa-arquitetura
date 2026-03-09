@@ -338,3 +338,10 @@ Story 3.3 (Object Removal API: LaMa Inpainting para Remocao de Objetos Indesejad
 
 ---
 
+
+### [phase-8] - 2026-03-09T16:14:28Z
+
+Story 4.1 (Before/After Slider API e Compartilhamento via Link) completed in 1 attempt(s).
+
+---
+
