@@ -8,6 +8,7 @@ import { projectRoutes } from './routes/project.routes';
 import { profileRoutes } from './routes/profile.routes';
 import { spatialRoutes } from './routes/spatial.routes';
 import { referenceRoutes } from './routes/reference.routes';
+import { renderRoutes } from './routes/render.routes';
 
 const server = Fastify({ logger: false });
 
@@ -42,6 +43,7 @@ server.register(profileRoutes, { prefix: '/profile' });
 server.register(projectRoutes, { prefix: '/projects' });
 server.register(spatialRoutes, { prefix: '/projects' });
 server.register(referenceRoutes, { prefix: '/projects' });
+server.register(renderRoutes);
 
 const start = async () => {
   try {
