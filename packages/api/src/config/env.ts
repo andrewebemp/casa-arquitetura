@@ -18,4 +18,5 @@ export const env = cleanEnv(process.env, {
   ASAAS_API_URL: str({ default: 'https://sandbox.asaas.com/api', desc: 'Asaas API base URL' }),
   ASAAS_PRO_VALUE: str({ default: '79.00', desc: 'Monthly value for Pro tier in BRL' }),
   ASAAS_BUSINESS_VALUE: str({ default: '299.00', desc: 'Monthly value for Business tier in BRL' }),
+  CDN_BASE_URL: str({ default: '', desc: 'Cloudflare CDN base URL for image delivery' }),
 });

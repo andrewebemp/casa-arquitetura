@@ -23,6 +23,7 @@ import { diagnosticsRoutes } from './routes/diagnostics.routes';
 import { consentRoutes } from './routes/consent.routes';
 import { asaasWebhookRoutes } from './routes/asaas-webhook.routes';
 import { rateLimitMiddleware } from './middleware/rate-limit.middleware';
+import { cacheRoutes } from './routes/cache.routes';
 
 const server = Fastify({ logger: false });
 
@@ -75,6 +76,7 @@ server.register(subscriptionRoutes, { prefix: '/subscriptions' });
 server.register(consentRoutes, { prefix: '/users/me' });
 server.register(webhookRoutes, { prefix: '/webhooks' });
 server.register(asaasWebhookRoutes, { prefix: '/webhooks' });
+server.register(cacheRoutes, { prefix: '/api' });
 
 const start = async () => {
   try {

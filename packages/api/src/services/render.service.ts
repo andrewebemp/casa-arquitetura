@@ -5,6 +5,7 @@ import { quotaService } from './quota.service';
 import { enqueueRenderJob, removeQueueJob } from '../queue/render.queue';
 import { renderEvents } from '../queue/render.events';
 import { redisHealthCheck } from '../lib/redis';
+import { semanticCacheService } from './semantic-cache.service';
 import type { Database, RenderJobType, SubscriptionTier } from '@decorai/shared';
 
 type RenderJobRow = Database['public']['Tables']['render_jobs']['Row'];
@@ -58,6 +59,38 @@ export const renderService = {
         message: 'Croqui must be approved before generating render',
         statusCode: 409,
       });
+    }
+
+    // Check semantic cache before consuming quota
+    const cacheHash = this.computeCacheHash(input.inputParams);
+    if (cacheHash) {
+      const cached = await semanticCacheService.get(cacheHash);
+      if (cached) {
+        logger.info({ cacheHash }, 'Semantic cache hit — skipping GPU and quota');
+        return {
+          id: `cache-${cacheHash.slice(0, 8)}`,
+          project_id: input.projectId,
+          type: input.type,
+          status: 'completed',
+          priority: 0,
+          input_params: input.inputParams,
+          output_params: {
+            result_image_url: cached.resultImageUrl,
+            original_image_url: cached.originalImageUrl,
+            processed_image_url: cached.processedImageUrl,
+            depth_map_url: cached.depthMapUrl,
+            metadata: cached.metadata,
+            cache_hit: true,
+          },
+          attempts: 0,
+          created_at: new Date().toISOString(),
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          error_message: null,
+          gpu_provider: null,
+          duration_ms: 0,
+        } as unknown as RenderJobRow;
+      }
     }
 
     // Check quota
@@ -205,6 +238,28 @@ export const renderService = {
     await renderEvents.broadcast({ jobId, status: 'canceled' });
 
     return { id: jobId, status: 'canceled' };
+  },
+
+  computeCacheHash(inputParams: Record<string, unknown>): string | null {
+    const sourceImageHash = inputParams.source_image_hash as string;
+    const styleId = inputParams.style_id as string;
+    const width = inputParams.width as number;
+    const height = inputParams.height as number;
+    const seed = inputParams.seed as number;
+    const promptHash = inputParams.prompt_hash as string;
+
+    if (!sourceImageHash || !styleId || !width || !height || seed == null || !promptHash) {
+      return null;
+    }
+
+    return semanticCacheService.computeHash({
+      sourceImageHash,
+      styleId,
+      width,
+      height,
+      seed,
+      promptHash,
+    });
   },
 
   /**

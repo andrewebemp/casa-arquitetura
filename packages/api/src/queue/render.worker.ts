@@ -10,6 +10,8 @@ import { processStagingJob } from './staging.handler';
 import { processSegmentationJob } from './segmentation.handler';
 import { processLightingJob } from './lighting.handler';
 import { processObjectRemovalJob } from './object-removal.handler';
+import { semanticCacheService } from '../services/semantic-cache.service';
+import { renderService } from '../services/render.service';
 import type { RenderJobData } from './render.queue';
 import type { SubscriptionTier } from '@decorai/shared';
 
@@ -174,6 +176,38 @@ const processRenderJob = async (job: Job<RenderJobData>): Promise<void> => {
   await renderEvents.broadcast({ jobId, status: 'completed', progress: 100 });
 };
 
+/**
+ * Store completed render result in semantic cache for future hits.
+ */
+const storeInSemanticCache = async (jobData: RenderJobData): Promise<void> => {
+  try {
+    const cacheHash = renderService.computeCacheHash(jobData.inputParams);
+    if (!cacheHash) return;
+
+    // Read the completed job output
+    const { data: job } = await supabaseAdmin
+      .from('render_jobs')
+      .select('output_params')
+      .eq('id', jobData.jobId)
+      .single();
+
+    if (!job) return;
+
+    const output = (job as { output_params: Record<string, unknown> | null }).output_params;
+    if (!output) return;
+
+    await semanticCacheService.set(cacheHash, {
+      resultImageUrl: (output.result_image_url as string) || '',
+      originalImageUrl: (output.original_image_url as string) || '',
+      processedImageUrl: (output.processed_image_url as string) || '',
+      depthMapUrl: (output.depth_map_url as string) || '',
+      metadata: (output.metadata as Record<string, unknown>) || {},
+    });
+  } catch (err) {
+    logger.error({ err, jobId: jobData.jobId }, 'Failed to store render in semantic cache');
+  }
+};
+
 let renderWorker: Worker<RenderJobData> | null = null;
 
 export const startRenderWorker = (): Worker<RenderJobData> => {
@@ -207,6 +241,9 @@ export const startRenderWorker = (): Worker<RenderJobData> => {
         // processRenderJob already has post-processing built in
         await processRenderJob(job);
       }
+
+      // Store completed render in semantic cache
+      await storeInSemanticCache(job.data);
     },
     {
       connection: getRedisClient(),
