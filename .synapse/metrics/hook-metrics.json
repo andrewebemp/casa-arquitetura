@@ -1,5 +1,5 @@
 {
-  "totalDuration": 3.1128,
+  "totalDuration": 3.5634,
   "hookBootMs": 0,
   "bracket": "FRESH",
   "layersLoaded": 2,
@@ -8,12 +8,12 @@
   "totalRules": 59,
   "perLayer": {
     "constitution": {
-      "duration": 0.4644,
+      "duration": 0.7029,
       "status": "ok",
       "rules": 34
     },
     "global": {
-      "duration": 0.3043,
+      "duration": 0.417,
       "status": "ok",
       "rules": 25
     },
@@ -48,5 +48,5 @@
       "rules": 0
     }
   },
-  "timestamp": "2026-03-09T18:00:51.446Z"
+  "timestamp": "2026-03-09T18:01:59.285Z"
 }
