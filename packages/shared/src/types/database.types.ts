@@ -284,6 +284,7 @@ export interface Database {
         };
         Update: {
           user_id?: string | null;
+          original_image_url?: string;
           staged_preview_url?: string | null;
           analysis?: Record<string, unknown>;
           session_token?: string | null;

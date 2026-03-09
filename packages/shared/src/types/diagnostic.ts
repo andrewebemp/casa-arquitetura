@@ -12,6 +12,12 @@ export interface DiagnosticAnalysis {
   recommendations: string[];
 }
 
+export interface DiagnosticCta {
+  message: string;
+  plan_recommended: 'pro' | 'business';
+  upgrade_url: string;
+}
+
 export interface Diagnostic {
   id: string;
   user_id: string | null;
@@ -20,4 +26,8 @@ export interface Diagnostic {
   analysis: DiagnosticAnalysis;
   session_token: string | null;
   created_at: string;
+}
+
+export interface DiagnosticResponse extends Diagnostic {
+  cta: DiagnosticCta;
 }
