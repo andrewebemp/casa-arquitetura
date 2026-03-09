@@ -856,3 +856,10 @@ Story 7.8 (API Rate Limiting: Per-Tier Request Throttling via Redis) completed i
 
 ---
 
+
+### [phase-8] - 2026-03-09T20:59:16Z
+
+Story 7.9 (Image CDN Delivery e Semantic Render Caching via Redis) completed in 1 attempt(s).
+
+---
+
