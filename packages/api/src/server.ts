@@ -22,6 +22,7 @@ import { shareLinkRoutes, publicShareRoutes } from './routes/share-link.routes';
 import { diagnosticsRoutes } from './routes/diagnostics.routes';
 import { consentRoutes } from './routes/consent.routes';
 import { asaasWebhookRoutes } from './routes/asaas-webhook.routes';
+import { rateLimitMiddleware } from './middleware/rate-limit.middleware';
 
 const server = Fastify({ logger: false });
 
@@ -46,6 +47,8 @@ server.addHook('onRequest', async (request, reply) => {
     return reply.status(204).send();
   }
 });
+
+server.addHook('onRequest', rateLimitMiddleware);
 
 server.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
