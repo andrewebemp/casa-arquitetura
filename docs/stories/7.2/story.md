@@ -1,6 +1,6 @@
 # Story 7.2 - Database Schema e Supabase Migrations
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a developer, I want the complete PostgreSQL database schema deployed via Supabase migrations with all 10 tables, RLS policies, indexes, triggers, and auto-provisioning functions so that all application features have a solid data foundation to build upon.
@@ -19,21 +19,21 @@ As a developer, I want the complete PostgreSQL database schema deployed via Supa
 - Given the migration files, when I inspect `supabase/migrations/`, then each migration is idempotent and ordered chronologically with clear naming
 
 ## Tasks
-- [ ] Task 1: Create migration `001_extensions.sql` — enable `uuid-ossp` and `pgcrypto` extensions
-- [ ] Task 2: Create migration `002_user_profiles.sql` — `user_profiles` table with RLS policies (SELECT, INSERT, UPDATE own data)
-- [ ] Task 3: Create migration `003_projects.sql` — `projects` table with indexes, RLS policies (full CRUD own data)
-- [ ] Task 4: Create migration `004_project_versions.sql` — `project_versions` table with UNIQUE constraint, indexes, RLS policies
-- [ ] Task 5: Create migration `005_spatial_inputs.sql` — `spatial_inputs` table with UNIQUE project_id constraint, RLS policies
-- [ ] Task 6: Create migration `006_reference_items.sql` — `reference_items` table with index, RLS policy (ALL own data)
-- [ ] Task 7: Create migration `007_chat_messages.sql` — `chat_messages` table with composite index, RLS policies
-- [ ] Task 8: Create migration `008_subscriptions.sql` — `subscriptions` table with UNIQUE user_id, RLS policies (SELECT, INSERT own)
-- [ ] Task 9: Create migration `009_diagnostics.sql` — `diagnostics` table with public INSERT, conditional SELECT policy
-- [ ] Task 10: Create migration `010_render_jobs.sql` — `render_jobs` table with status/priority indexes, RLS policy
-- [ ] Task 11: Create migration `011_share_links.sql` — `share_links` table with unique token, public SELECT, owner INSERT policy
-- [ ] Task 12: Create migration `012_triggers.sql` — `update_updated_at()` function and triggers for 4 tables
-- [ ] Task 13: Create migration `013_handle_new_user.sql` — `handle_new_user()` function and `on_auth_user_created` trigger
-- [ ] Task 14: Validate all migrations apply cleanly with `supabase db reset` (or manual SQL verification)
-- [ ] Task 15: Write integration tests verifying table existence, column types, and constraint behavior
+- [x] Task 1: Create migration `001_extensions.sql` — enable `uuid-ossp` and `pgcrypto` extensions
+- [x] Task 2: Create migration `002_user_profiles.sql` — `user_profiles` table with RLS policies (SELECT, INSERT, UPDATE own data)
+- [x] Task 3: Create migration `003_projects.sql` — `projects` table with indexes, RLS policies (full CRUD own data)
+- [x] Task 4: Create migration `004_project_versions.sql` — `project_versions` table with UNIQUE constraint, indexes, RLS policies
+- [x] Task 5: Create migration `005_spatial_inputs.sql` — `spatial_inputs` table with UNIQUE project_id constraint, RLS policies
+- [x] Task 6: Create migration `006_reference_items.sql` — `reference_items` table with index, RLS policy (ALL own data)
+- [x] Task 7: Create migration `007_chat_messages.sql` — `chat_messages` table with composite index, RLS policies
+- [x] Task 8: Create migration `008_subscriptions.sql` — `subscriptions` table with UNIQUE user_id, RLS policies (SELECT, INSERT own)
+- [x] Task 9: Create migration `009_diagnostics.sql` — `diagnostics` table with public INSERT, conditional SELECT policy
+- [x] Task 10: Create migration `010_render_jobs.sql` — `render_jobs` table with status/priority indexes, RLS policy
+- [x] Task 11: Create migration `011_share_links.sql` — `share_links` table with unique token, public SELECT, owner INSERT policy
+- [x] Task 12: Create migration `012_triggers.sql` — `update_updated_at()` function and triggers for 4 tables
+- [x] Task 13: Create migration `013_handle_new_user.sql` — `handle_new_user()` function and `on_auth_user_created` trigger
+- [x] Task 14: Validate all migrations apply cleanly with `supabase db reset` (or manual SQL verification)
+- [x] Task 15: Write integration tests verifying table existence, column types, and constraint behavior
 
 ## Dependencies
 - Story 7.1 — Monorepo scaffolding (provides `supabase/` directory structure and shared types)
@@ -63,8 +63,16 @@ As a developer, I want the complete PostgreSQL database schema deployed via Supa
 
 ## Dev Agent Record
 ### Implementation Plan
+All 13 migrations and integration tests were already implemented in a previous session. This session verified completeness, ran quality gates, and marked tasks complete.
+
 ### Debug Log
+No issues encountered.
+
 ### Change Log
+- 2026-03-09: Verified all 13 migrations match architecture DDL exactly
+- 2026-03-09: Verified 73 integration tests pass (migrations.test.ts)
+- 2026-03-09: Quality gates passed: lint ✓, typecheck ✓, test (121/121) ✓
+- 2026-03-09: Story marked as Done
 
 ## Testing
 - Migration apply: All 13 migrations run without errors on clean database
@@ -77,5 +85,22 @@ As a developer, I want the complete PostgreSQL database schema deployed via Supa
 - Indexes: All 14 indexes exist and are used by query planner
 
 ## File List
+- `supabase/migrations/001_extensions.sql` — uuid-ossp and pgcrypto extensions
+- `supabase/migrations/002_user_profiles.sql` — user_profiles table + RLS
+- `supabase/migrations/003_projects.sql` — projects table + indexes + RLS
+- `supabase/migrations/004_project_versions.sql` — project_versions + UNIQUE + RLS
+- `supabase/migrations/005_spatial_inputs.sql` — spatial_inputs + UNIQUE project_id + RLS
+- `supabase/migrations/006_reference_items.sql` — reference_items + index + RLS
+- `supabase/migrations/007_chat_messages.sql` — chat_messages + composite index + RLS
+- `supabase/migrations/008_subscriptions.sql` — subscriptions + UNIQUE user_id + RLS
+- `supabase/migrations/009_diagnostics.sql` — diagnostics + public INSERT + session SELECT
+- `supabase/migrations/010_render_jobs.sql` — render_jobs + status/priority indexes + RLS
+- `supabase/migrations/011_share_links.sql` — share_links + unique token + public SELECT
+- `supabase/migrations/012_triggers.sql` — update_updated_at() + 4 triggers
+- `supabase/migrations/013_handle_new_user.sql` — handle_new_user() SECURITY DEFINER + trigger
+- `packages/shared/src/__tests__/migrations.test.ts` — 73 integration tests
 
 ## QA Results
+- `npm run lint`: PASS (4/4 tasks)
+- `npm run typecheck`: PASS (4/4 tasks)
+- `npm test`: PASS (121/121 tests, 7 test files, including 73 migration tests)
