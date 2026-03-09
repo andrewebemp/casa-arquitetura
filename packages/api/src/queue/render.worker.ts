@@ -5,6 +5,7 @@ import { renderEvents } from './render.events';
 import { logger } from '../lib/logger';
 import { aiPipelineClient } from '../lib/ai-pipeline.client';
 import { processRefinementJob } from './refinement.handler';
+import { processStagingJob } from './staging.handler';
 import type { RenderJobData } from './render.queue';
 
 const updateJobStatus = async (
@@ -96,6 +97,10 @@ export const startRenderWorker = (): Worker<RenderJobData> => {
       logger.info({ jobId: job.data.jobId, type: job.data.type }, 'Processing render job');
       if (job.data.type === 'refinement') {
         await processRefinementJob(job);
+      } else if (job.data.type === 'initial' && job.data.inputParams.style_id) {
+        await processStagingJob(job);
+      } else if (job.data.type === 'style_change') {
+        await processStagingJob(job);
       } else {
         await processRenderJob(job);
       }
