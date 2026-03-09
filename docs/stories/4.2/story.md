@@ -188,6 +188,8 @@ All components (Tasks 1-8) were already implemented from prior phases. This sess
 - `packages/web/src/__tests__/molecules/social-share-buttons.test.tsx` — Social buttons tests (Task 11)
 - `packages/web/src/__tests__/molecules/share-link-list.test.tsx` — ShareLinkList tests (Task 11)
 - `packages/web/src/__tests__/workspace-toolbar-integration.test.tsx` — Toolbar integration tests (Task 12)
+- `packages/web/src/__tests__/integration/workspace-slider-integration.test.tsx` — Additional slider integration tests (Task 12)
 - `packages/web/src/__tests__/public-share-page.test.tsx` — Public page tests (Task 13)
+- `packages/web/src/__tests__/integration/public-share-page.test.tsx` — Additional public page integration tests (Task 13)
 
 ## QA Results
