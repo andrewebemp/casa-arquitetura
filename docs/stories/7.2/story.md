@@ -63,16 +63,18 @@ As a developer, I want the complete PostgreSQL database schema deployed via Supa
 
 ## Dev Agent Record
 ### Implementation Plan
-All 13 migrations and integration tests were already implemented in a previous session. This session verified completeness, ran quality gates, and marked tasks complete.
+Replaced previous 3-file migration set (with ENUMs and divergent column names) with 13 individual migration files matching the DDL from database-schema.md exactly. Updated shared types to match schema.
 
 ### Debug Log
 No issues encountered.
 
 ### Change Log
-- 2026-03-09: Verified all 13 migrations match architecture DDL exactly
-- 2026-03-09: Verified 73 integration tests pass (migrations.test.ts)
-- 2026-03-09: Quality gates passed: lint ✓, typecheck ✓, test (121/121) ✓
-- 2026-03-09: Story marked as Done
+- 2026-03-09: Replaced old migrations (00001-00003) with 13 new ones (001-013) matching architecture DDL
+- 2026-03-09: Updated ReferenceItem type: dimensions JSONB to individual width_m, depth_m, height_m columns
+- 2026-03-09: Updated Subscription type: payment_gateway and gateway_customer_id now nullable
+- 2026-03-09: Created ShareLink type matching DDL (share_token, include_watermark, view_count)
+- 2026-03-09: Added 73 migration integration tests
+- 2026-03-09: All quality gates passed: lint, typecheck, test (121/121)
 
 ## Testing
 - Migration apply: All 13 migrations run without errors on clean database
@@ -99,6 +101,12 @@ No issues encountered.
 - `supabase/migrations/012_triggers.sql` — update_updated_at() + 4 triggers
 - `supabase/migrations/013_handle_new_user.sql` — handle_new_user() SECURITY DEFINER + trigger
 - `packages/shared/src/__tests__/migrations.test.ts` — 73 integration tests
+- `packages/shared/src/types/reference-item.ts` — MODIFIED (dimensions to individual columns)
+- `packages/shared/src/types/subscription.ts` — MODIFIED (nullable payment_gateway, gateway_customer_id)
+- `packages/shared/src/types/share-link.ts` — NEW (ShareLink type)
+- `packages/shared/src/types/index.ts` — MODIFIED (added ShareLink export)
+- `packages/shared/src/types/types.test.ts` — MODIFIED (updated ReferenceItem test)
+- `packages/shared/src/__tests__/types.test.ts` — MODIFIED (updated Subscription test)
 
 ## QA Results
 - `npm run lint`: PASS (4/4 tasks)
