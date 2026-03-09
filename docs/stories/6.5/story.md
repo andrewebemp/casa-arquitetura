@@ -131,9 +131,14 @@ As a corretor de imoveis ou arquiteto visitando o DecorAI Brasil, I want to see 
 
 ## Dev Agent Record
 ### Implementation Plan
+Tasks 1-9 were implemented in a previous session. This session completed Tasks 10-12 (unit tests and quality gates).
+
 ### Debug Log
+- Hook tests failed with `TypeError: Cannot redefine property: location` — resolved by mocking the hook module with a capturedUrl variable instead of modifying window.location
+- Plano page test for "Comecar Gratis" failed because authenticated free-tier user sees "Plano Atual" — resolved by using rejected subscription (unauthenticated state) for the free CTA test
+
 ### Change Log
-- 2026-03-09: Implemented all 12 tasks — pricing constants, PricingCard, PricingGrid, SubscriptionSummary, PricingFAQ, useCheckout, usePortal hooks, /plano page, auth redirect flow, 32 unit tests. All quality gates pass.
+- 2026-03-09: Completed all 12 tasks — pricing constants, PricingCard, PricingGrid, SubscriptionSummary, PricingFAQ, useCheckout, usePortal hooks, /plano page, auth redirect flow. Created useCheckout, usePortal, and plano-page tests (14 new tests). All quality gates pass (477 tests, 0 lint errors, 0 type errors).
 
 ## Testing
 - Unit tests for PricingCard molecule (renders tier name, price, features; shows "Mais Popular" badge for Pro; shows "Plano Atual" badge when active; CTA click triggers handler)
