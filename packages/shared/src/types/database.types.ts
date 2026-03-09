@@ -123,6 +123,7 @@ export interface Database {
           items: Record<string, unknown>[];
           croqui_ascii: string | null;
           croqui_approved: boolean;
+          croqui_turn_number: number;
           photo_interpretation: Record<string, unknown> | null;
           created_at: string;
           updated_at: string;
@@ -135,6 +136,7 @@ export interface Database {
           items?: Record<string, unknown>[];
           croqui_ascii?: string | null;
           croqui_approved?: boolean;
+          croqui_turn_number?: number;
           photo_interpretation?: Record<string, unknown> | null;
           created_at?: string;
           updated_at?: string;
@@ -145,6 +147,7 @@ export interface Database {
           items?: Record<string, unknown>[];
           croqui_ascii?: string | null;
           croqui_approved?: boolean;
+          croqui_turn_number?: number;
           photo_interpretation?: Record<string, unknown> | null;
           updated_at?: string;
         };

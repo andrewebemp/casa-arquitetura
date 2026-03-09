@@ -37,6 +37,7 @@ export interface SpatialInput {
   items: PositionedItem[];
   croqui_ascii: string | null;
   croqui_approved: boolean;
+  croqui_turn_number: number;
   photo_interpretation: PhotoInterpretation | null;
   created_at: string;
   updated_at: string;

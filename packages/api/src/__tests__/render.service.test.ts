@@ -131,19 +131,33 @@ describe('render service', () => {
         tier: 'free',
       });
 
-      // Mock DB insert
-      const insertChain = buildChain();
-      insertChain.single.mockResolvedValue({
-        data: {
-          id: 'render-job-1',
-          project_id: 'proj-1',
-          type: 'initial',
-          status: 'queued',
-          priority: 10,
-        },
-        error: null,
+      // Mock supabaseAdmin.from calls: first spatial_inputs (approval check), then render_jobs (insert)
+      let adminCallCount = 0;
+      mockSupabaseFrom.mockImplementation(() => {
+        adminCallCount++;
+        if (adminCallCount === 1) {
+          // Croqui approval check
+          const spatialChain = buildChain();
+          spatialChain.single.mockResolvedValue({
+            data: { croqui_approved: true },
+            error: null,
+          });
+          return spatialChain as never;
+        }
+        // DB insert for render job
+        const insertChain = buildChain();
+        insertChain.single.mockResolvedValue({
+          data: {
+            id: 'render-job-1',
+            project_id: 'proj-1',
+            type: 'initial',
+            status: 'queued',
+            priority: 10,
+          },
+          error: null,
+        });
+        return insertChain as never;
       });
-      mockSupabaseFrom.mockReturnValue(insertChain as never);
 
       mockEnqueue.mockResolvedValue('render-job-1');
 
@@ -152,6 +166,29 @@ describe('render service', () => {
       expect(result.id).toBe('render-job-1');
       expect(result.status).toBe('queued');
       expect(mockEnqueue).toHaveBeenCalled();
+    });
+
+    it('should throw CROQUI_NOT_APPROVED when croqui is not approved', async () => {
+      mockRedisHealthCheck.mockResolvedValue(true);
+
+      // Mock project ownership check
+      const clientChain = buildChain();
+      clientChain.single.mockResolvedValue({ data: { id: 'proj-1' }, error: null });
+      const userClient = { from: vi.fn().mockReturnValue(clientChain) };
+      mockCreateUserClient.mockReturnValue(userClient as never);
+
+      // Mock spatial_inputs - croqui not approved
+      const spatialChain = buildChain();
+      spatialChain.single.mockResolvedValue({
+        data: { croqui_approved: false },
+        error: null,
+      });
+      mockSupabaseFrom.mockReturnValue(spatialChain as never);
+
+      await expect(renderService.createJob(input)).rejects.toMatchObject({
+        code: 'CROQUI_NOT_APPROVED',
+        statusCode: 409,
+      });
     });
   });
 

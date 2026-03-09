@@ -45,6 +45,21 @@ export const renderService = {
       });
     }
 
+    // Check croqui approval gate (AC6: approval required before generation)
+    const { data: spatialInput } = await supabaseAdmin
+      .from('spatial_inputs')
+      .select('croqui_approved')
+      .eq('project_id', input.projectId)
+      .single();
+
+    if (!spatialInput || !spatialInput.croqui_approved) {
+      throw new AppError({
+        code: 'CROQUI_NOT_APPROVED',
+        message: 'Croqui must be approved before generating render',
+        statusCode: 409,
+      });
+    }
+
     // Check quota
     const quota = await quotaService.enforceQuota(input.userId);
 

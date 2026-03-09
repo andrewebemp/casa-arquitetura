@@ -12,4 +12,5 @@ export const env = cleanEnv(process.env, {
   STRIPE_WEBHOOK_SECRET: str({ desc: 'Stripe webhook signing secret' }),
   STRIPE_PRO_PRICE_ID: str({ desc: 'Stripe Price ID for Pro tier' }),
   STRIPE_BUSINESS_PRICE_ID: str({ desc: 'Stripe Price ID for Business tier' }),
+  ANTHROPIC_API_KEY: str({ desc: 'Anthropic API key for Claude croqui generation' }),
 });
