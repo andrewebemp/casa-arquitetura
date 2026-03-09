@@ -1,0 +1,512 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Workflow: Reverse Staging (Diagnostic Funnel)
+# Funil de aquisicao freemium: diagnostico de listing com CTA para plano pago
+# ═══════════════════════════════════════════════════════════════════════════════
+
+workflow:
+  id: wf-reverse-staging
+  name: "Reverse Staging Diagnostic Funnel"
+  version: "1.0.0"
+  description: |
+    Workflow de aquisicao via reverse staging: o usuario envia uma foto do seu
+    anuncio imobiliario atual, e o sistema gera um diagnostico de qualidade
+    visual mostrando o que esta perdendo sem staging profissional. Inclui um
+    preview antes/depois em baixa qualidade com watermark como amostra do
+    potencial, finalizando com CTA para plano pago.
+    Estrategia baseada no modelo "show the gap" de Pete Flint (NFX/Trulia).
+  duration: "30-90 seconds"
+  orchestrator: "@decorai-chief"
+  squad: "decorai"
+  best_for:
+    - "Aquisicao de novos usuarios (freemium funnel)"
+    - "Demonstrar valor do staging para corretores ceticos"
+    - "Gerar leads qualificados para plano pago"
+    - "Landing page hero action (envie sua foto)"
+  not_for:
+    - "Geracao de render final para uso (use wf-staging-pipeline)"
+    - "Refinamento de render existente (use wf-refinement-loop)"
+    - "Usuarios que ja sao pagantes (oferecer pipeline completo)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INPUTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+inputs:
+  required:
+    - name: listing_photo
+      type: "image"
+      description: "Foto atual do anuncio imobiliario (ambiente vazio ou mal decorado)"
+      constraints:
+        formats: ["jpg", "png", "webp"]
+        max_size: "10MB"
+        min_resolution: "640x480"
+
+  optional:
+    - name: listing_url
+      type: "string"
+      description: "URL do anuncio (para contexto adicional)"
+
+    - name: user_role
+      type: enum
+      values: ["corretor", "imobiliaria", "incorporadora", "proprietario", "designer"]
+      description: "Perfil do usuario (para personalizar CTA)"
+
+    - name: city
+      type: "string"
+      description: "Cidade do imovel (para dados de mercado regionais)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: RECEBER FOTO DO LISTING ATUAL
+# Objetivo: Validar e classificar a foto recebida
+# ═══════════════════════════════════════════════════════════════════════════════
+
+phases:
+  - id: PHASE-1
+    name: "Receber Foto do Listing"
+    tier: orchestrator
+    agent: "@decorai-chief"
+    description: |
+      Recebe a foto do listing atual, valida formato/resolucao, e classifica
+      o tipo de ambiente e condicao atual (vazio, semi-mobiliado, mobiliado
+      com qualidade baixa). Roteia para analise.
+    estimated_time: "1-3 seconds"
+
+    tasks:
+      - task_id: DA-T-RS-001
+        agent: "@decorai-chief"
+        required: true
+        description: "Validar foto e classificar condicao do listing"
+        actions:
+          - "Validar formato e resolucao minima"
+          - "Classificar condicao: vazio | semi-mobiliado | mobiliado-baixa-qualidade"
+          - "Identificar tipo de comodo automaticamente"
+          - "Registrar metadados do usuario para personalizacao"
+        output: "listing-intake.yaml"
+
+    output: "listing-intake.yaml"
+    output_schema:
+      photo_valid: "boolean"
+      room_type: "string"
+      current_condition: "empty | semi-furnished | poorly-furnished"
+      user_profile: "string"
+
+    checkpoint:
+      id: CP-DA-RS-001
+      criteria:
+        - "Photo is valid and processable"
+        - "Room type identified"
+      human_review: false
+      on_fail:
+        invalid_photo:
+          action: "Ask user to upload better quality photo"
+          message: |
+            A foto precisa ter pelo menos 640x480 pixels e estar em formato
+            JPG, PNG ou WebP. Tente enviar outra foto do ambiente.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: ANALISAR QUALIDADE DO LISTING ATUAL
+# Objetivo: Gerar score de qualidade visual e identificar problemas
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-2
+    name: "Analisar Qualidade do Listing"
+    tier: 0
+    agent: "@spatial-analyst"
+    depends_on: ["PHASE-1"]
+    description: |
+      Analisa a qualidade visual do listing atual contra criterios objetivos
+      do mercado imobiliario: iluminacao, enquadramento, limpeza visual,
+      presenca de mobiliario, decoracao, e apelo emocional. Gera um score
+      de atratividade de 0-100.
+    estimated_time: "5-10 seconds"
+
+    tasks:
+      - task_file: tasks/analyze-listing-quality.md
+        task_id: DA-T-RS-002
+        agent: "@spatial-analyst"
+        required: true
+        description: "Analisar qualidade visual e gerar score de atratividade"
+        input_from:
+          - "PHASE-1:listing-intake.yaml"
+          - "listing_photo"
+        output: "listing-quality-analysis.yaml"
+        analysis_dimensions:
+          visual_quality:
+            weight: 0.25
+            checks:
+              - "Iluminacao adequada (natural + artificial)"
+              - "Enquadramento e angulo da foto"
+              - "Foco e nitidez"
+              - "Resolucao e qualidade da imagem"
+          spatial_presentation:
+            weight: 0.25
+            checks:
+              - "Sensacao de amplitude"
+              - "Proporcoes percebidas do espaco"
+              - "Visibilidade de elementos-chave (janelas, piso)"
+          staging_level:
+            weight: 0.30
+            checks:
+              - "Presenca e qualidade do mobiliario"
+              - "Decoracao e ambientacao"
+              - "Harmonizacao de cores e estilos"
+              - "Sensacao de 'habitabilidade'"
+          emotional_appeal:
+            weight: 0.20
+            checks:
+              - "Convidatividade (quer morar aqui?)"
+              - "Diferenciacao vs concorrencia"
+              - "Apelo aspiracional"
+
+    output: "listing-quality-analysis.yaml"
+    output_schema:
+      attractiveness_score: "int (0-100)"
+      visual_quality_score: "int (0-100)"
+      spatial_score: "int (0-100)"
+      staging_score: "int (0-100)"
+      emotional_score: "int (0-100)"
+      top_issues:
+        - issue: "string"
+          impact: "high | medium | low"
+          fixable_with_staging: "boolean"
+      market_comparison:
+        percentile: "int (0-100)"
+        benchmark: "string (e.g., 'Abaixo da media do mercado')"
+
+    checkpoint:
+      id: CP-DA-RS-002
+      criteria:
+        - "Attractiveness score calculated"
+        - "At least 3 issues identified"
+      human_review: false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: GERAR DIAGNOSTICO "O QUE VOCE ESTA PERDENDO"
+# Objetivo: Criar narrativa de impacto com dados de mercado
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-3
+    name: "Gerar Diagnostico de Impacto"
+    tier: 2
+    agent: "@proptech-growth"
+    depends_on: ["PHASE-2"]
+    description: |
+      Gera o diagnostico "O que voce esta perdendo" com base na analise
+      de qualidade e dados de mercado. Inclui estimativa de impacto em
+      dias de venda, valor percebido, e taxa de cliques. Usa dados reais
+      do mercado imobiliario brasileiro para dar credibilidade.
+    estimated_time: "3-8 seconds"
+
+    tasks:
+      - task_file: tasks/generate-loss-diagnostic.md
+        task_id: DA-T-RS-003
+        agent: "@proptech-growth"
+        required: true
+        description: "Gerar diagnostico de perda com dados de mercado"
+        input_from:
+          - "PHASE-2:listing-quality-analysis.yaml"
+          - "user_role"
+          - "city"
+        output: "loss-diagnostic.yaml"
+        data_sources:
+          market_stats:
+            - "Imoveis com staging vendem 73% mais rapido (NAR, 2024)"
+            - "Fotos profissionais geram 118% mais cliques (Redfin, 2023)"
+            - "Virtual staging custa 95% menos que staging fisico"
+            - "ROI medio de staging: 586% (NAR Home Staging Report)"
+          brazilian_context:
+            - "Tempo medio de venda sem staging: 180-240 dias"
+            - "Com staging visual: 60-90 dias"
+            - "Custo de oportunidade por mes parado: IPTU + condominio"
+        diagnostic_structure:
+          score_section:
+            title: "Seu Score de Atratividade"
+            content: "Score + comparacao com mercado + ranking percentile"
+          problems_section:
+            title: "O que esta custando voce"
+            content: "Top 3 problemas com impacto quantificado"
+          opportunity_section:
+            title: "O que voce ganharia com staging"
+            content: "Estimativa de melhoria por categoria + ROI"
+          comparison_section:
+            title: "Voce vs Concorrencia"
+            content: "Comparacao visual e numerica"
+
+    output: "loss-diagnostic.yaml"
+    output_schema:
+      score_summary:
+        current: "int (0-100)"
+        potential: "int (0-100)"
+        improvement: "int (percentage)"
+      impact_estimate:
+        days_saved: "int (estimated days faster to sell)"
+        perceived_value_increase: "string (e.g., '5-15%')"
+        click_rate_improvement: "string (e.g., '+118%')"
+        cost_of_inaction_monthly: "string (e.g., 'R$ 2.500/mes')"
+      top_recommendations:
+        - recommendation: "string"
+          priority: "1 | 2 | 3"
+          achievable_with: "staging | styling | photo"
+      narrative: "string (formatted diagnostic text)"
+
+    checkpoint:
+      id: CP-DA-RS-003
+      criteria:
+        - "Diagnostic narrative generated"
+        - "At least 3 quantified impacts included"
+        - "CTA-ready content produced"
+      human_review: false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: GERAR PREVIEW ANTES/DEPOIS (BAIXA QUALIDADE + WATERMARK)
+# Objetivo: Mostrar amostra do potencial sem entregar qualidade final
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-4
+    name: "Gerar Preview Antes/Depois"
+    tier: 1
+    agent: "@staging-architect"
+    depends_on: ["PHASE-2"]
+    parallel_with: "PHASE-3"
+    description: |
+      Gera um preview de staging em baixa qualidade com watermark pesado.
+      O objetivo e mostrar o potencial transformacional sem entregar
+      qualidade utilizavel. Usa pipeline simplificado (menos steps,
+      resolucao reduzida, sem upscale) para velocidade e economia.
+    estimated_time: "10-20 seconds"
+
+    tasks:
+      - task_id: DA-T-RS-004
+        agent: "@staging-architect"
+        required: true
+        description: "Gerar preview de staging em baixa qualidade"
+        input_from:
+          - "listing_photo"
+          - "PHASE-2:listing-quality-analysis.yaml"
+        output: "preview-staged.png"
+        config:
+          resolution: "768x768"
+          steps: 15
+          controlnet: ["depth"]
+          style: "auto-detect from room type (modern default)"
+          watermark:
+            enabled: true
+            text: "DecorAI - Preview"
+            opacity: 0.4
+            position: "diagonal-repeat"
+          quality: "preview-only"
+
+      - task_id: DA-T-RS-005
+        agent: "@staging-architect"
+        required: true
+        description: "Gerar composicao antes/depois com slider"
+        input_from:
+          - "listing_photo"
+          - "preview-staged.png"
+        output: "before-after-preview.png"
+        actions:
+          - "Redimensionar ambas as imagens para mesmo tamanho"
+          - "Criar composicao side-by-side"
+          - "Adicionar labels 'Antes' e 'Depois'"
+          - "Aplicar watermark global"
+
+    output: "before-after-preview.png"
+
+    checkpoint:
+      id: CP-DA-RS-004
+      criteria:
+        - "Preview generated successfully"
+        - "Watermark properly applied"
+        - "Before/after composition created"
+      human_review: false
+      on_fail:
+        action: "Skip preview, deliver diagnostic without visual"
+        fallback_message: "Nao foi possivel gerar preview. Veja o diagnostico abaixo."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: APRESENTAR DIAGNOSTICO COM CTA
+# Objetivo: Entregar diagnostico completo com call-to-action para plano pago
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-5
+    name: "Apresentar Diagnostico com CTA"
+    tier: 2
+    agent: "@proptech-growth"
+    depends_on: ["PHASE-3", "PHASE-4"]
+    description: |
+      Consolida e apresenta o diagnostico completo com preview visual,
+      narrativa de impacto, dados de mercado, e call-to-action personalizado
+      por perfil de usuario. O CTA direciona para upgrade de plano com
+      oferta contextualizada.
+    estimated_time: "instantaneo (apresentacao)"
+
+    tasks:
+      - task_file: tasks/present-diagnostic-cta.md
+        task_id: DA-T-RS-006
+        agent: "@proptech-growth"
+        required: true
+        description: "Apresentar diagnostico e CTA personalizado"
+        input_from:
+          - "PHASE-2:listing-quality-analysis.yaml"
+          - "PHASE-3:loss-diagnostic.yaml"
+          - "PHASE-4:before-after-preview.png"
+          - "user_role"
+        output: "diagnostic-presentation.yaml"
+        presentation_structure:
+          header:
+            title: "Diagnostico de Atratividade do seu Imovel"
+            subtitle: "Analise baseada em IA + dados de mercado"
+          score_card:
+            current_score: "{attractiveness_score}/100"
+            market_position: "Voce esta no percentil {percentile}%"
+            verdict: "Seu anuncio esta {verdict} da media do mercado"
+          before_after:
+            image: "before-after-preview.png"
+            caption: "Veja o potencial do seu espaco com staging virtual"
+          key_findings:
+            format: "3 cards com icone + titulo + impacto"
+            content: "top_issues from analysis"
+          market_impact:
+            days_saved: "{days_saved} dias mais rapido"
+            value_increase: "+{perceived_value_increase} no valor percebido"
+            click_improvement: "+{click_rate_improvement} de cliques"
+          cta:
+            primary:
+              text: "Transformar meu anuncio agora"
+              action: "redirect_to_signup_or_upgrade"
+              urgency: "Oferta especial: primeiro render gratis no plano Basic"
+            secondary:
+              text: "Ver exemplos de staging"
+              action: "redirect_to_gallery"
+            personalized_by_role:
+              corretor:
+                message: "Seus clientes esperam fotos profissionais. Destaque-se da concorrencia."
+                offer: "Plano Corretor: 10 renders/mes por R$ 49,90"
+              imobiliaria:
+                message: "Escale o staging para todo seu portfolio."
+                offer: "Plano Imobiliaria: renders ilimitados por R$ 199/mes"
+              incorporadora:
+                message: "Lance seus empreendimentos com staging virtual antes da obra."
+                offer: "Plano Enterprise: consultoria + volume"
+              proprietario:
+                message: "Venda ou alugue mais rapido com staging profissional."
+                offer: "Primeiro render gratis. Planos a partir de R$ 9,90"
+              designer:
+                message: "Impressione seus clientes com visualizacoes instantaneas."
+                offer: "Plano Designer: API + renders ilimitados"
+
+    output: "diagnostic-presentation.yaml"
+
+    checkpoint:
+      id: CP-DA-RS-005
+      criteria:
+        - "Full diagnostic presented"
+        - "CTA personalized by user role"
+        - "Preview image included (or fallback message)"
+      human_review: false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OUTPUTS CONSOLIDADOS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+outputs:
+  deliverables:
+    - name: "Diagnostico de Atratividade"
+      file: "diagnostic-presentation.yaml"
+      description: "Diagnostico completo com score, analise, e recomendacoes"
+      phase: PHASE-5
+
+    - name: "Preview Antes/Depois"
+      file: "before-after-preview.png"
+      description: "Composicao antes/depois em baixa qualidade com watermark"
+      phase: PHASE-4
+
+  metrics_tracked:
+    funnel:
+      - "Photo uploaded (top of funnel)"
+      - "Diagnostic viewed (middle)"
+      - "CTA clicked (bottom)"
+      - "Plan purchased (conversion)"
+    engagement:
+      - "Time on diagnostic page"
+      - "Before/after interaction (slider usage)"
+      - "Share/screenshot attempts"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRANSITIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+transitions:
+  - from: input
+    to: PHASE-1
+    condition: "Listing photo received"
+
+  - from: PHASE-1
+    to: PHASE-2
+    condition: "Photo validated and classified"
+
+  - from: PHASE-2
+    to: PHASE-3
+    condition: "Quality analysis complete"
+    parallel: "PHASE-4 starts simultaneously"
+
+  - from: PHASE-2
+    to: PHASE-4
+    condition: "Quality analysis complete"
+    parallel: "PHASE-3 starts simultaneously"
+
+  - from: PHASE-3
+    to: PHASE-5
+    condition: "Diagnostic generated"
+    wait_for: "PHASE-4"
+
+  - from: PHASE-4
+    to: PHASE-5
+    condition: "Preview generated"
+    wait_for: "PHASE-3"
+
+  - from: PHASE-5
+    to: complete
+    condition: "Diagnostic presented with CTA"
+
+  - from: PHASE-5
+    to: wf-staging-pipeline
+    condition: "User clicks CTA and upgrades to paid plan"
+    description: "Handoff to full staging pipeline after conversion"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SINAIS DE COMUNICACAO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+completion_signal: "<promise>REVERSE-STAGING:COMPLETE</promise>"
+conversion_signal: "<promise>CONVERSION:CTA-CLICKED</promise>"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRATAMENTO DE ERROS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+error_handling:
+  on_photo_invalid:
+    - action: "Request new photo with guidance"
+    - message: "Envie uma foto do ambiente em boa resolucao (minimo 640x480)"
+  on_preview_failure:
+    - action: "Deliver diagnostic without visual preview"
+    - fallback: "Use stock before/after examples from same room type"
+  on_market_data_unavailable:
+    - action: "Use national averages instead of regional"
+    - disclaimer: "Dados baseados em medias nacionais"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  version: "1.0.0"
+  created: "2026-03-09"
+  squad: "decorai"
+  total_agents: 4
+  total_phases: 5
+  total_tasks: 6
+  funnel_type: "freemium acquisition"
+  estimated_duration: "30-90 seconds"
+  conversion_target: "15-25% CTA click rate"

@@ -2,11 +2,17 @@
 # ============================================================================
 # AIOS Autonomous Runner - Phase 5: System Architecture
 #
-# Generates system architecture documentation based on the PRD.
+# Generates fullstack system architecture documentation based on PRD,
+# UX/UI spec, front-end spec, and squad DecorAI agent definitions.
 #
-# Precondition: docs/prd.md must exist
+# Preconditions:
+#   - docs/prd.md must exist
+#   - docs/architecture/ux-ui-spec.md (recommended)
+#   - docs/front-end-spec.md (recommended)
+#   - squads/decorai/ (recommended for agent integration)
+#
 # Template:     .aios-core/templates/phase-prompts/phase-5-architecture.md
-# Output:       docs/architecture.md
+# Output:       docs/architecture/fullstack-architecture.md
 #
 # Usage: ./phase-5-architecture.sh
 #
@@ -30,6 +36,10 @@ PHASE_NAME="System Architecture"
 PHASE_NUM="5"
 PROMPT_TEMPLATE="${TEMPLATES_DIR}/phase-5-architecture.md"
 
+# Output path (updated to architecture/ subdirectory)
+ARCH_OUTPUT_DIR="${DOCS_DIR}/architecture"
+ARCH_OUTPUT_FILE="${ARCH_OUTPUT_DIR}/fullstack-architecture.md"
+
 # ============================================================================
 #                          PRECONDITIONS
 # ============================================================================
@@ -43,6 +53,24 @@ check_preconditions() {
 
   # Verify Claude CLI is available
   check_dependencies "${CLAUDE_CMD}" || return 1
+
+  # Recommended inputs (warn if missing, don't block)
+  if [[ ! -f "${ARCH_OUTPUT_DIR}/ux-ui-spec.md" ]]; then
+    log_warn "UX/UI spec not found at docs/architecture/ux-ui-spec.md — architecture may be incomplete"
+  fi
+
+  if [[ ! -f "${DOCS_DIR}/front-end-spec.md" ]]; then
+    log_warn "Front-end spec not found at docs/front-end-spec.md — frontend architecture may be incomplete"
+  fi
+
+  if [[ ! -d "${PROJECT_ROOT}/squads/decorai" ]]; then
+    log_warn "Squad DecorAI not found at squads/decorai/ — agent integration will be skipped"
+  else
+    log_info "Squad DecorAI found — agents will be integrated into architecture"
+  fi
+
+  # Ensure output directory exists
+  mkdir -p "$ARCH_OUTPUT_DIR"
 
   return 0
 }
@@ -68,15 +96,27 @@ execute_phase() {
 # ============================================================================
 
 validate_output() {
-  # Verify docs/architecture.md was created and has content
-  validate_file_created "docs/architecture.md" "architecture document" || return 1
+  # Verify fullstack-architecture.md was created
+  # Check both new and legacy paths
+  if [[ -f "$ARCH_OUTPUT_FILE" ]]; then
+    local arch_path="$ARCH_OUTPUT_FILE"
+  elif [[ -f "${PROJECT_ROOT}/docs/architecture.md" ]]; then
+    # Legacy path — move to new location
+    log_warn "Architecture doc found at legacy path docs/architecture.md — moving to docs/architecture/"
+    mkdir -p "$ARCH_OUTPUT_DIR"
+    mv "${PROJECT_ROOT}/docs/architecture.md" "$ARCH_OUTPUT_FILE"
+    local arch_path="$ARCH_OUTPUT_FILE"
+  else
+    log_error "Architecture document not found at ${ARCH_OUTPUT_FILE} or docs/architecture.md"
+    return 1
+  fi
 
   # --- Squad Integration Hooks ---
 
   # Conselho Gate: Architecture decisions (FULL mode - irreversible)
   if [[ "$CONSELHO_GATES" == "true" ]]; then
     if ! run_conselho_gate \
-      "As decisões arquiteturais em docs/architecture.md são sólidas? Avalie stack, padrões e trade-offs." \
+      "As decisões arquiteturais em ${arch_path} são sólidas? Avalie stack, padrões, trade-offs e integração com squad DecorAI." \
       "full"; then
       log_warn "Conselho inconclusivo para arquitetura. Revisão humana recomendada."
     fi
@@ -85,27 +125,42 @@ validate_output() {
   # Process Excellence: Analyze data flow for bottlenecks
   if [[ "$PROCESS_EXCELLENCE" == "true" ]]; then
     run_process_excellence "otimizador-de-processos" \
-      "Analise o fluxo de dados proposto em docs/architecture.md. Identifique gargalos potenciais usando Theory of Constraints." || true
+      "Analise o fluxo de dados proposto em ${arch_path}. Identifique gargalos potenciais usando Theory of Constraints. Considere o pipeline DecorAI: spatial-analyst → staging-architect → conversational-designer → visual-quality-engineer." || true
   fi
 
   # Additional content checks
-  local arch_path="${PROJECT_ROOT}/docs/architecture.md"
   local line_count
   line_count=$(wc -l < "$arch_path" | tr -d ' ')
 
-  if [[ "$line_count" -lt 20 ]]; then
-    log_warn "Architecture document seems too short (${line_count} lines). Expected comprehensive coverage."
+  if [[ "$line_count" -lt 50 ]]; then
+    log_warn "Architecture document seems too short (${line_count} lines). Expected comprehensive fullstack coverage."
   fi
 
-  # Check for key sections that a good architecture document should have
-  local expected_sections=("Technology Stack" "API" "Security" "Infrastructure")
+  # Check for key sections (expanded for fullstack template)
+  local expected_sections=(
+    "Tech Stack"
+    "API"
+    "Security"
+    "Infrastructure"
+    "Frontend"
+    "Backend"
+    "Data Model"
+    "Testing"
+    "DecorAI"
+  )
+  local missing_count=0
   for section in "${expected_sections[@]}"; do
     if grep -qi "$section" "$arch_path" 2>/dev/null; then
       log_debug "Found section: ${section}"
     else
       log_warn "Expected section not found in architecture doc: ${section}"
+      ((missing_count++))
     fi
   done
+
+  if [[ "$missing_count" -gt 3 ]]; then
+    log_warn "Multiple sections missing (${missing_count}/${#expected_sections[@]}). Document may need regeneration."
+  fi
 
   log_info "Architecture document has ${line_count} lines"
   return 0
@@ -118,14 +173,26 @@ validate_output() {
 extract_learnings() {
   local output="$1"
 
-  local arch_path="${PROJECT_ROOT}/docs/architecture.md"
-  if [[ -f "$arch_path" ]]; then
-    # Extract tech stack mentions as learnings for future phases
-    local tech_mentions
-    tech_mentions=$(grep -i "stack\|framework\|database\|frontend\|backend" "$arch_path" 2>/dev/null | head -5 | tr '\n' '; ')
-    if [[ -n "$tech_mentions" ]]; then
-      echo "Architecture defines: ${tech_mentions}"
-    fi
+  if [[ -f "$ARCH_OUTPUT_FILE" ]]; then
+    local arch_path="$ARCH_OUTPUT_FILE"
+  elif [[ -f "${PROJECT_ROOT}/docs/architecture.md" ]]; then
+    local arch_path="${PROJECT_ROOT}/docs/architecture.md"
+  else
+    return 0
+  fi
+
+  # Extract tech stack mentions as learnings for future phases
+  local tech_mentions
+  tech_mentions=$(grep -i "stack\|framework\|database\|frontend\|backend\|pipeline\|gpu" "$arch_path" 2>/dev/null | head -8 | tr '\n' '; ')
+  if [[ -n "$tech_mentions" ]]; then
+    echo "Architecture defines: ${tech_mentions}"
+  fi
+
+  # Extract squad DecorAI integration notes
+  local squad_mentions
+  squad_mentions=$(grep -i "decorai\|spatial-analyst\|staging-architect\|pipeline-optimizer" "$arch_path" 2>/dev/null | head -3 | tr '\n' '; ')
+  if [[ -n "$squad_mentions" ]]; then
+    echo "Squad DecorAI integration: ${squad_mentions}"
   fi
 }
 

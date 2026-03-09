@@ -1,0 +1,263 @@
+template:
+  id: tmpl-spatial-analysis
+  name: "Spatial Analysis Output"
+  agent: "@spatial-analyst"
+  task: analyze-photo.md
+  version: "1.0.0"
+  description: >
+    Resultado completo da análise espacial de uma foto de ambiente,
+    incluindo dimensões estimadas, elementos estruturais identificados,
+    cálculos de área, orientação e croqui ASCII para validação do usuário.
+
+sections:
+  - title: "Metadados da Análise"
+    required: true
+    format: "structured"
+    fields:
+      - name: analysis_id
+        type: string
+        description: "Identificador único da análise espacial"
+        example: "spa-f7e8d9c0-b1a2-3456-cdef-789012345678"
+      - name: timestamp
+        type: datetime
+        description: "Data/hora da análise (ISO 8601)"
+        example: "2026-03-09T10:15:00-03:00"
+      - name: source_image_url
+        type: string
+        description: "URL da imagem fonte analisada"
+      - name: image_resolution
+        type: string
+        description: "Resolução da imagem analisada"
+        example: "3024x4032"
+      - name: depth_model
+        type: string
+        description: "Modelo de profundidade utilizado"
+        example: "DUSt3R v2 + Depth Anything v2"
+      - name: confidence_global
+        type: number
+        description: "Confiança global da análise (0.0 a 1.0)"
+        example: 0.87
+      - name: protocol_turn
+        type: number
+        description: "Turno do protocolo 3-turn (1=draft, 2=corrections, 3=final)"
+        example: 1
+
+  - title: "Dimensões do Ambiente"
+    required: true
+    format: "structured"
+    fields:
+      - name: room_type
+        type: string
+        description: "Tipo de cômodo identificado"
+        enum: ["sala_estar", "sala_jantar", "sala_integrada", "quarto_casal", "quarto_solteiro", "suite_master", "cozinha", "cozinha_americana", "banheiro", "lavabo", "escritorio", "home_office", "varanda", "varanda_gourmet", "area_servico", "hall", "corredor"]
+      - name: largura_m
+        type: number
+        description: "Largura estimada em metros"
+        example: 4.20
+      - name: comprimento_m
+        type: number
+        description: "Comprimento estimado em metros"
+        example: 5.80
+      - name: pe_direito_m
+        type: number
+        description: "Pé-direito estimado em metros"
+        example: 2.70
+      - name: area_total_m2
+        type: number
+        description: "Área total calculada em m²"
+        example: 24.36
+      - name: volume_m3
+        type: number
+        description: "Volume estimado em m³"
+        example: 65.77
+      - name: margin_error_percent
+        type: number
+        description: "Margem de erro estimada das medições (%)"
+        example: 8.5
+      - name: measurement_basis
+        type: string
+        description: "Base para calibração das medidas"
+        enum: ["door_height", "window_standard", "furniture_reference", "user_provided", "multi_reference"]
+        example: "door_height"
+
+  - title: "Elementos Estruturais"
+    required: true
+    format: "table"
+    fields:
+      - name: element_id
+        type: string
+        description: "ID do elemento estrutural"
+        example: "str-001"
+      - name: type
+        type: string
+        description: "Tipo do elemento"
+        enum: ["parede", "janela", "porta", "coluna", "viga", "desnivel", "nicho", "sanca", "pilar", "arco", "escada", "lareira"]
+      - name: position
+        type: string
+        description: "Posição no ambiente (parede norte/sul/leste/oeste, centro, canto)"
+        example: "parede_norte"
+      - name: dimensions
+        type: string
+        description: "Dimensões LxAxP em metros"
+        example: "1.20x2.10x0.15"
+      - name: material
+        type: string
+        description: "Material identificado"
+        enum: ["alvenaria", "drywall", "vidro", "madeira", "concreto", "metal", "indefinido"]
+      - name: condition
+        type: string
+        description: "Estado de conservação"
+        enum: ["otimo", "bom", "regular", "necessita_reparo"]
+      - name: constraint
+        type: boolean
+        description: "Se é uma restrição para o staging (não pode ser removido/coberto)"
+      - name: confidence
+        type: number
+        description: "Confiança na detecção (0.0 a 1.0)"
+
+  - title: "Cálculos de Área"
+    required: true
+    format: "structured"
+    fields:
+      - name: area_livre_m2
+        type: number
+        description: "Área livre disponível para mobiliário (descontando elementos fixos)"
+        example: 18.50
+      - name: area_circulacao_m2
+        type: number
+        description: "Área mínima de circulação recomendada"
+        example: 6.00
+      - name: area_util_staging_m2
+        type: number
+        description: "Área útil para staging (livre - circulação)"
+        example: 12.50
+      - name: perimetro_m
+        type: number
+        description: "Perímetro do ambiente em metros"
+        example: 20.00
+      - name: area_paredes_m2
+        type: number
+        description: "Área total de paredes em m²"
+        example: 54.00
+      - name: pontos_focais
+        type: list
+        description: "Pontos focais identificados para staging"
+        example:
+          - "Janela panorâmica parede_leste (vista privilegiada)"
+          - "Lareira parede_norte (ponto de atenção natural)"
+      - name: zonas_sugeridas
+        type: list
+        description: "Zonas sugeridas para layout de staging"
+        example:
+          - zone: "estar"
+            area_m2: 8.0
+            position: "centro-norte"
+          - zone: "leitura"
+            area_m2: 3.5
+            position: "canto-leste"
+
+  - title: "Orientação e Iluminação"
+    required: true
+    format: "structured"
+    fields:
+      - name: orientacao_solar
+        type: string
+        description: "Orientação solar estimada"
+        enum: ["norte", "sul", "leste", "oeste", "nordeste", "noroeste", "sudeste", "sudoeste", "indefinido"]
+      - name: fontes_luz_natural
+        type: list
+        description: "Fontes de luz natural identificadas"
+        example:
+          - type: "janela"
+            position: "parede_leste"
+            dimensions: "1.50x1.20"
+            luz_estimada: "intensa_manha"
+          - type: "porta_balcao"
+            position: "parede_sul"
+            dimensions: "2.00x2.10"
+            luz_estimada: "moderada_tarde"
+      - name: pontos_eletricos_visiveis
+        type: list
+        description: "Pontos de luz/tomada visíveis na foto"
+        example:
+          - type: "luminaria_teto"
+            position: "centro"
+          - type: "spot"
+            position: "parede_norte"
+            quantity: 3
+      - name: luz_predominante
+        type: string
+        description: "Tipo de luz predominante na foto"
+        enum: ["natural_direta", "natural_difusa", "artificial_quente", "artificial_fria", "mista"]
+      - name: horario_estimado
+        type: string
+        description: "Horário estimado pela incidência de luz"
+        example: "manhã (9-11h)"
+
+  - title: "Croqui ASCII"
+    required: true
+    format: "paragraph"
+    fields:
+      - name: croqui
+        type: text
+        description: >
+          Representação ASCII do ambiente em vista superior (planta baixa).
+          Usa caracteres: | para paredes verticais, - para paredes horizontais,
+          + para cantos, [ ] para janelas, D para portas, . para área livre.
+          Escala: 1 caractere = ~0.5m
+        example: |
+          +--------[ ]--------+
+          |                    |
+          |   .  .  .  .  .   |
+          |                    |
+          |   .  .  .  .  .   |
+          D                   |
+          |   .  .  .  .  .   |
+          |                    |
+          +--------------------+
+
+          Legenda:
+          [ ] = Janela (1.50m, parede norte)
+          D   = Porta (0.80m, parede oeste)
+          Escala: 1 char ~ 0.50m
+          Dimensões: 4.20m x 5.80m = 24.36m²
+      - name: croqui_version
+        type: number
+        description: "Versão do croqui (incrementa no protocolo 3-turn)"
+        example: 1
+      - name: user_corrections
+        type: list
+        description: "Correções do usuário aplicadas (vazio no turno 1)"
+        example: []
+
+  - title: "Handoff para Staging"
+    required: true
+    format: "structured"
+    fields:
+      - name: handoff_status
+        type: string
+        description: "Status do handoff para o @staging-architect"
+        enum: ["pending_user_confirmation", "confirmed", "rejected", "needs_revision"]
+      - name: depth_map_url
+        type: string
+        description: "URL do mapa de profundidade gerado"
+      - name: edge_map_url
+        type: string
+        description: "URL do mapa de bordas (canny)"
+      - name: segmentation_map_url
+        type: string
+        description: "URL do mapa de segmentação semântica"
+      - name: conditioning_ready
+        type: boolean
+        description: "Se todos os mapas de condicionamento estão prontos"
+      - name: recommended_styles
+        type: list
+        description: "Estilos recomendados baseado na análise do ambiente"
+        example: ["moderno", "contemporaneo", "escandinavo"]
+      - name: staging_constraints
+        type: list
+        description: "Restrições identificadas para o staging"
+        example:
+          - "Coluna estrutural no centro-norte não pode ser coberta"
+          - "Janela panorâmica deve permanecer visível (ponto focal)"
+          - "Desnível de 15cm na transição sala/varanda"

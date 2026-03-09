@@ -30,7 +30,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EXECUTORS_DIR="${SCRIPT_DIR}/phase-executors"
 
-# Source common functions
+# Export PROJECT_ROOT before sourcing common.sh so it uses our value
+# instead of calculating relative to phase-executors/
+export PROJECT_ROOT
 source "${EXECUTORS_DIR}/common.sh"
 
 # ═══════════════════════════════════════════════════════════════════════════════

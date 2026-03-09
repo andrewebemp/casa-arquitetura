@@ -1,0 +1,682 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Workflow: Staging Pipeline Completo
+# Pipeline completo de virtual staging: input -> analise espacial -> croqui ->
+# geracao -> qualidade -> output
+# ═══════════════════════════════════════════════════════════════════════════════
+
+workflow:
+  id: wf-staging-pipeline
+  name: "Staging Pipeline Completo"
+  version: "1.0.0"
+  description: |
+    Pipeline completo de virtual staging que transforma uma foto de ambiente vazio
+    (ou descricao textual) em um render fotorrealista decorado. Coordena 6 fases
+    sequenciais com checkpoints de qualidade e aprovacao humana no croqui.
+    Suporta input via foto, medidas textuais, ou combinacao (multi-input).
+  duration: "2-5 minutes per render"
+  orchestrator: "@decorai-chief"
+  squad: "decorai"
+  best_for:
+    - "Gerar staging de ambiente vazio a partir de foto"
+    - "Decorar ambiente a partir de descricao textual com medidas"
+    - "Gerar render a partir de foto + instrucoes de estilo"
+    - "Pipeline completo para listagem imobiliaria"
+  not_for:
+    - "Refinamentos iterativos de render existente (use wf-refinement-loop)"
+    - "Troca de elementos individuais (use wf-element-swap)"
+    - "Diagnostico de listing (use wf-reverse-staging)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INPUTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+inputs:
+  required:
+    - name: user_input
+      type: "photo | text | multi"
+      description: "Foto do ambiente, descricao textual com medidas, ou combinacao"
+      constraints:
+        photo:
+          formats: ["jpg", "png", "webp"]
+          max_size: "10MB"
+          min_resolution: "640x480"
+        text:
+          min_length: 20
+          must_include: "dimensoes ou descricao espacial"
+
+  optional:
+    - name: style_preference
+      type: string
+      description: "Estilo desejado (moderno, escandinavo, industrial, etc.)"
+      default: "moderno"
+
+    - name: room_type
+      type: enum
+      values: ["sala", "quarto", "cozinha", "banheiro", "escritorio", "varanda", "suite"]
+      description: "Tipo do comodo (auto-detectado se foto)"
+
+    - name: tier
+      type: enum
+      values: ["free", "basic", "professional", "enterprise"]
+      default: "free"
+      description: "Tier do usuario (determina resolucao, upscale, etc.)"
+
+    - name: budget_range
+      type: string
+      description: "Faixa de orcamento para mobiliario (informativo)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PRECONDITIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+preconditions:
+  system:
+    - "GPU inference endpoint available (fal.ai / Replicate / Modal)"
+    - "SAM 2 model loaded for segmentation"
+    - "ControlNet models available (depth, canny, segmentation)"
+    - "Depth Anything V2 model available"
+    - "CLIP model available for style matching"
+  user:
+    - "At least one input provided (photo or text description)"
+    - "User authenticated and tier identified"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: ANALISE ESPACIAL
+# Objetivo: Extrair dimensoes, elementos estruturais e layout do espaco
+# ═══════════════════════════════════════════════════════════════════════════════
+
+phases:
+  - id: PHASE-1
+    name: "Analise Espacial"
+    tier: 0
+    agent: "@spatial-analyst"
+    description: |
+      Analisa o input do usuario (foto ou texto) para extrair informacoes espaciais:
+      dimensoes do comodo, elementos estruturais (portas, janelas, pilares),
+      pontos de iluminacao natural, e regioes disponiveis para mobiliario.
+      Usa Depth Anything V2 para mapa de profundidade e SAM 2 para segmentacao.
+    estimated_time: "10-30 seconds"
+    prerequisite: "Input recebido e validado"
+
+    input_routing:
+      photo_input:
+        tasks:
+          - task_file: tasks/analyze-photo.md
+            task_id: DA-T-001
+            agent: "@spatial-analyst"
+            required: true
+            description: "Analisar foto com depth estimation e segmentacao semantica"
+            tools: ["Depth Anything V2", "SAM 2", "OneFormer ADE20K"]
+            output: "photo-analysis.yaml"
+
+          - task_file: tasks/estimate-room-dimensions.md
+            task_id: DA-T-002
+            agent: "@spatial-analyst"
+            required: true
+            description: "Estimar dimensoes reais do comodo a partir de mapa de profundidade"
+            tools: ["Depth Anything V2", "monocular depth calibration"]
+            output: "dimensions-estimate.yaml"
+
+      text_input:
+        tasks:
+          - task_file: tasks/parse-dimensions.md
+            task_id: DA-T-003
+            agent: "@spatial-analyst"
+            required: true
+            description: "Parsear dimensoes e layout a partir de descricao textual"
+            tools: ["Claude API (NL parsing)"]
+            output: "parsed-dimensions.yaml"
+
+      multi_input:
+        tasks:
+          - task_file: tasks/analyze-photo.md
+            task_id: DA-T-001
+            agent: "@spatial-analyst"
+            required: true
+
+          - task_file: tasks/parse-dimensions.md
+            task_id: DA-T-003
+            agent: "@spatial-analyst"
+            required: true
+
+          - task_file: tasks/validate-spatial-consistency.md
+            task_id: DA-T-004
+            agent: "@spatial-analyst"
+            required: true
+            description: "Validar consistencia entre dimensoes da foto e dimensoes textuais"
+            output: "consistency-report.yaml"
+            actions:
+              - "Comparar dimensoes estimadas da foto com dimensoes textuais"
+              - "Identificar discrepancias significativas (> 15%)"
+              - "Usar dimensoes textuais como ground truth quando confiaveis"
+              - "Fundir ambas as fontes em spatial-analysis unificada"
+
+    output: "spatial-analysis.yaml"
+    output_schema:
+      room_type: "string"
+      dimensions:
+        width: "float (meters)"
+        length: "float (meters)"
+        height: "float (meters)"
+        confidence: "float (0-1)"
+      structural_elements:
+        - type: "door | window | pillar | beam | outlet"
+          position: "{x, y, width, height}"
+          confidence: "float (0-1)"
+      depth_map: "base64 encoded image"
+      segmentation_mask: "base64 encoded image"
+      furniture_zones:
+        - zone_id: "string"
+          area_m2: "float"
+          suitable_for: ["string"]
+
+    checkpoint:
+      id: CP-DA-001
+      criteria:
+        - "Dimensions extracted with >= 80% confidence"
+        - "Structural elements identified (doors, windows)"
+        - "Depth map generated successfully"
+        - "Segmentation mask covers >= 90% of image"
+        - "At least 1 furniture zone identified"
+      human_review: false
+      on_fail:
+        low_confidence:
+          action: "Ask user for manual dimension confirmation"
+          message: |
+            Nao consegui estimar as dimensoes com confianca suficiente.
+            Poderia informar as medidas aproximadas do comodo?
+            (largura x comprimento x altura em metros)
+        no_structural_elements:
+          action: "Proceed with empty room assumption"
+          log: "WARNING: No structural elements detected - using full room"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: CONFIRMACAO DE CROQUI
+# Objetivo: Gerar e aprovar croqui ASCII do layout proposto
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-2
+    name: "Confirmacao de Croqui"
+    tier: 0
+    agent: "@spatial-analyst"
+    depends_on: ["PHASE-1"]
+    description: |
+      Gera um croqui ASCII do layout proposto usando a tecnica 3-turn:
+      Turn 1 - Croqui inicial baseado na analise espacial
+      Turn 2 - Refinamento com feedback do usuario
+      Turn 3 - Confirmacao final
+      Este e um checkpoint BLOCKING - o pipeline so continua com aprovacao.
+    estimated_time: "30-60 seconds (including user interaction)"
+    prerequisite: "spatial-analysis.yaml gerado com confianca >= 80%"
+
+    tasks:
+      - task_file: tasks/generate-croqui.md
+        task_id: DA-T-005
+        agent: "@spatial-analyst"
+        required: true
+        description: "Gerar croqui ASCII do layout proposto (3-turn technique)"
+        output: "confirmed-croqui.yaml"
+        technique: "3-turn ASCII visualization"
+        turns:
+          turn_1:
+            action: "Gerar croqui inicial com dimensoes e mobiliario sugerido"
+            present: "Croqui ASCII com legenda e escala"
+            ask: "Este layout representa bem o espaco? Algum ajuste?"
+          turn_2:
+            action: "Aplicar ajustes solicitados pelo usuario"
+            present: "Croqui atualizado com diff highlighted"
+            ask: "Layout ok? Posso gerar o render?"
+          turn_3:
+            action: "Confirmar layout final"
+            output: "confirmed-croqui.yaml com furniture placement map"
+
+    output: "confirmed-croqui.yaml"
+    output_schema:
+      layout_approved: "boolean"
+      furniture_placement:
+        - item: "string"
+          position: "{x, y}"
+          rotation: "degrees"
+          size: "{width, depth, height}"
+      room_layout_ascii: "string (multiline ASCII art)"
+      style_hints: "string[] (captured from user interaction)"
+
+    checkpoint:
+      id: CP-DA-002
+      criteria:
+        - "User approved croqui layout"
+      human_review: true
+      blocking: true
+      on_fail:
+        action: "Return to turn_1 with new approach"
+        max_retries: 3
+        escalation: "If user rejects 3 times, ask for reference image or detailed description"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: DEFINICAO DE ESTILO
+# Objetivo: Gerar style guide e prompt de geracao com parametros ControlNet
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-3
+    name: "Definicao de Estilo"
+    tier: 1
+    agent: "@interior-strategist"
+    depends_on: ["PHASE-2"]
+    description: |
+      Define o estilo de interiores completo: paleta de cores, materiais,
+      mobiliario, iluminacao, e gera o prompt otimizado para o modelo de
+      geracao com parametros ControlNet especificos.
+      Leva em conta o mercado brasileiro e preferencias regionais.
+    estimated_time: "5-15 seconds"
+    prerequisite: "Croqui aprovado pelo usuario"
+
+    tasks:
+      - task_file: tasks/create-style-guide.md
+        task_id: DA-T-006
+        agent: "@interior-strategist"
+        required: true
+        description: "Criar style guide completo com paleta, materiais e referencias"
+        input_from:
+          - "PHASE-2:confirmed-croqui.yaml"
+          - "user_input:style_preference"
+          - "user_input:room_type"
+          - "user_input:budget_range"
+        output: "style-guide.yaml"
+        actions:
+          - "Identificar estilo base (moderno, escandinavo, industrial, etc.)"
+          - "Selecionar paleta de cores harmonizada (5-7 cores)"
+          - "Definir materiais predominantes (piso, parede, tecidos)"
+          - "Selecionar pecas de mobiliario compativeis com layout"
+          - "Definir iluminacao (natural + artificial)"
+          - "Ajustar para contexto brasileiro (marcas, disponibilidade)"
+
+      - task_file: tasks/generate-style-prompt.md
+        task_id: DA-T-007
+        agent: "@interior-strategist"
+        required: true
+        description: "Gerar prompt otimizado para modelo de IA com params ControlNet"
+        input_from:
+          - "PHASE-3:style-guide.yaml"
+          - "PHASE-1:spatial-analysis.yaml"
+        output: "style-config.yaml"
+        actions:
+          - "Compor prompt positivo detalhado para SDXL/FLUX"
+          - "Definir prompt negativo (artefatos, distorcoes)"
+          - "Configurar ControlNet parameters (depth weight, canny weight)"
+          - "Definir IP-Adapter settings se reference image disponivel"
+          - "Ajustar CFG scale, steps, scheduler para qualidade/velocidade"
+
+    output: "style-config.yaml"
+    output_schema:
+      positive_prompt: "string"
+      negative_prompt: "string"
+      controlnet_params:
+        depth_weight: "float (0-2)"
+        canny_weight: "float (0-2)"
+        segmentation_weight: "float (0-2)"
+      generation_params:
+        model: "string (FLUX.2 | SDXL)"
+        steps: "int"
+        cfg_scale: "float"
+        scheduler: "string"
+        seed: "int (-1 for random)"
+      ip_adapter:
+        enabled: "boolean"
+        reference_image: "base64 | null"
+        weight: "float (0-1)"
+
+    checkpoint:
+      id: CP-DA-003
+      criteria:
+        - "Style prompt generated with all ControlNet params"
+        - "Prompt length between 50-500 tokens"
+        - "ControlNet weights within valid ranges"
+      human_review: false
+      on_fail:
+        action: "Regenerate with default style params"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: GERACAO DO RENDER
+# Objetivo: Gerar render fotorrealista via modelo de IA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-4
+    name: "Geracao do Render"
+    tier: 1
+    agent: "@staging-architect"
+    depends_on: ["PHASE-3"]
+    description: |
+      Executa a geracao do render fotorrealista usando o pipeline configurado:
+      SDXL/FLUX com ControlNet para manter estrutura espacial, IP-Adapter
+      para consistencia de estilo, e parametros otimizados por tier.
+    estimated_time: "10-30 seconds"
+    prerequisite: "style-config.yaml com todos os parametros definidos"
+
+    tasks:
+      - task_file: tasks/generate-staging.md
+        task_id: DA-T-008
+        agent: "@staging-architect"
+        required: true
+        description: "Gerar render fotorrealista com ControlNet + estilo definido"
+        input_from:
+          - "PHASE-3:style-config.yaml"
+          - "PHASE-1:spatial-analysis.yaml (depth_map, segmentation_mask)"
+          - "PHASE-2:confirmed-croqui.yaml (furniture_placement)"
+        tools:
+          primary: "FLUX.2 via fal.ai"
+          fallback: "SDXL + ControlNet via Replicate"
+        output: "render-initial.png"
+        tier_config:
+          free:
+            resolution: "1024x1024"
+            steps: 20
+            controlnet_models: ["depth"]
+            watermark: true
+          basic:
+            resolution: "1536x1536"
+            steps: 30
+            controlnet_models: ["depth", "canny"]
+            watermark: false
+          professional:
+            resolution: "2048x2048"
+            steps: 40
+            controlnet_models: ["depth", "canny", "segmentation"]
+            watermark: false
+          enterprise:
+            resolution: "2048x2048"
+            steps: 50
+            controlnet_models: ["depth", "canny", "segmentation"]
+            watermark: false
+            batch: true
+
+    output: "render-initial.png"
+
+    checkpoint:
+      id: CP-DA-004
+      criteria:
+        - "Render generated successfully (non-null output)"
+        - "Render generated in < 30 seconds"
+        - "Resolution matches tier configuration"
+        - "No generation errors or model failures"
+      human_review: false
+      on_fail:
+        gpu_timeout:
+          action: "Retry with fallback GPU provider"
+          max_retries: 2
+        model_error:
+          action: "Retry with reduced steps and simpler ControlNet config"
+        persistent_failure:
+          action: "Notify user of temporary service issue, offer retry"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: VALIDACAO DE QUALIDADE
+# Objetivo: Validar qualidade visual do render gerado
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-5
+    name: "Validacao de Qualidade"
+    tier: 3
+    agent: "@visual-quality-engineer"
+    depends_on: ["PHASE-4"]
+    description: |
+      Valida a qualidade visual do render contra criterios objetivos:
+      artefatos visuais, consistencia geometrica, iluminacao realista,
+      perspectiva correta, e aderencia ao croqui aprovado.
+      Usa NeRF-based metrics e SSIM/LPIPS para scoring.
+    estimated_time: "5-10 seconds"
+    prerequisite: "render-initial.png gerado com sucesso"
+
+    tasks:
+      - task_file: tasks/validate-render-quality.md
+        task_id: DA-T-009
+        agent: "@visual-quality-engineer"
+        required: true
+        description: "Validar qualidade do render contra criterios objetivos"
+        input_from:
+          - "PHASE-4:render-initial.png"
+          - "PHASE-1:spatial-analysis.yaml"
+          - "PHASE-2:confirmed-croqui.yaml"
+          - "PHASE-3:style-config.yaml"
+        output: "quality-report.yaml"
+        checks:
+          artifacts:
+            - "Extra fingers/limbs on people (if present)"
+            - "Distorted furniture geometry"
+            - "Floating objects"
+            - "Wall/floor texture bleeding"
+            - "Window/mirror reflection errors"
+          geometry:
+            - "Perspective consistency"
+            - "Furniture scale correctness"
+            - "Room proportions match spatial analysis"
+          lighting:
+            - "Natural light direction consistency"
+            - "Shadow coherence"
+            - "No overexposure or underexposure"
+          style:
+            - "Adherence to requested style"
+            - "Color palette consistency"
+            - "Material realism"
+
+    output: "quality-report.yaml"
+    output_schema:
+      overall_score: "float (0-100)"
+      artifact_score: "float (0-100)"
+      geometry_score: "float (0-100)"
+      lighting_score: "float (0-100)"
+      style_score: "float (0-100)"
+      critical_issues: "string[]"
+      warnings: "string[]"
+      pass: "boolean"
+
+    checkpoint:
+      id: CP-DA-005
+      criteria:
+        - "Quality score >= minimum threshold (free: 60, paid: 75)"
+        - "No critical artifacts detected"
+        - "Geometry score >= 70"
+      human_review: false
+      on_fail:
+        low_quality:
+          action: "Regenerate with adjusted parameters"
+          adjustments:
+            - "Increase steps by 10"
+            - "Adjust ControlNet weights"
+            - "Try different seed"
+          max_retries: 2
+        critical_artifacts:
+          action: "Regenerate with stronger negative prompts targeting artifact type"
+        persistent_failure:
+          action: "Deliver best available render with quality disclaimer"
+          message: |
+            O render foi gerado mas ficou abaixo da qualidade ideal.
+            Voce pode solicitar uma nova geracao ou aceitar este resultado.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 6: UPSCALE E ENTREGA
+# Objetivo: Upscale (se tier pago) e entrega do render final
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-6
+    name: "Upscale e Entrega"
+    tier: tools
+    agents:
+      primary: "@pipeline-optimizer"
+      secondary: "@staging-architect"
+    depends_on: ["PHASE-5"]
+    description: |
+      Aplica upscale via Real-ESRGAN para tiers pagos, otimiza o arquivo
+      final (compressao, formato), e entrega ao usuario com metadados.
+    estimated_time: "5-15 seconds"
+    prerequisite: "Render passou na validacao de qualidade"
+
+    tasks:
+      - task_file: tasks/upscale-render.md
+        task_id: DA-T-010
+        agent: "@staging-architect"
+        required: false
+        condition: "tier != 'free'"
+        description: "Aplicar upscale 2x-4x via Real-ESRGAN"
+        input_from:
+          - "PHASE-4:render-initial.png"
+          - "PHASE-5:quality-report.yaml"
+        tools: ["Real-ESRGAN"]
+        output: "render-upscaled.png"
+        config:
+          free:
+            skip: true
+          basic:
+            scale: 2
+            model: "realesrgan-x2plus"
+          professional:
+            scale: 4
+            model: "realesrgan-x4plus"
+          enterprise:
+            scale: 4
+            model: "realesrgan-x4plus"
+            denoise: 0.5
+
+      - task_id: DA-T-011
+        agent: "@pipeline-optimizer"
+        required: true
+        description: "Otimizar e preparar arquivo final para entrega"
+        actions:
+          - "Selecionar melhor render (initial ou upscaled)"
+          - "Aplicar compressao otimizada (quality vs size)"
+          - "Gerar thumbnail para preview"
+          - "Adicionar metadados (estilo, dimensoes, data)"
+          - "Aplicar watermark se tier free"
+          - "Salvar em CDN/storage"
+        output: "final-render.png"
+
+    output: "final-render.png"
+
+    checkpoint:
+      id: CP-DA-006
+      criteria:
+        - "Final render delivered successfully"
+        - "File size within tier limits"
+        - "Watermark applied correctly (free tier)"
+      human_review: false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OUTPUTS CONSOLIDADOS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+outputs:
+  deliverables:
+    - name: "Render fotorrealista decorado"
+      file: "final-render.png"
+      description: "Render final com mobiliario e decoracao aplicados"
+      phase: PHASE-6
+
+    - name: "Croqui ASCII aprovado"
+      file: "confirmed-croqui.yaml"
+      description: "Layout aprovado pelo usuario com posicionamento de mobiliario"
+      phase: PHASE-2
+
+    - name: "Quality report"
+      file: "quality-report.yaml"
+      description: "Relatorio de qualidade com scores por categoria"
+      phase: PHASE-5
+
+  intermediate:
+    - name: "Analise espacial"
+      file: "spatial-analysis.yaml"
+      description: "Dimensoes, depth map, segmentacao do espaco"
+      phase: PHASE-1
+
+    - name: "Style guide"
+      file: "style-guide.yaml"
+      description: "Guia de estilo com paleta, materiais, mobiliario"
+      phase: PHASE-3
+
+    - name: "Style config (prompts)"
+      file: "style-config.yaml"
+      description: "Prompts e parametros de geracao"
+      phase: PHASE-3
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SINAIS DE COMUNICACAO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+completion_signal: "<promise>STAGING-PIPELINE:COMPLETE</promise>"
+checkpoint_signal: "<promise>CHECKPOINT:PHASE-{N}</promise>"
+blocked_signal: "<promise>BLOCKED:{task_id}</promise>"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRATAMENTO DE ERROS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+error_handling:
+  on_phase_failure:
+    - log_error: true
+    - halt_workflow: true
+    - notify_user: true
+    - message: "Erro na fase {phase_name}. Tentando recuperacao automatica..."
+  on_gpu_unavailable:
+    - action: "Switch to fallback GPU provider"
+    - fallback_chain: ["fal.ai", "Replicate", "Modal.com"]
+    - max_retries: 3
+  on_model_timeout:
+    - action: "Retry with reduced parameters"
+    - reduce: ["steps", "resolution"]
+    - max_retries: 2
+  on_quality_below_threshold:
+    - action: "Regenerate with adjusted params"
+    - max_retries: 2
+    - escalation: "Deliver best available with disclaimer"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRANSITIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+transitions:
+  - from: input
+    to: PHASE-1
+    condition: "Valid input received (photo or text)"
+    description: "Route to correct analysis path based on input type"
+
+  - from: PHASE-1
+    to: PHASE-2
+    condition: "Spatial analysis complete with confidence >= 80%"
+    checkpoint_required: true
+
+  - from: PHASE-2
+    to: PHASE-3
+    condition: "User approved croqui layout"
+    checkpoint_required: true
+    blocking: true
+
+  - from: PHASE-3
+    to: PHASE-4
+    condition: "Style config generated with valid ControlNet params"
+    checkpoint_required: true
+
+  - from: PHASE-4
+    to: PHASE-5
+    condition: "Render generated successfully"
+    checkpoint_required: true
+
+  - from: PHASE-5
+    to: PHASE-6
+    condition: "Quality score >= threshold"
+    checkpoint_required: true
+
+  - from: PHASE-6
+    to: complete
+    condition: "Final render delivered"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  version: "1.0.0"
+  created: "2026-03-09"
+  squad: "decorai"
+  total_agents: 5
+  total_phases: 6
+  total_tasks: 11
+  estimated_duration: "2-5 minutes"
+  quality_gates: ["QG-DA-001", "QG-DA-002", "QG-DA-003"]

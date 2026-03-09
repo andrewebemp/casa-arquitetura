@@ -1,0 +1,305 @@
+# DecorAI Tool Registry
+# Registro completo de ferramentas usadas pelo squad, organizadas por categoria
+# Versao: 1.0.0 | Atualizado: 2026-03-09
+
+metadata:
+  squad: decorai
+  version: "1.0.0"
+  total_tools: 22
+  last_updated: "2026-03-09"
+
+# ============================================================
+# GENERATION - Modelos de geracao de imagem
+# ============================================================
+generation:
+  - name: "FLUX.2"
+    provider: "fal.ai"
+    category: generation
+    purpose: "Geracao text-to-image de alta qualidade, alternativa ao SDXL para cenarios sem ControlNet"
+    cost_per_run: "R$ 0.15-0.40"
+    latency: "5-12s"
+    integration_effort: medium
+    gpu_requirement: "A100 (80GB)"
+    url: "https://fal.ai/models/fal-ai/flux"
+    notes: "Melhor qualidade que SDXL para text-to-image puro, mas sem suporte nativo a ControlNet"
+
+  - name: "SDXL (Stable Diffusion XL)"
+    provider: "Stability AI"
+    category: generation
+    purpose: "Base model principal para geracao de interiores via ControlNet conditioning"
+    cost_per_run: "R$ 0.30-0.80 (varia por provider)"
+    latency: "8-20s (30 steps)"
+    integration_effort: medium
+    gpu_requirement: "A10G (24GB) minimo, A100 (80GB) ideal"
+    url: "https://stability.ai/stable-diffusion"
+    notes: "Backbone do pipeline de staging. Melhor ecossistema de ControlNet. Usar com scheduler DPM++ 2M Karras."
+
+  - name: "ControlNet"
+    provider: "Open Source (Lvmin Zhang)"
+    category: generation
+    purpose: "Conditioning de SDXL via depth maps, edge maps, e segmentation para preservar estrutura espacial"
+    cost_per_run: "Incluso no custo de geracao (overhead ~5%)"
+    latency: "+1-3s sobre geracao base"
+    integration_effort: high
+    gpu_requirement: "Mesma GPU do modelo base"
+    url: "https://github.com/lllyasviel/ControlNet"
+    notes: "Essencial para virtual staging. Sem ControlNet, moveis flutuam e perspectiva distorce."
+
+  - name: "ControlNet Interior Design (ml6team/IDCN)"
+    provider: "ml6team / Junming Chen"
+    category: generation
+    purpose: "ControlNet fine-tuned especificamente para design de interiores"
+    cost_per_run: "Mesmo que ControlNet padrao"
+    latency: "Mesmo que ControlNet padrao"
+    integration_effort: medium
+    gpu_requirement: "Mesma GPU do modelo base"
+    url: "https://huggingface.co/ml6team/controlnet-interior-design"
+    notes: "Pre-treinado em datasets de interiores. Melhor compreensao de mobiliario, iluminacao, e proporcoes de ambientes."
+
+  - name: "ComfyUI"
+    provider: "Open Source"
+    category: generation
+    purpose: "Workflow visual como API para pipeline customizado de geracao"
+    cost_per_run: "Depende do workflow (hospedagem propria)"
+    latency: "Depende do workflow"
+    integration_effort: high
+    gpu_requirement: "Variavel por workflow"
+    url: "https://github.com/comfyanonymous/ComfyUI"
+    notes: "Maximo controle sobre pipeline. Ideal para producao quando pipeline esta estavel."
+
+# ============================================================
+# SEGMENTATION - Segmentacao semantica e instancia
+# ============================================================
+segmentation:
+  - name: "SAM 2 (Segment Anything Model 2)"
+    provider: "Meta AI"
+    category: segmentation
+    purpose: "Segmentacao universal de objetos em imagens. Usado para isolar moveis, paredes, piso, teto."
+    cost_per_run: "R$ 0.02-0.05"
+    latency: "1-3s"
+    integration_effort: medium
+    gpu_requirement: "T4 (16GB) suficiente"
+    url: "https://github.com/facebookresearch/segment-anything-2"
+    notes: "Zero-shot segmentation. Funciona com prompts de ponto, caixa, ou texto. Base para inpainting seletivo."
+
+  - name: "OneFormer ADE20K"
+    provider: "Hugging Face / SHI-Labs"
+    category: segmentation
+    purpose: "Segmentacao semantica com 150 classes (parede, piso, teto, janela, porta, mobilia)"
+    cost_per_run: "R$ 0.01-0.03"
+    latency: "1-2s"
+    integration_effort: low
+    gpu_requirement: "T4 (16GB) suficiente"
+    url: "https://huggingface.co/shi-labs/oneformer_ade20k_swin_large"
+    notes: "Melhor para segmentacao semantica de ambientes. ADE20K tem classes especificas de interiores. Usado como conditioning map para ControlNet Seg."
+
+  - name: "Grounded-SAM-2"
+    provider: "IDEA-Research"
+    category: segmentation
+    purpose: "Segmentacao guiada por texto (open-vocabulary). Segmentar objetos por descricao natural."
+    cost_per_run: "R$ 0.03-0.08"
+    latency: "2-5s"
+    integration_effort: medium
+    gpu_requirement: "A10G (24GB) recomendado"
+    url: "https://github.com/IDEA-Research/Grounded-SAM-2"
+    notes: "Combina Grounding DINO + SAM 2. Permite: 'segmente o sofa' ou 'segmente todas as janelas'. Ideal para refinamento conversacional."
+
+# ============================================================
+# DEPTH - Estimativa de profundidade monocular
+# ============================================================
+depth:
+  - name: "Depth Anything V2"
+    provider: "TikTok/ByteDance"
+    category: depth
+    purpose: "Depth estimation monocular de alta qualidade. Gera depth map para ControlNet Depth."
+    cost_per_run: "R$ 0.02-0.05"
+    latency: "2-5s"
+    integration_effort: low
+    gpu_requirement: "T4 (16GB) suficiente"
+    url: "https://github.com/DepthAnything/Depth-Anything-V2"
+    notes: "Best-in-class para depth monocular. Variantes Small/Base/Large para trade-off velocidade/qualidade. Usar Large para producao, Small para preview."
+
+  - name: "ZoeDepth"
+    provider: "Intel ISL"
+    category: depth
+    purpose: "Depth estimation metrica (em metros, nao relativa). Util para calcular dimensoes reais."
+    cost_per_run: "R$ 0.02-0.04"
+    latency: "2-4s"
+    integration_effort: medium
+    gpu_requirement: "T4 (16GB) suficiente"
+    url: "https://github.com/isl-org/ZoeDepth"
+    notes: "Diferencial: depth metrica permite estimar dimensoes reais do ambiente (metros). Complementa Depth Anything V2 que produz depth relativa."
+
+  - name: "Marigold"
+    provider: "ETH Zurich"
+    category: depth
+    purpose: "Depth estimation via diffusion models. Alta qualidade com bordas nítidas."
+    cost_per_run: "R$ 0.05-0.15"
+    latency: "5-10s"
+    integration_effort: medium
+    gpu_requirement: "A10G (24GB) recomendado"
+    url: "https://github.com/prs-eth/Marigold"
+    notes: "Melhor qualidade de bordas que Depth Anything, mas mais lento e caro. Usar para ambientes complexos com muitos planos."
+
+# ============================================================
+# ENHANCEMENT - Melhoria e pos-processamento de imagens
+# ============================================================
+enhancement:
+  - name: "Real-ESRGAN"
+    provider: "Xintao Wang / TencentARC"
+    category: enhancement
+    purpose: "Upscaling de imagem 2x/4x com restauracao de detalhes. De 1024x768 para 2048x1536+."
+    cost_per_run: "R$ 0.05-0.15"
+    latency: "3-8s"
+    integration_effort: low
+    gpu_requirement: "T4 (16GB) suficiente para 2x, A10G para 4x"
+    url: "https://github.com/xinntao/Real-ESRGAN"
+    notes: "Padrao da industria para upscaling. Rapido e confiavel. Usar x2 para tier Pro, x4 para Enterprise."
+
+  - name: "LaMa (Large Mask Inpainting)"
+    provider: "Samsung AI"
+    category: enhancement
+    purpose: "Inpainting de grandes regioes. Remover moveis existentes antes do staging."
+    cost_per_run: "R$ 0.03-0.08"
+    latency: "2-5s"
+    integration_effort: medium
+    gpu_requirement: "T4 (16GB) suficiente"
+    url: "https://github.com/advimman/lama"
+    notes: "Melhor inpainting para grandes areas. Usado para 'room emptying' — transformar quarto mobiliado em vazio antes do staging. Essencial para reverse staging."
+
+  - name: "IC-Light"
+    provider: "lllyasviel"
+    category: enhancement
+    purpose: "Relighting de imagens. Ajustar iluminacao pos-geracao sem re-render."
+    cost_per_run: "R$ 0.05-0.12"
+    latency: "3-6s"
+    integration_effort: medium
+    gpu_requirement: "A10G (24GB) recomendado"
+    url: "https://github.com/lllyasviel/IC-Light"
+    notes: "Permite ajustar iluminacao de renders sem regenerar. Util para simular dia/noite, aumentar/diminuir luz natural, destacar areas."
+
+# ============================================================
+# STYLE - Analise e transferencia de estilo
+# ============================================================
+style:
+  - name: "CLIP (Contrastive Language-Image Pretraining)"
+    provider: "OpenAI"
+    category: style
+    purpose: "Alinhamento texto-imagem. Medir coerencia entre prompt e render gerado."
+    cost_per_run: "R$ 0.005-0.01"
+    latency: "<1s"
+    integration_effort: low
+    gpu_requirement: "CPU suficiente (GPU acelera)"
+    url: "https://github.com/openai/CLIP"
+    notes: "Usado como metrica de qualidade: CLIP score mede se o render corresponde ao estilo pedido. Score > 0.85 = aprovado. Tambem usado para busca semantica no cache."
+
+  - name: "IP-Adapter"
+    provider: "Tencent AI Lab"
+    category: style
+    purpose: "Transferencia de estilo via imagem de referencia. Aplicar estilo de uma foto em outra."
+    cost_per_run: "R$ 0.10-0.25"
+    latency: "5-12s (junto com geracao)"
+    integration_effort: high
+    gpu_requirement: "A10G (24GB) minimo"
+    url: "https://github.com/tencent-ailab/IP-Adapter"
+    notes: "Permite que usuario envie foto de referencia de estilo. IP-Adapter transfere atmosfera/paleta/estilo para o ambiente-alvo. Complementa prompt textual."
+
+# ============================================================
+# LLM - Modelos de linguagem
+# ============================================================
+llm:
+  - name: "Claude API (Anthropic)"
+    provider: "Anthropic"
+    category: llm
+    purpose: "Interpretacao de instrucoes em linguagem natural, chat de refinamento, classificacao de intencao"
+    cost_per_run: "R$ 0.02-0.15 (varia por tokens)"
+    latency: "1-5s"
+    integration_effort: low
+    gpu_requirement: "N/A (API cloud)"
+    url: "https://docs.anthropic.com/claude/reference"
+    notes: "Backbone conversacional do DecorAI. Processa instrucoes como 'troca o sofa por um menor azul marinho' e traduz em parametros de pipeline. Modelo: Claude Sonnet para velocidade, Opus para complexidade."
+
+# ============================================================
+# GPU PLATFORMS - Provedores de infraestrutura GPU
+# ============================================================
+gpu_platforms:
+  - name: "fal.ai"
+    provider: "fal.ai"
+    category: gpu_platform
+    purpose: "GPU serverless com modelos pre-carregados. Melhor para burst traffic e prototipagem."
+    cost_per_hour:
+      T4: "R$ 1.50"
+      A10G: "R$ 3.80"
+      A100_40GB: "R$ 7.50"
+      A100_80GB: "R$ 12.00"
+    cold_start: "3-8s (modelo cached), 15-30s (sem cache)"
+    integration_effort: low
+    url: "https://fal.ai"
+    notes: "Cold start mais rapido que concorrentes. SDK JS+Python. Queue nativo. Melhor para picos de demanda. MCP server disponivel (fal-mcp-server)."
+
+  - name: "Replicate"
+    provider: "Replicate"
+    category: gpu_platform
+    purpose: "Marketplace de modelos ML como API. 100k+ modelos disponiveis."
+    cost_per_hour:
+      T4: "R$ 2.00"
+      A40: "R$ 5.00"
+      A100: "R$ 10.00"
+    cold_start: "5-15s (popular), 30-60s (custom)"
+    integration_effort: low
+    url: "https://replicate.com"
+    notes: "Maior marketplace. Deploy customizado via Cog. Bom para prototipagem e modelos community. Mais caro que alternativas para producao."
+
+  - name: "Modal.com"
+    provider: "Modal"
+    category: gpu_platform
+    purpose: "Serverless com containers customizados. Maximo controle para producao."
+    cost_per_hour:
+      T4: "R$ 1.20"
+      A10G: "R$ 3.00"
+      A100_40GB: "R$ 6.00"
+      H100: "R$ 18.00"
+    cold_start: "5-10s (snapshot), 20-40s (fresh)"
+    integration_effort: high
+    url: "https://modal.com"
+    notes: "Melhor custo-beneficio para producao. Volumes persistentes para pre-carregar modelos. Secrets management. Recomendado como provider primario."
+
+# ============================================================
+# PAYMENTS - Gateways de pagamento
+# ============================================================
+payments:
+  - name: "Stripe"
+    provider: "Stripe"
+    category: payments
+    purpose: "Gateway internacional. Subscriptions, invoicing, payment links."
+    cost_per_transaction: "3.99% + R$ 0.39 (cartao BR)"
+    integration_effort: medium
+    url: "https://stripe.com/br"
+    notes: "Padrao global. Melhor para tiers Enterprise/internacional. Stripe Billing para subscriptions. Checkout pre-built disponivel."
+
+  - name: "Asaas"
+    provider: "Asaas"
+    category: payments
+    purpose: "Gateway brasileiro. Boleto, Pix, cartao. Mais barato para transacoes domesticas."
+    cost_per_transaction: "2.99% cartao, R$ 1.99 boleto, R$ 0.99-1.49 Pix"
+    integration_effort: medium
+    url: "https://asaas.com"
+    notes: "Essencial para mercado BR. Pix e preferencia de pagamento (75% dos brasileiros). Boleto para imobiliarias. Cobranca recorrente nativa. Mais barato que Stripe para volume domestico."
+
+# ============================================================
+# SUMMARY
+# ============================================================
+summary:
+  by_category:
+    generation: 5
+    segmentation: 3
+    depth: 3
+    enhancement: 3
+    style: 2
+    llm: 1
+    gpu_platform: 3
+    payments: 2
+  total: 22
+  primary_pipeline: "Depth Anything V2 -> ControlNet IDCN + SDXL -> Real-ESRGAN"
+  primary_gpu: "Modal.com (producao), fal.ai (burst/fallback)"
+  primary_payment: "Asaas (BR), Stripe (internacional/enterprise)"

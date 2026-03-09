@@ -1,0 +1,305 @@
+template:
+  id: tmpl-style-guide
+  name: "Interior Design Style Guide"
+  agent: "@interior-strategist"
+  task: style-guide.md
+  version: "1.0.0"
+  description: >
+    Guia de estilo completo para virtual staging, incluindo paleta de cores,
+    materiais, mobiliário, iluminação, prompts para ControlNet, parâmetros
+    de geração e referências visuais. Baseado na metodologia MEPI
+    (Gilberto Rangel) adaptada para AI staging.
+
+sections:
+  - title: "Identificação do Estilo"
+    required: true
+    format: "structured"
+    fields:
+      - name: guide_id
+        type: string
+        description: "Identificador único do style guide"
+        example: "stg-m0d3rn0-2026-001"
+      - name: style_preset
+        type: string
+        description: "Preset de estilo base"
+        enum: ["moderno", "industrial", "minimalista", "classico", "escandinavo", "rustico", "tropical", "contemporaneo", "boho", "luxo"]
+      - name: style_name_display
+        type: string
+        description: "Nome do estilo para exibição ao cliente"
+        example: "Moderno Brasileiro"
+      - name: style_description
+        type: string
+        description: "Descrição do estilo em 2-3 frases"
+        example: >
+          Linhas limpas e geometria definida com toques de brasilidade.
+          Combina materiais nobres como madeira maciça e pedras naturais
+          com acabamentos contemporâneos. Equilíbrio entre funcionalidade
+          e elegância sofisticada.
+      - name: target_audience
+        type: string
+        description: "Público-alvo para este estilo"
+        example: "Jovens profissionais, 28-45 anos, renda A/B"
+      - name: room_types_ideal
+        type: list
+        description: "Tipos de cômodo ideais para este estilo"
+        example: ["sala_estar", "sala_integrada", "suite_master", "home_office"]
+      - name: mepi_phase
+        type: string
+        description: "Fase MEPI correspondente (Metodologia de Projeto de Interiores)"
+        enum: ["conceituacao", "desenvolvimento", "detalhamento", "execucao"]
+        example: "conceituacao"
+
+  - title: "Paleta de Cores"
+    required: true
+    format: "structured"
+    fields:
+      - name: primary_colors
+        type: list
+        description: "Cores primárias (2-3 cores dominantes)"
+        example:
+          - hex: "#2C3E50"
+            name: "Azul Petróleo"
+            usage: "Paredes accent, estofados principais"
+            percentage: 30
+          - hex: "#ECF0F1"
+            name: "Branco Neve"
+            usage: "Paredes, teto, base geral"
+            percentage: 50
+      - name: secondary_colors
+        type: list
+        description: "Cores secundárias (2-3 cores de suporte)"
+        example:
+          - hex: "#BDC3C7"
+            name: "Cinza Claro"
+            usage: "Mobiliário secundário, tapetes"
+            percentage: 12
+          - hex: "#7F8C8D"
+            name: "Cinza Médio"
+            usage: "Detalhes, molduras"
+            percentage: 5
+      - name: accent_colors
+        type: list
+        description: "Cores de destaque (1-2 cores vibrantes)"
+        example:
+          - hex: "#E74C3C"
+            name: "Vermelho Coral"
+            usage: "Almofadas, arte, objetos decorativos"
+            percentage: 3
+      - name: color_harmony
+        type: string
+        description: "Tipo de harmonia cromática"
+        enum: ["complementar", "analogo", "triade", "monocromatico", "split_complementar"]
+      - name: color_temperature
+        type: string
+        description: "Temperatura geral da paleta"
+        enum: ["quente", "fria", "neutra", "mista_quente", "mista_fria"]
+
+  - title: "Materiais e Texturas"
+    required: true
+    format: "table"
+    fields:
+      - name: material_id
+        type: string
+        description: "ID do material"
+        example: "mat-001"
+      - name: name
+        type: string
+        description: "Nome do material"
+        example: "Madeira Freijó"
+      - name: category
+        type: string
+        description: "Categoria do material"
+        enum: ["madeira", "pedra", "metal", "tecido", "couro", "ceramica", "vidro", "concreto", "fibra_natural", "sintetico"]
+      - name: finish
+        type: string
+        description: "Acabamento"
+        enum: ["natural", "polido", "acetinado", "fosco", "rustico", "texturizado", "brilhante", "patina"]
+      - name: usage
+        type: string
+        description: "Uso no ambiente"
+        example: "Piso, mesa de centro, painéis"
+      - name: texture_prompt_token
+        type: string
+        description: "Token para prompt de textura do modelo"
+        example: "natural freijo wood grain, warm tone, satin finish"
+      - name: brazilian_availability
+        type: string
+        description: "Disponibilidade no mercado brasileiro"
+        enum: ["facil", "moderada", "importado", "sob_encomenda"]
+
+  - title: "Mobiliário"
+    required: true
+    format: "table"
+    fields:
+      - name: furniture_id
+        type: string
+        description: "ID do móvel"
+        example: "fur-001"
+      - name: piece
+        type: string
+        description: "Peça de mobiliário"
+        example: "Sofá 3 lugares"
+      - name: category
+        type: string
+        description: "Categoria"
+        enum: ["assento", "mesa", "armazenamento", "cama", "bancada", "estante", "aparador", "rack"]
+      - name: style_keywords
+        type: string
+        description: "Keywords de estilo para o prompt"
+        example: "mid-century modern sofa, clean lines, tapered wooden legs"
+      - name: material_primary
+        type: string
+        description: "Material principal"
+        example: "Linho cru"
+      - name: color_ref
+        type: string
+        description: "Referência de cor da paleta"
+        example: "#ECF0F1"
+      - name: scale
+        type: string
+        description: "Dimensões típicas LxPxA em cm"
+        example: "220x90x80"
+      - name: priority
+        type: string
+        description: "Prioridade no staging"
+        enum: ["essencial", "recomendado", "opcional"]
+
+  - title: "Iluminação"
+    required: true
+    format: "structured"
+    fields:
+      - name: lighting_mood
+        type: string
+        description: "Mood de iluminação geral"
+        enum: ["aconchegante", "clean", "dramatico", "natural", "romantico", "energetico"]
+      - name: color_temperature_k
+        type: number
+        description: "Temperatura de cor em Kelvin"
+        example: 3000
+      - name: color_temperature_range
+        type: string
+        description: "Faixa de temperatura de cor"
+        example: "2700K - 3500K"
+      - name: lighting_layers
+        type: list
+        description: "Camadas de iluminação (método MEPI)"
+        example:
+          - layer: "geral"
+            type: "pendente_central"
+            description: "Pendente geométrico em metal dourado"
+            prompt_token: "geometric pendant light, brushed gold, warm glow"
+          - layer: "tarefa"
+            type: "luminaria_mesa"
+            description: "Luminária de mesa articulada"
+            prompt_token: "adjustable desk lamp, matte black, focused light"
+          - layer: "accent"
+            type: "spots_direcionais"
+            description: "Spots embutidos para quadros"
+            prompt_token: "recessed spotlights, warm directional lighting on artwork"
+          - layer: "decorativa"
+            type: "fita_led"
+            description: "LED indireto em sanca ou prateleira"
+            prompt_token: "indirect LED strip lighting, warm ambient glow"
+      - name: natural_light_handling
+        type: string
+        description: "Como tratar a luz natural no render"
+        enum: ["preserve", "enhance", "soften", "dramatic_contrast"]
+      - name: ic_light_preset
+        type: string
+        description: "Preset IC-Light recomendado"
+        example: "warm_interior_afternoon"
+
+  - title: "Prompts para ControlNet"
+    required: true
+    format: "structured"
+    fields:
+      - name: positive_prompt
+        type: string
+        description: "Prompt positivo completo para o modelo SDXL + ControlNet"
+        example: >
+          interior design photography, modern brazilian living room,
+          clean lines, natural freijo wood flooring, white walls,
+          mid-century modern furniture, geometric pendant light brushed gold,
+          warm ambient lighting 3000K, large windows natural light,
+          indoor plants, minimalist decor, high-end interior,
+          professional architectural photography, 8k uhd, sharp focus,
+          soft shadows, magazine quality
+      - name: negative_prompt
+        type: string
+        description: "Prompt negativo para evitar artefatos"
+        example: >
+          low quality, blurry, distorted, deformed furniture, floating objects,
+          unrealistic shadows, oversaturated, cartoon, anime, illustration,
+          watermark, text, logo, bad perspective, warped lines,
+          duplicate furniture, extra limbs, bad anatomy, cropped,
+          out of frame, worst quality, jpeg artifacts, ugly
+      - name: cfg_scale
+        type: number
+        description: "CFG Scale recomendado"
+        example: 7.5
+      - name: cfg_scale_range
+        type: string
+        description: "Range aceitável de CFG Scale"
+        example: "6.5 - 8.5"
+      - name: denoising_strength
+        type: number
+        description: "Denoising strength recomendado"
+        example: 0.75
+      - name: denoising_range
+        type: string
+        description: "Range aceitável de denoising"
+        example: "0.65 - 0.85"
+      - name: controlnet_configs
+        type: list
+        description: "Configurações por ControlNet"
+        example:
+          - model: "depth"
+            weight: 0.85
+            guidance_start: 0.0
+            guidance_end: 1.0
+            purpose: "Preservar profundidade e perspectiva"
+          - model: "canny"
+            weight: 0.60
+            guidance_start: 0.0
+            guidance_end: 0.8
+            purpose: "Manter bordas estruturais"
+          - model: "segmentation"
+            weight: 0.70
+            guidance_start: 0.1
+            guidance_end: 0.9
+            purpose: "Respeitar áreas de piso/parede/teto"
+      - name: sampler
+        type: string
+        description: "Sampler recomendado"
+        example: "DPM++ 2M Karras"
+      - name: steps
+        type: number
+        description: "Número de steps de inferência"
+        example: 30
+      - name: steps_range
+        type: string
+        description: "Range aceitável de steps"
+        example: "25 - 40"
+
+  - title: "Referências Visuais"
+    required: false
+    format: "list"
+    fields:
+      - name: reference_id
+        type: string
+        description: "ID da referência"
+      - name: source
+        type: string
+        description: "Fonte da referência"
+        example: "Pinterest / Archdaily / Casa Vogue Brasil"
+      - name: url
+        type: string
+        description: "URL da referência visual"
+      - name: relevance
+        type: string
+        description: "O que capturar desta referência"
+        example: "Paleta de cores e disposição do mobiliário"
+      - name: style_elements
+        type: list
+        description: "Elementos de estilo presentes"
+        example: ["madeira natural", "iluminação indireta", "plantas pendentes"]

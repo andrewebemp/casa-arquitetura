@@ -1,0 +1,465 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Workflow: Refinement Loop (Chat Visual Refinement)
+# Loop iterativo de ajustes via chat para refinar render existente
+# ═══════════════════════════════════════════════════════════════════════════════
+
+workflow:
+  id: wf-refinement-loop
+  name: "Refinement Loop"
+  version: "1.0.0"
+  description: |
+    Workflow de refinamento iterativo que permite ao usuario ajustar um render
+    existente via instrucoes em linguagem natural no chat. Cada iteracao passa
+    por: interpretacao da instrucao -> mapeamento para operacao de pipeline ->
+    execucao da edicao -> validacao de conformidade -> apresentacao com comparacao.
+    Suporta operacoes de segment+inpaint, restyle parcial, e ajustes de prompt.
+  duration: "15-45 seconds per iteration"
+  orchestrator: "@decorai-chief"
+  squad: "decorai"
+  best_for:
+    - "Trocar cor de parede ou piso no render existente"
+    - "Adicionar ou remover movel especifico"
+    - "Mudar estilo de decoracao mantendo layout"
+    - "Ajustar iluminacao ou atmosfera"
+    - "Corrigir artefatos pontuais no render"
+  not_for:
+    - "Geracao completa a partir do zero (use wf-staging-pipeline)"
+    - "Troca de material/textura especifica (use wf-element-swap)"
+    - "Mudanca radical de layout (requer novo pipeline)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INPUTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+inputs:
+  required:
+    - name: existing_render
+      type: "image"
+      description: "Render existente gerado pelo pipeline ou iteracao anterior"
+      source: "wf-staging-pipeline output OR previous refinement iteration"
+
+    - name: refinement_instruction
+      type: "string"
+      description: "Instrucao em linguagem natural do usuario"
+      examples:
+        - "Troca o sofa por um de couro marrom"
+        - "Muda a cor da parede para azul petroleo"
+        - "Adiciona uma planta grande no canto direito"
+        - "Tira a mesa de centro"
+        - "Muda o estilo para industrial"
+        - "A luz esta muito fria, aquece um pouco"
+
+  optional:
+    - name: spatial_analysis
+      type: "yaml"
+      description: "Analise espacial do pipeline original (para contexto)"
+      source: "wf-staging-pipeline:PHASE-1"
+
+    - name: style_config
+      type: "yaml"
+      description: "Configuracao de estilo do pipeline original"
+      source: "wf-staging-pipeline:PHASE-3"
+
+    - name: iteration_history
+      type: "array"
+      description: "Historico de iteracoes anteriores (para contexto acumulado)"
+      max_items: 10
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: INTERPRETACAO DA INSTRUCAO
+# Objetivo: Entender a intencao do usuario e mapear para operacao concreta
+# ═══════════════════════════════════════════════════════════════════════════════
+
+phases:
+  - id: PHASE-1
+    name: "Interpretar Instrucao"
+    tier: 2
+    agent: "@conversational-designer"
+    description: |
+      Interpreta a instrucao em linguagem natural do usuario, classifica
+      a intencao (adicionar, remover, trocar, ajustar), identifica o alvo
+      da edicao (qual elemento/regiao), e extrai parametros especificos.
+      Usa o Natural Conversation Framework (NCF) para desambiguacao.
+    estimated_time: "2-5 seconds"
+    prerequisite: "Render existente e instrucao do usuario"
+
+    tasks:
+      - task_file: tasks/interpret-refinement.md
+        task_id: DA-T-012
+        agent: "@conversational-designer"
+        required: true
+        description: "Interpretar instrucao NL e classificar intencao"
+        input_from:
+          - "existing_render"
+          - "refinement_instruction"
+          - "iteration_history (if available)"
+        output: "interpreted-instruction.yaml"
+        actions:
+          - "Classificar intencao primaria (add | remove | swap | adjust | restyle)"
+          - "Identificar alvo da edicao (elemento, regiao, propriedade)"
+          - "Extrair parametros especificos (cor, material, tamanho, posicao)"
+          - "Resolver ambiguidades via contexto ou pergunta ao usuario"
+          - "Determinar confianca da interpretacao"
+
+    output: "interpreted-instruction.yaml"
+    output_schema:
+      intent:
+        primary: "add | remove | swap | adjust | restyle"
+        confidence: "float (0-1)"
+      target:
+        element: "string (sofa, parede, piso, mesa, etc.)"
+        region: "string (canto, centro, lado direito, etc.) | null"
+        bounding_box: "{x, y, width, height} | null"
+      parameters:
+        color: "string | null"
+        material: "string | null"
+        style: "string | null"
+        size: "string | null"
+        position: "string | null"
+      ambiguous: "boolean"
+      clarification_needed: "string | null"
+
+    checkpoint:
+      id: CP-DA-RF-001
+      criteria:
+        - "Intent classified with confidence >= 0.7"
+        - "Target element identified"
+        - "No unresolved ambiguities"
+      human_review: false
+      on_fail:
+        ambiguous_instruction:
+          action: "Ask clarification question"
+          message_template: |
+            Entendi que voce quer {intent} o/a {target}, mas preciso de mais detalhes:
+            {clarification_needed}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: MAPEAMENTO PARA OPERACAO DE PIPELINE
+# Objetivo: Traduzir intencao para operacao tecnica especifica
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-2
+    name: "Mapear para Operacao de Pipeline"
+    tier: 2
+    agent: "@conversational-designer"
+    depends_on: ["PHASE-1"]
+    description: |
+      Traduz a intencao interpretada em uma operacao tecnica especifica
+      do pipeline: segment+inpaint, full restyle, prompt adjustment,
+      ou composicao de operacoes para instrucoes complexas.
+    estimated_time: "1-3 seconds"
+
+    tasks:
+      - task_file: tasks/map-to-operation.md
+        task_id: DA-T-013
+        agent: "@conversational-designer"
+        required: true
+        description: "Mapear intencao para operacao tecnica do pipeline"
+        input_from:
+          - "PHASE-1:interpreted-instruction.yaml"
+          - "spatial_analysis (if available)"
+        output: "pipeline-operation.yaml"
+        operation_mapping:
+          add:
+            operation: "inpaint"
+            requires: ["target_region", "object_description"]
+            tools: ["SAM 2", "LaMa/Inpaint-Anything", "SDXL"]
+          remove:
+            operation: "segment_and_inpaint_background"
+            requires: ["target_element"]
+            tools: ["SAM 2", "LaMa"]
+          swap:
+            operation: "segment_and_replace"
+            requires: ["target_element", "replacement_description"]
+            tools: ["SAM 2", "SDXL + ControlNet"]
+          adjust:
+            operation: "prompt_adjustment"
+            requires: ["property", "new_value"]
+            tools: ["SDXL", "IP-Adapter", "IC-Light"]
+          restyle:
+            operation: "full_regeneration_with_controlnet"
+            requires: ["new_style"]
+            tools: ["SDXL + ControlNet (depth)", "CLIP"]
+
+    output: "pipeline-operation.yaml"
+    output_schema:
+      operation_type: "inpaint | segment_and_replace | prompt_adjustment | full_restyle"
+      tools_required: "string[]"
+      mask_needed: "boolean"
+      mask_target: "string | null"
+      generation_params:
+        prompt_delta: "string (modifications to original prompt)"
+        controlnet_adjustments: "object | null"
+        inpaint_region: "{x, y, width, height} | null"
+        strength: "float (0-1, how much to change)"
+
+    checkpoint:
+      id: CP-DA-RF-002
+      criteria:
+        - "Operation mapped to valid pipeline operation"
+        - "All required tools available"
+        - "Parameters within valid ranges"
+      human_review: false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: EXECUTAR EDICAO
+# Objetivo: Aplicar a operacao mapeada no render existente
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-3
+    name: "Executar Edicao"
+    tier: 1
+    agent: "@staging-architect"
+    depends_on: ["PHASE-2"]
+    description: |
+      Executa a operacao de edicao no render existente: segmentacao do alvo
+      com SAM 2, inpainting com modelo apropriado, ou regeneracao parcial
+      com ControlNet para manter areas nao afetadas.
+    estimated_time: "10-30 seconds"
+
+    tasks:
+      - task_id: DA-T-014
+        agent: "@staging-architect"
+        required: true
+        description: "Executar edicao baseada na operacao mapeada"
+        input_from:
+          - "existing_render"
+          - "PHASE-2:pipeline-operation.yaml"
+          - "spatial_analysis (depth_map, segmentation_mask)"
+        output: "edited-render.png"
+        execution_paths:
+          segment_and_replace:
+            steps:
+              - "Segmentar elemento alvo com SAM 2 (gerar mask)"
+              - "Expandir mask com feathering (3-5px)"
+              - "Gerar replacement com SDXL + ControlNet (depth preservado)"
+              - "Compositar resultado com blending suave"
+          inpaint:
+            steps:
+              - "Definir regiao de inpaint (mask ou bounding box)"
+              - "Inpaint com LaMa (remocao) ou SDXL (adicao)"
+              - "Harmonizar iluminacao com IC-Light"
+          prompt_adjustment:
+            steps:
+              - "Modificar prompt com delta especificado"
+              - "Regenerar com ControlNet depth (alta weight = manter layout)"
+              - "Usar img2img com alta strength para mudancas sutis"
+          full_restyle:
+            steps:
+              - "Extrair depth map do render existente"
+              - "Regenerar com novo prompt de estilo"
+              - "ControlNet depth weight alto (0.8-1.2) para manter estrutura"
+              - "Comparar com original para preservar layout"
+
+    output: "edited-render.png"
+
+    checkpoint:
+      id: CP-DA-RF-003
+      criteria:
+        - "Edit executed successfully"
+        - "Non-target areas preserved (SSIM >= 0.85 for unchanged regions)"
+        - "No new critical artifacts introduced"
+      human_review: false
+      on_fail:
+        action: "Retry with adjusted parameters"
+        max_retries: 2
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: VALIDAR CONFORMIDADE COM ESPECIFICACAO
+# Objetivo: Verificar que a edicao atende ao que foi pedido
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-4
+    name: "Validar Conformidade"
+    tier: 2
+    agent: "@conversational-designer"
+    depends_on: ["PHASE-3"]
+    description: |
+      Verifica se o resultado da edicao corresponde a instrucao original
+      do usuario. Compara intencao com resultado e prepara feedback.
+    estimated_time: "2-5 seconds"
+
+    tasks:
+      - task_id: DA-T-015
+        agent: "@conversational-designer"
+        required: true
+        description: "Validar que edicao atende a instrucao original"
+        input_from:
+          - "PHASE-1:interpreted-instruction.yaml"
+          - "PHASE-3:edited-render.png"
+          - "existing_render"
+        output: "conformance-check.yaml"
+        checks:
+          - "Intencao primaria atendida (elemento adicionado/removido/trocado)"
+          - "Parametros especificos respeitados (cor, material, posicao)"
+          - "Regioes nao-alvo preservadas"
+          - "Resultado visualmente coerente"
+
+    output: "conformance-check.yaml"
+    output_schema:
+      conforms: "boolean"
+      intent_satisfied: "boolean"
+      parameters_matched: "object (param -> matched boolean)"
+      preservation_score: "float (0-1)"
+      issues: "string[]"
+
+    checkpoint:
+      id: CP-DA-RF-004
+      criteria:
+        - "Intent satisfied"
+        - "Preservation score >= 0.8"
+      human_review: false
+      on_fail:
+        action: "Flag issues for user review"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: APRESENTAR RESULTADO COM COMPARACAO
+# Objetivo: Mostrar antes/depois e oferecer opcoes ao usuario
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-5
+    name: "Apresentar Resultado"
+    tier: 2
+    agent: "@conversational-designer"
+    depends_on: ["PHASE-4"]
+    description: |
+      Apresenta o resultado ao usuario com comparacao antes/depois,
+      descreve as alteracoes realizadas, e oferece opcoes para proxima acao.
+    estimated_time: "instantaneo (apresentacao)"
+
+    tasks:
+      - task_id: DA-T-016
+        agent: "@conversational-designer"
+        required: true
+        description: "Apresentar resultado com comparacao e opcoes"
+        input_from:
+          - "existing_render"
+          - "PHASE-3:edited-render.png"
+          - "PHASE-4:conformance-check.yaml"
+          - "PHASE-1:interpreted-instruction.yaml"
+        output: "presentation.yaml"
+        presentation:
+          before_after:
+            format: "side-by-side or slider"
+            highlight_changes: true
+          description:
+            template: |
+              Alterei {action_description}:
+              - {change_detail_1}
+              - {change_detail_2}
+          options:
+            - "Aceitar e continuar editando"
+            - "Aceitar e finalizar"
+            - "Desfazer e tentar diferente"
+            - "Ajustar mais (instrucao adicional)"
+
+    output: "presentation.yaml"
+
+    checkpoint:
+      id: CP-DA-RF-005
+      criteria:
+        - "Before/after comparison generated"
+        - "Options presented to user"
+      human_review: true
+      blocking: true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# LOOP CONTROL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+loop_control:
+  max_iterations: 10
+  iteration_tracking:
+    store: "iteration_history"
+    per_iteration:
+      - instruction: "string"
+      - operation: "string"
+      - render_before: "image reference"
+      - render_after: "image reference"
+      - accepted: "boolean"
+  undo_support:
+    enabled: true
+    max_undo_depth: 5
+    strategy: "Store render snapshots for rollback"
+  continue_condition: "User chooses 'Aceitar e continuar editando' or 'Ajustar mais'"
+  exit_conditions:
+    - "User chooses 'Aceitar e finalizar'"
+    - "Max iterations reached"
+    - "User explicitly exits ('pronto', 'finalizar', 'ok')"
+  on_exit:
+    action: "Deliver final render to user"
+    optional: "Offer upscale if paid tier"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRANSITIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+transitions:
+  - from: input
+    to: PHASE-1
+    condition: "Existing render and instruction received"
+
+  - from: PHASE-1
+    to: PHASE-2
+    condition: "Intent classified with confidence >= 0.7"
+
+  - from: PHASE-2
+    to: PHASE-3
+    condition: "Operation mapped successfully"
+
+  - from: PHASE-3
+    to: PHASE-4
+    condition: "Edit executed successfully"
+
+  - from: PHASE-4
+    to: PHASE-5
+    condition: "Conformance check complete"
+
+  - from: PHASE-5
+    to: PHASE-1
+    condition: "User wants more edits (loop continues)"
+    description: "Loop back with updated render as new existing_render"
+
+  - from: PHASE-5
+    to: complete
+    condition: "User accepts and finalizes"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SINAIS DE COMUNICACAO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+completion_signal: "<promise>REFINEMENT-LOOP:COMPLETE</promise>"
+iteration_signal: "<promise>REFINEMENT:ITERATION-{N}</promise>"
+blocked_signal: "<promise>BLOCKED:CLARIFICATION-NEEDED</promise>"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRATAMENTO DE ERROS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+error_handling:
+  on_interpretation_failure:
+    - action: "Ask user to rephrase instruction"
+    - message: "Nao consegui entender o que voce quer alterar. Pode reformular?"
+    - max_retries: 2
+  on_edit_failure:
+    - action: "Retry with adjusted parameters"
+    - fallback: "Offer to regenerate entire render with new style"
+    - max_retries: 2
+  on_conformance_failure:
+    - action: "Present result anyway with disclaimer"
+    - message: "O resultado pode nao estar exatamente como pedido. Aceita ou quer tentar de novo?"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  version: "1.0.0"
+  created: "2026-03-09"
+  squad: "decorai"
+  total_agents: 2
+  total_phases: 5
+  total_tasks: 5
+  loop: true
+  max_iterations: 10
+  estimated_duration_per_iteration: "15-45 seconds"

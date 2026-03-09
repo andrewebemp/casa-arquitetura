@@ -1,0 +1,534 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Workflow: Element Swap
+# Troca de elementos individuais (parede, piso, bancada, armario)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+workflow:
+  id: wf-element-swap
+  name: "Element Swap"
+  version: "1.0.0"
+  description: |
+    Workflow especializado para troca de elementos individuais em um render
+    ou foto existente: paredes, pisos, bancadas, armarios, revestimentos.
+    Diferente do refinement loop (que trata instrucoes genericas), este
+    workflow e otimizado para substituicao de materiais/texturas com
+    precisao de segmentacao e consistencia de iluminacao.
+  duration: "15-40 seconds per swap"
+  orchestrator: "@decorai-chief"
+  squad: "decorai"
+  best_for:
+    - "Trocar piso de ceramica por porcelanato"
+    - "Mudar cor/textura de parede"
+    - "Substituir bancada de cozinha/banheiro"
+    - "Trocar frente de armario/gabinete"
+    - "Alterar tipo de revestimento"
+    - "Comparar opcoes de acabamento (A/B testing visual)"
+  not_for:
+    - "Adicionar ou remover moveis (use wf-refinement-loop)"
+    - "Mudar estilo completo do ambiente (use wf-staging-pipeline)"
+    - "Ajustes sutis de iluminacao ou atmosfera (use wf-refinement-loop)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INPUTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+inputs:
+  required:
+    - name: source_image
+      type: "image"
+      description: "Render existente ou foto real do ambiente"
+      constraints:
+        formats: ["jpg", "png", "webp"]
+        max_size: "10MB"
+        min_resolution: "640x480"
+
+  optional:
+    - name: target_element
+      type: enum
+      values: ["parede", "piso", "bancada", "armario", "revestimento", "teto", "rodape"]
+      description: "Elemento a ser trocado (se nao informado, usuario seleciona)"
+
+    - name: replacement_spec
+      type: "string"
+      description: "Especificacao do material/textura de substituicao"
+      examples:
+        - "Porcelanato marmorizado branco 60x60"
+        - "Pintura azul petroleo fosca"
+        - "Granito preto Sao Gabriel"
+        - "MDF carvalho mel"
+
+    - name: reference_image
+      type: "image"
+      description: "Foto do material desejado como referencia visual"
+
+    - name: spatial_analysis
+      type: "yaml"
+      description: "Analise espacial do pipeline (para perspectiva de textura)"
+      source: "wf-staging-pipeline:PHASE-1"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: IDENTIFICAR ELEMENTO ALVO
+# Objetivo: Identificar e segmentar o elemento a ser substituido
+# ═══════════════════════════════════════════════════════════════════════════════
+
+phases:
+  - id: PHASE-1
+    name: "Identificar Elemento Alvo"
+    tier: 0
+    agent: "@spatial-analyst"
+    description: |
+      Identifica o elemento alvo para troca. Se o usuario especificou,
+      segmenta diretamente. Se nao, apresenta os elementos detectados
+      para selecao. Usa SAM 2 para segmentacao precisa e OneFormer
+      para classificacao semantica.
+    estimated_time: "3-8 seconds"
+
+    tasks:
+      - task_id: DA-T-ES-001
+        agent: "@spatial-analyst"
+        required: true
+        description: "Segmentar e identificar elemento alvo"
+        input_from:
+          - "source_image"
+          - "target_element (if provided)"
+        tools: ["SAM 2", "OneFormer ADE20K"]
+        output: "element-identification.yaml"
+        execution_paths:
+          user_specified:
+            steps:
+              - "Executar segmentacao semantica da imagem completa"
+              - "Identificar regioes que correspondem ao elemento especificado"
+              - "Gerar mask de alta precisao com SAM 2"
+              - "Validar que mask cobre elemento completo"
+          user_selection:
+            steps:
+              - "Executar segmentacao semantica completa"
+              - "Identificar todos os elementos trocaveis"
+              - "Apresentar lista de elementos com thumbnail"
+              - "Aguardar selecao do usuario"
+              - "Gerar mask do elemento selecionado"
+
+    output: "element-identification.yaml"
+    output_schema:
+      element_type: "string"
+      mask: "base64 encoded binary mask"
+      bounding_box: "{x, y, width, height}"
+      area_percentage: "float (% da imagem)"
+      surface_normal_estimate: "string (horizontal | vertical | angled)"
+      adjacent_elements: "string[] (elementos vizinhos para blending)"
+      confidence: "float (0-1)"
+
+    checkpoint:
+      id: CP-DA-ES-001
+      criteria:
+        - "Element identified with confidence >= 0.8"
+        - "Mask covers element completely (no gaps)"
+        - "Mask does not bleed into adjacent elements"
+      human_review: false
+      on_fail:
+        low_confidence:
+          action: "Ask user to confirm/draw region"
+          message: "Nao tenho certeza se identifiquei o elemento correto. Pode confirmar?"
+        mask_incomplete:
+          action: "Retry with SAM 2 multi-point prompting"
+          max_retries: 2
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: SEGMENTAR ELEMENTO COM SAM
+# Objetivo: Gerar mask de alta precisao para o elemento
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-2
+    name: "Segmentar Elemento com SAM"
+    tier: 1
+    agent: "@staging-architect"
+    depends_on: ["PHASE-1"]
+    description: |
+      Refina a segmentacao do elemento usando SAM 2 com multiplos prompts
+      para garantir mask de alta qualidade. Aplica feathering e edge
+      refinement para transicoes suaves. Extrai informacoes de perspectiva
+      para aplicacao correta de textura.
+    estimated_time: "3-5 seconds"
+
+    tasks:
+      - task_id: DA-T-ES-002
+        agent: "@staging-architect"
+        required: true
+        description: "Refinar segmentacao e preparar mask para inpainting"
+        input_from:
+          - "source_image"
+          - "PHASE-1:element-identification.yaml"
+          - "spatial_analysis (if available)"
+        tools: ["SAM 2", "Depth Anything V2"]
+        output: "refined-mask.yaml"
+        actions:
+          - "Refinar mask com SAM 2 multi-point prompting"
+          - "Aplicar edge refinement (alpha matting nas bordas)"
+          - "Aplicar feathering de 2-4px para transicao suave"
+          - "Extrair depth map da regiao para perspectiva de textura"
+          - "Calcular orientacao da superficie (floor=horizontal, wall=vertical)"
+          - "Detectar linhas de perspectiva para alinhamento de textura"
+
+    output: "refined-mask.yaml"
+    output_schema:
+      mask_refined: "base64 encoded mask with feathering"
+      edge_quality: "float (0-1)"
+      depth_region: "base64 encoded depth of masked area"
+      surface_orientation: "horizontal | vertical | angled"
+      perspective_lines: "array of vanishing point data"
+      texture_scale_hint: "float (tiles per meter estimate)"
+
+    checkpoint:
+      id: CP-DA-ES-002
+      criteria:
+        - "Mask refined with clean edges"
+        - "Edge quality >= 0.85"
+        - "Surface orientation determined"
+      human_review: false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: OBTER ESPECIFICACAO DE SUBSTITUICAO
+# Objetivo: Definir material/textura de substituicao com detalhes
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-3
+    name: "Obter Especificacao de Substituicao"
+    tier: 1
+    agent: "@interior-strategist"
+    depends_on: ["PHASE-1"]
+    parallel_with: "PHASE-2"
+    description: |
+      Define a especificacao completa do material de substituicao: tipo,
+      cor, textura, padrao, e gera o prompt de geracao otimizado.
+      Se usuario forneceu spec textual, enriquece. Se forneceu imagem
+      de referencia, extrai caracteristicas com CLIP.
+    estimated_time: "3-8 seconds"
+
+    tasks:
+      - task_file: tasks/define-replacement-material.md
+        task_id: DA-T-ES-003
+        agent: "@interior-strategist"
+        required: true
+        description: "Definir especificacao completa do material de substituicao"
+        input_from:
+          - "PHASE-1:element-identification.yaml"
+          - "replacement_spec (if provided)"
+          - "reference_image (if provided)"
+        tools: ["CLIP", "IP-Adapter"]
+        output: "replacement-spec.yaml"
+        execution_paths:
+          text_spec:
+            steps:
+              - "Parsear especificacao textual do usuario"
+              - "Enriquecer com detalhes tecnicos (acabamento, reflexividade)"
+              - "Gerar prompt de textura para modelo de IA"
+              - "Definir parametros de IP-Adapter (se catalogo disponivel)"
+          reference_image:
+            steps:
+              - "Extrair features visuais com CLIP"
+              - "Identificar cor dominante, textura, padrao, brilho"
+              - "Gerar prompt baseado nas features extraidas"
+              - "Configurar IP-Adapter com imagem de referencia"
+          no_spec:
+            steps:
+              - "Apresentar opcoes populares para o tipo de elemento"
+              - "Sugerir materiais compativeis com estilo existente"
+              - "Aguardar selecao do usuario"
+
+    output: "replacement-spec.yaml"
+    output_schema:
+      material:
+        name: "string"
+        type: "string (ceramica, madeira, granito, pintura, mdf, etc.)"
+        color_primary: "hex color"
+        color_secondary: "hex color | null"
+        finish: "fosco | semi-brilho | brilho | acetinado | rustico"
+        pattern: "liso | marmorizado | veio | geometrico | texturizado"
+      generation_prompt: "string (prompt otimizado para geracao)"
+      ip_adapter:
+        enabled: "boolean"
+        reference: "base64 | null"
+        weight: "float (0-1)"
+      texture_params:
+        repeat: "boolean"
+        scale: "float (tamanho relativo do padrao)"
+        rotation: "float (graus)"
+
+    checkpoint:
+      id: CP-DA-ES-003
+      criteria:
+        - "Material specification complete"
+        - "Generation prompt ready"
+      human_review: false
+      on_fail:
+        action: "Ask user for more details about desired material"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: GERAR SUBSTITUICAO (INPAINTING)
+# Objetivo: Gerar o elemento de substituicao com inpainting
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-4
+    name: "Gerar Substituicao"
+    tier: 1
+    agent: "@staging-architect"
+    depends_on: ["PHASE-2", "PHASE-3"]
+    description: |
+      Executa a substituicao do elemento usando inpainting com ControlNet.
+      Preserva perspectiva, iluminacao e sombras do ambiente original.
+      Aplica textura com escala e orientacao corretas baseadas nos dados
+      de perspectiva extraidos na fase de segmentacao.
+    estimated_time: "10-25 seconds"
+
+    tasks:
+      - task_id: DA-T-ES-004
+        agent: "@staging-architect"
+        required: true
+        description: "Executar inpainting com material especificado"
+        input_from:
+          - "source_image"
+          - "PHASE-2:refined-mask.yaml"
+          - "PHASE-3:replacement-spec.yaml"
+        tools:
+          primary: "SDXL + ControlNet (depth + inpaint)"
+          secondary: "FLUX.2 via fal.ai"
+          lighting: "IC-Light (harmonizacao)"
+        output: "swapped-render.png"
+        actions:
+          - "Preparar inpainting mask (from refined-mask)"
+          - "Configurar ControlNet depth com mask da regiao"
+          - "Aplicar prompt de material com parametros de textura"
+          - "Executar inpainting com SDXL/FLUX"
+          - "Harmonizar iluminacao com IC-Light"
+          - "Aplicar edge blending entre area inpainted e original"
+          - "Ajustar contraste e saturacao para match com imagem original"
+        generation_config:
+          inpaint_strength: 0.85
+          controlnet_depth_weight: 0.6
+          cfg_scale: 7.5
+          steps: 30
+          denoising_strength: 0.75
+
+    output: "swapped-render.png"
+
+    checkpoint:
+      id: CP-DA-ES-004
+      criteria:
+        - "Inpainting completed successfully"
+        - "Material matches specification"
+        - "Edge blending smooth (no visible seams)"
+        - "Perspective of texture correct"
+        - "Lighting consistent with surrounding area"
+      human_review: false
+      on_fail:
+        seam_visible:
+          action: "Re-apply edge blending with wider feathering"
+        wrong_perspective:
+          action: "Retry with adjusted ControlNet depth weight"
+        wrong_material:
+          action: "Retry with stronger IP-Adapter weight or adjusted prompt"
+        max_retries: 2
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: QUALITY CHECK
+# Objetivo: Validar qualidade do resultado final
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: PHASE-5
+    name: "Quality Check"
+    tier: 3
+    agent: "@visual-quality-engineer"
+    depends_on: ["PHASE-4"]
+    description: |
+      Valida a qualidade do swap contra criterios especificos para troca
+      de elementos: continuidade de bordas, perspectiva de textura,
+      consistencia de iluminacao, e aparencia fotorrealista.
+    estimated_time: "3-8 seconds"
+
+    tasks:
+      - task_id: DA-T-ES-005
+        agent: "@visual-quality-engineer"
+        required: true
+        description: "Validar qualidade do element swap"
+        input_from:
+          - "source_image"
+          - "PHASE-4:swapped-render.png"
+          - "PHASE-2:refined-mask.yaml"
+        output: "swap-quality-report.yaml"
+        checks:
+          edge_continuity:
+            weight: 0.30
+            description: "Transicao suave entre area trocada e original"
+            metric: "Edge SSIM between mask boundary and surrounding"
+          texture_perspective:
+            weight: 0.25
+            description: "Textura segue perspectiva correta do ambiente"
+            metric: "Vanishing point consistency"
+          lighting_consistency:
+            weight: 0.25
+            description: "Iluminacao e sombras consistentes com original"
+            metric: "Luminance histogram comparison"
+          material_realism:
+            weight: 0.20
+            description: "Material parece real e nao artificialmente colado"
+            metric: "LPIPS perceptual similarity"
+
+    output: "swap-quality-report.yaml"
+    output_schema:
+      overall_score: "float (0-100)"
+      edge_continuity_score: "float (0-100)"
+      texture_perspective_score: "float (0-100)"
+      lighting_consistency_score: "float (0-100)"
+      material_realism_score: "float (0-100)"
+      pass: "boolean"
+      issues: "string[]"
+
+    checkpoint:
+      id: CP-DA-ES-005
+      criteria:
+        - "Overall quality score >= 70"
+        - "No critical edge artifacts"
+        - "Lighting consistent (score >= 65)"
+      human_review: false
+      on_fail:
+        action: "Attempt auto-fix via regeneration with adjusted params"
+        max_retries: 2
+        escalation:
+          action: "Deliver best result with quality note"
+          message: "O resultado pode ter pequenas imperfeicoes nas bordas."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PRESENTATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+presentation:
+  format: "before_after_comparison"
+  layout: "side-by-side with slider"
+  include:
+    - "Original image"
+    - "Swapped image"
+    - "Material specification used"
+    - "Quality score"
+  options:
+    - "Aceitar resultado"
+    - "Tentar outro material"
+    - "Trocar outro elemento"
+    - "Voltar ao original"
+  ab_testing:
+    enabled: true
+    description: "Permite gerar multiplas opcoes de material para comparacao"
+    max_variants: 3
+    presentation: "Grid de opcoes com voto de preferencia"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OUTPUTS CONSOLIDADOS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+outputs:
+  deliverables:
+    - name: "Render com elemento trocado"
+      file: "swapped-render.png"
+      description: "Imagem com elemento substituido"
+      phase: PHASE-4
+
+    - name: "Relatorio de qualidade do swap"
+      file: "swap-quality-report.yaml"
+      description: "Scores de qualidade por dimensao"
+      phase: PHASE-5
+
+  intermediate:
+    - name: "Mask do elemento"
+      file: "refined-mask.yaml"
+      description: "Segmentacao de alta precisao do elemento trocado"
+      phase: PHASE-2
+
+    - name: "Especificacao do material"
+      file: "replacement-spec.yaml"
+      description: "Detalhes do material de substituicao"
+      phase: PHASE-3
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRANSITIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+transitions:
+  - from: input
+    to: PHASE-1
+    condition: "Source image provided"
+
+  - from: PHASE-1
+    to: PHASE-2
+    condition: "Element identified with confidence >= 0.8"
+    parallel: "PHASE-3 starts simultaneously"
+
+  - from: PHASE-1
+    to: PHASE-3
+    condition: "Element identified"
+    parallel: "PHASE-2 starts simultaneously"
+
+  - from: PHASE-2
+    to: PHASE-4
+    condition: "Mask refined"
+    wait_for: "PHASE-3"
+
+  - from: PHASE-3
+    to: PHASE-4
+    condition: "Replacement spec ready"
+    wait_for: "PHASE-2"
+
+  - from: PHASE-4
+    to: PHASE-5
+    condition: "Inpainting completed"
+
+  - from: PHASE-5
+    to: complete
+    condition: "Quality check passed and user accepts"
+
+  - from: PHASE-5
+    to: PHASE-3
+    condition: "User wants to try different material"
+    description: "Loop back to material selection"
+
+  - from: PHASE-5
+    to: PHASE-1
+    condition: "User wants to swap different element"
+    description: "Loop back to element identification"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SINAIS DE COMUNICACAO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+completion_signal: "<promise>ELEMENT-SWAP:COMPLETE</promise>"
+checkpoint_signal: "<promise>CHECKPOINT:ES-PHASE-{N}</promise>"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRATAMENTO DE ERROS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+error_handling:
+  on_segmentation_failure:
+    - action: "Retry with different SAM 2 prompting strategy"
+    - fallback: "Ask user to draw/indicate the element region"
+    - max_retries: 2
+  on_inpainting_failure:
+    - action: "Retry with adjusted parameters"
+    - fallback: "Try alternative inpainting model (LaMa fallback)"
+    - max_retries: 2
+  on_quality_failure:
+    - action: "Auto-adjust and retry"
+    - escalation: "Deliver best available with quality disclaimer"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  version: "1.0.0"
+  created: "2026-03-09"
+  squad: "decorai"
+  total_agents: 4
+  total_phases: 5
+  total_tasks: 5
+  supports_ab_testing: true
+  estimated_duration: "15-40 seconds per swap"
+  supported_elements: ["parede", "piso", "bancada", "armario", "revestimento", "teto", "rodape"]

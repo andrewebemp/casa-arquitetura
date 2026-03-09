@@ -33,7 +33,10 @@ if [[ -z "${SCRIPT_DIR:-}" ]]; then
 fi
 
 # Project root is the repository root (up from .aios-core/scripts/phase-executors/)
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+# Allow callers (e.g., autonomous-runner.sh) to pre-set PROJECT_ROOT
+if [[ -z "${PROJECT_ROOT:-}" ]]; then
+  PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+fi
 
 # Key directories
 AIOS_CORE_DIR="${PROJECT_ROOT}/.aios-core"
@@ -480,7 +483,8 @@ run_claude() {
   # Execute Claude with prompt piped via stdin
   # --print: Output response to stdout (no interactive mode)
   # --dangerously-skip-permissions: Skip permission prompts for autonomous execution
-  output=$("${CLAUDE_CMD}" --print --dangerously-skip-permissions <<< "$prompt" 2>&1) || exit_code=$?
+  # Unset CLAUDECODE to allow spawning from within an existing Claude Code session
+  output=$(unset CLAUDECODE; "${CLAUDE_CMD}" --print --dangerously-skip-permissions <<< "$prompt" 2>&1) || exit_code=$?
 
   if [[ $exit_code -ne 0 ]]; then
     log_error "Claude CLI exited with code ${exit_code}"

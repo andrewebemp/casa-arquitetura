@@ -7,8 +7,8 @@ export interface Subscription {
   user_id: string;
   tier: SubscriptionTier;
   status: SubscriptionStatus;
-  payment_gateway: PaymentGateway;
-  gateway_customer_id: string;
+  payment_gateway: PaymentGateway | null;
+  gateway_customer_id: string | null;
   gateway_subscription_id: string | null;
   renders_used: number;
   renders_limit: number;

@@ -1,0 +1,223 @@
+template:
+  id: tmpl-render-report
+  name: "Staging Render Report"
+  agent: "@staging-architect"
+  task: generate-staging.md
+  version: "1.0.0"
+  description: >
+    Relatório completo de um render de virtual staging, incluindo metadados
+    do pipeline, estilo aplicado, elementos modificados, métricas de qualidade,
+    histórico de versões e links para download.
+
+sections:
+  - title: "Metadados do Render"
+    required: true
+    format: "structured"
+    fields:
+      - name: render_id
+        type: string
+        description: "Identificador único do render (UUID v4)"
+        example: "rnd-a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      - name: timestamp
+        type: datetime
+        description: "Data/hora de geração (ISO 8601)"
+        example: "2026-03-09T14:30:00-03:00"
+      - name: pipeline_version
+        type: string
+        description: "Versão do pipeline utilizado"
+        example: "v2.1.0"
+      - name: model_stack
+        type: list
+        description: "Stack de modelos utilizados no pipeline"
+        example:
+          - "SDXL 1.0 (base generation)"
+          - "ControlNet v1.1 (depth + canny + segmentation)"
+          - "IC-Light v2 (relighting)"
+          - "Real-ESRGAN x4 (upscale)"
+      - name: gpu_provider
+        type: string
+        description: "Provedor GPU utilizado"
+        enum: ["fal.ai", "Replicate", "Modal", "RunPod"]
+      - name: processing_time_ms
+        type: number
+        description: "Tempo total de processamento em milissegundos"
+        example: 12400
+      - name: cost_brl
+        type: number
+        description: "Custo do render em Reais"
+        example: 1.20
+
+  - title: "Imagem Original"
+    required: true
+    format: "structured"
+    fields:
+      - name: original_url
+        type: string
+        description: "URL da imagem original no storage"
+      - name: resolution
+        type: string
+        description: "Resolução da imagem original"
+        example: "1920x1080"
+      - name: room_type
+        type: string
+        description: "Tipo de cômodo detectado"
+        enum: ["sala", "quarto", "cozinha", "banheiro", "escritorio", "varanda", "area_gourmet", "suite"]
+      - name: spatial_analysis_id
+        type: string
+        description: "ID da análise espacial vinculada (do @spatial-analyst)"
+
+  - title: "Estilo Aplicado"
+    required: true
+    format: "structured"
+    fields:
+      - name: style_preset
+        type: string
+        description: "Preset de estilo utilizado"
+        enum: ["moderno", "industrial", "minimalista", "classico", "escandinavo", "rustico", "tropical", "contemporaneo", "boho", "luxo"]
+      - name: style_guide_id
+        type: string
+        description: "ID do style guide aplicado (do @interior-strategist)"
+      - name: color_palette
+        type: list
+        description: "Paleta de cores utilizada (hex)"
+        example: ["#2C3E50", "#ECF0F1", "#E74C3C", "#3498DB", "#F39C12"]
+      - name: prompt_positivo
+        type: string
+        description: "Prompt positivo enviado ao modelo"
+      - name: prompt_negativo
+        type: string
+        description: "Prompt negativo enviado ao modelo"
+      - name: cfg_scale
+        type: number
+        description: "CFG scale utilizado"
+        example: 7.5
+      - name: denoising_strength
+        type: number
+        description: "Força de denoising aplicada"
+        example: 0.75
+      - name: controlnet_weights
+        type: structured
+        description: "Pesos dos ControlNets aplicados"
+        fields:
+          - name: depth
+            type: number
+            example: 0.85
+          - name: canny
+            type: number
+            example: 0.60
+          - name: segmentation
+            type: number
+            example: 0.70
+
+  - title: "Elementos Modificados"
+    required: true
+    format: "table"
+    fields:
+      - name: element_id
+        type: string
+        description: "ID do elemento no mapa de segmentação"
+      - name: element_type
+        type: string
+        description: "Tipo do elemento"
+        enum: ["movel", "decoracao", "iluminacao", "revestimento", "tapete", "cortina", "planta", "arte"]
+      - name: action
+        type: string
+        description: "Ação realizada no elemento"
+        enum: ["added", "replaced", "removed", "repositioned", "restyled"]
+      - name: description
+        type: string
+        description: "Descrição do elemento (ex: 'Sofá 3 lugares cinza claro')"
+      - name: confidence
+        type: number
+        description: "Confiança da colocação (0.0 a 1.0)"
+      - name: bounding_box
+        type: string
+        description: "Bounding box no formato [x1,y1,x2,y2]"
+
+  - title: "Métricas de Qualidade"
+    required: true
+    format: "structured"
+    fields:
+      - name: overall_score
+        type: number
+        description: "Score geral de qualidade (0-100)"
+        example: 87
+      - name: fid_score
+        type: number
+        description: "Frechet Inception Distance (menor = melhor, <50 bom, <30 excelente)"
+        example: 28.4
+      - name: ssim
+        type: number
+        description: "Structural Similarity Index (0-1, >0.85 bom, >0.9 excelente)"
+        example: 0.92
+      - name: lpips
+        type: number
+        description: "Learned Perceptual Image Patch Similarity (menor = melhor, <0.2 aceitável)"
+        example: 0.14
+      - name: clip_score
+        type: number
+        description: "CLIP alignment score (0-1, >0.3 bom)"
+        example: 0.38
+      - name: psnr_db
+        type: number
+        description: "Peak Signal-to-Noise Ratio em dB"
+        example: 32.5
+      - name: artifacts_detected
+        type: list
+        description: "Lista de artefatos detectados (vazia se nenhum)"
+        example: []
+      - name: photorealism_score
+        type: number
+        description: "Score de fotorrealismo (0-100)"
+        example: 91
+      - name: quality_gate_passed
+        type: boolean
+        description: "Se passou no quality gate QG-DA-003"
+        example: true
+
+  - title: "Histórico de Versões"
+    required: false
+    format: "list"
+    fields:
+      - name: version
+        type: number
+        description: "Número da versão (1, 2, 3...)"
+      - name: timestamp
+        type: datetime
+        description: "Quando esta versão foi gerada"
+      - name: changes
+        type: string
+        description: "Descrição das mudanças em relação à versão anterior"
+      - name: refinement_type
+        type: string
+        description: "Tipo de refinamento aplicado"
+        enum: ["style_change", "element_add", "element_remove", "lighting", "color_adjust", "full_regen"]
+      - name: requested_by
+        type: string
+        description: "Quem solicitou (user ou agent)"
+
+  - title: "Links para Download"
+    required: true
+    format: "structured"
+    fields:
+      - name: render_full
+        type: string
+        description: "URL do render em resolução completa"
+      - name: render_preview
+        type: string
+        description: "URL do preview (thumbnail 512px)"
+      - name: render_watermarked
+        type: string
+        description: "URL do render com marca d'água (para tier gratuito)"
+      - name: comparison_slider
+        type: string
+        description: "URL do comparativo antes/depois (slider interativo)"
+      - name: depth_map
+        type: string
+        description: "URL do mapa de profundidade gerado"
+      - name: segmentation_map
+        type: string
+        description: "URL do mapa de segmentação"
+      - name: expires_at
+        type: datetime
+        description: "Data de expiração dos links (ISO 8601)"

@@ -1,0 +1,192 @@
+# DecorAI Squad Configuration
+# AI Interior Design & Virtual Staging for Brazilian Real Estate
+
+squad:
+  id: decorai
+  name: "DecorAI Brasil"
+  version: "1.0.0"
+  description: "AI Interior Design & Virtual Staging squad for the Brazilian real estate market"
+  domain: "AI Interior Design + PropTech + Visual AI"
+  slash_prefix: "decorai"
+  pattern_prefix: "DA"
+  created: "2026-03-09"
+  author: "squad-chief"
+  mode: "yolo"
+  fidelity: "60-75%"
+
+  target_product:
+    name: "DecorAI Brasil"
+    type: "Web Platform (SaaS)"
+    prd: "docs/prd.md"
+    brief: "docs/project-brief.md"
+
+  target_users:
+    primary: "Corretores de imóveis e imobiliárias (450K+ CRECI)"
+    secondary: "Incorporadoras e construtoras (~3K ativas)"
+    tertiary: "Designers de interiores e arquitetos (~150K CAU+ABD)"
+
+agents:
+  orchestrator:
+    - id: decorai-chief
+      file: agents/decorai-chief.md
+      tier: orchestrator
+      purpose: "Triage, routing, coordination"
+
+  tier_0:
+    - id: spatial-analyst
+      file: agents/spatial-analyst.md
+      tier: 0
+      mind: "Fei-Fei Li (Stanford/World Labs) + Saining Xie (NYU)"
+      framework: "Spatial Intelligence + Four Stages of Spatial Supersensing"
+      purpose: "Space interpretation, dimension extraction, croqui generation"
+      covers: ["FR-24", "FR-25", "FR-26", "FR-29", "FR-30", "FR-31", "FR-32"]
+
+  tier_1:
+    - id: staging-architect
+      file: agents/staging-architect.md
+      tier: 1
+      mind: "Lvmin Zhang (ControlNet) + Junming Chen (IDCN)"
+      framework: "ControlNet + IDCN pipeline"
+      purpose: "AI generation & staging pipeline"
+      covers: ["FR-01", "FR-02", "FR-03", "FR-07", "FR-08", "FR-09", "FR-20", "FR-21", "FR-22", "FR-23"]
+
+    - id: interior-strategist
+      file: agents/interior-strategist.md
+      tier: 1
+      mind: "Gilberto Rangel (MEPI/UFRJ) + Miriam Gurgel (Projetando Espaços)"
+      framework: "MEPI + Brazilian design methodology"
+      purpose: "Interior design styles, materials, Brazilian market expertise"
+      covers: ["FR-02"]
+
+  tier_2:
+    - id: conversational-designer
+      file: agents/conversational-designer.md
+      tier: 2
+      mind: "Robert J. Moore (IBM NCF) + Erika Hall (Conversation-First)"
+      framework: "Natural Conversation Framework (100 patterns)"
+      purpose: "Chat visual refinement, NL interpretation"
+      covers: ["FR-04", "FR-05", "FR-06", "FR-27", "FR-28"]
+
+    - id: proptech-growth
+      file: agents/proptech-growth.md
+      tier: 2
+      mind: "Pete Flint (NFX/Trulia) + Mike DelPrete (PropTech analyst)"
+      framework: "NFX Network Effects + Evidence-Based Analysis"
+      purpose: "Growth strategy, reverse staging funnel, pricing"
+      covers: ["FR-12", "FR-13", "FR-16"]
+
+  tier_3:
+    - id: visual-quality-engineer
+      file: agents/visual-quality-engineer.md
+      tier: 3
+      mind: "Ben Mildenhall (NeRF) + Shuzhe Wang (DUSt3R)"
+      framework: "NeRF + DUSt3R 3D reconstruction"
+      purpose: "Visual quality, 3D reconstruction, benchmarking"
+      covers: ["FR-20"]
+
+  tools:
+    - id: pipeline-optimizer
+      file: agents/pipeline-optimizer.md
+      tier: tools
+      purpose: "GPU routing, cost optimization, cache, infrastructure"
+      covers: ["NFR-01", "NFR-02", "NFR-04", "NFR-05", "NFR-06", "NFR-07"]
+
+quality_gates:
+  - id: QG-DA-001
+    transition: "Input → spatial-analyst"
+    type: routing
+    description: "Route input to correct analysis path (photo vs text vs multi)"
+
+  - id: QG-DA-002
+    transition: "spatial-analyst → staging-architect"
+    type: blocking
+    description: "Croqui must be approved by user before generation"
+
+  - id: QG-DA-003
+    transition: "staging-architect → output"
+    type: blocking
+    description: "Render quality must meet minimum threshold"
+
+  - id: QG-DA-004
+    transition: "conversational-designer → staging-architect"
+    type: non-blocking
+    description: "Refinement instruction mapped to pipeline operation"
+
+handoff_map:
+  decorai-chief:
+    routes_to: ["spatial-analyst", "staging-architect", "conversational-designer", "interior-strategist", "proptech-growth", "visual-quality-engineer", "pipeline-optimizer"]
+
+  spatial-analyst:
+    outputs_to: ["staging-architect"]
+    receives_from: ["decorai-chief"]
+
+  staging-architect:
+    outputs_to: ["visual-quality-engineer", "conversational-designer"]
+    receives_from: ["decorai-chief", "spatial-analyst", "conversational-designer", "interior-strategist"]
+
+  conversational-designer:
+    outputs_to: ["staging-architect"]
+    receives_from: ["decorai-chief"]
+
+  interior-strategist:
+    outputs_to: ["staging-architect"]
+    receives_from: ["decorai-chief"]
+
+  proptech-growth:
+    outputs_to: ["decorai-chief"]
+    receives_from: ["decorai-chief"]
+
+  visual-quality-engineer:
+    outputs_to: ["staging-architect"]
+    receives_from: ["decorai-chief", "staging-architect"]
+
+  pipeline-optimizer:
+    outputs_to: ["staging-architect"]
+    receives_from: ["decorai-chief"]
+
+tools_registry:
+  generation:
+    - "FLUX.2 (fal.ai)"
+    - "SDXL + ControlNet"
+    - "ControlNet Interior Design (ml6team)"
+    - "ComfyUI"
+  segmentation:
+    - "SAM 2 (Meta)"
+    - "OneFormer ADE20K"
+    - "Grounded-SAM-2"
+  depth:
+    - "Depth Anything V2"
+    - "ZoeDepth"
+    - "Marigold"
+  enhancement:
+    - "Real-ESRGAN"
+    - "LaMa / Inpaint-Anything"
+    - "IC-Light"
+  style:
+    - "CLIP"
+    - "IP-Adapter"
+  llm:
+    - "Claude API (Anthropic)"
+  gpu_platforms:
+    - "fal.ai"
+    - "Replicate"
+    - "Modal.com"
+  payments:
+    - "Stripe"
+    - "Asaas"
+  mcp_servers:
+    - "fal-mcp-server"
+    - "mcp-server-stability-ai"
+
+research_sources:
+  tools: "docs/research/decorai-tools-research.md"
+  minds: "Phase 1 research (19 elite minds identified)"
+
+epics_coverage:
+  epic_1: ["spatial-analyst", "staging-architect", "interior-strategist"]
+  epic_2: ["conversational-designer", "staging-architect"]
+  epic_3: ["staging-architect", "visual-quality-engineer"]
+  epic_4: ["decorai-chief"]
+  epic_5: ["proptech-growth"]
+  epic_6: ["proptech-growth"]
+  epic_7: ["staging-architect", "pipeline-optimizer", "visual-quality-engineer"]
