@@ -5,6 +5,22 @@ import DiagnosticoPage from '@/app/diagnostico/page';
 import * as diagnosticsService from '@/services/diagnostics-service';
 import type { DiagnosticResponse } from '@decorai/shared';
 
+// Mock supabase client
+jest.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: {
+      getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
+    },
+  }),
+}));
+
+// Mock next/link
+jest.mock('next/link', () => {
+  return function MockLink({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) {
+    return <a href={href} {...props}>{children}</a>;
+  };
+});
+
 jest.mock('@/services/diagnostics-service');
 
 const mockedService = diagnosticsService as jest.Mocked<typeof diagnosticsService>;
@@ -52,7 +68,7 @@ describe('DiagnosticoPage Integration', () => {
   it('renders hero section and upload area', () => {
     render(<DiagnosticoPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Diagnostico Gratuito do Seu Imovel')).toBeInTheDocument();
+    expect(screen.getByText('Descubra quanto seu imovel esta perdendo')).toBeInTheDocument();
     expect(screen.getByText(/Arraste a foto do seu imovel/)).toBeInTheDocument();
   });
 
@@ -87,7 +103,7 @@ describe('DiagnosticoPage Integration', () => {
 
     // Should show loading immediately
     await waitFor(() => {
-      expect(screen.getByText(/Enviando sua foto/)).toBeInTheDocument();
+      expect(screen.getByText('Analisando seu imovel...')).toBeInTheDocument();
     });
   });
 
@@ -116,7 +132,7 @@ describe('DiagnosticoPage Integration', () => {
     // Verify result components
     expect(screen.getByText('45')).toBeInTheDocument();
     expect(screen.getByText('Iluminacao fraca')).toBeInTheDocument();
-    expect(screen.getByText('Transformar Meu Imovel')).toBeInTheDocument();
+    expect(screen.getByText('Ver Planos')).toBeInTheDocument();
   });
 
   it('shows error state and retry button on failure', async () => {

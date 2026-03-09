@@ -2,6 +2,13 @@ import { render, screen } from '@testing-library/react';
 import { DiagnosticResult } from '@/components/organisms/DiagnosticResult';
 import type { DiagnosticResponse } from '@decorai/shared';
 
+// Mock next/link
+jest.mock('next/link', () => {
+  return function MockLink({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) {
+    return <a href={href} {...props}>{children}</a>;
+  };
+});
+
 const mockResult: DiagnosticResponse = {
   id: 'diag-1',
   user_id: null,
@@ -57,7 +64,7 @@ describe('DiagnosticResult', () => {
   it('renders CTA section', () => {
     render(<DiagnosticResult result={mockResult} />);
 
-    expect(screen.getByText('Transformar Meu Imovel')).toBeInTheDocument();
+    expect(screen.getByText('Ver Planos')).toBeInTheDocument();
     expect(screen.getByText('Seu imovel esta perdendo muito valor!')).toBeInTheDocument();
   });
 

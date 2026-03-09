@@ -94,17 +94,19 @@ As a corretor de imoveis ou proprietario visitando o site pela primeira vez, I w
 
 ## Tasks
 - [x] Task 1: Criar componente DiagnosticUpload em packages/web/src/components/molecules/DiagnosticUploader.tsx com area de drag-and-drop para upload de foto com preview, validacao de formato/tamanho, e indicador de progresso
-- [x] Task 2: Estado de loading implementado diretamente na pagina com Loader2 spinner, barra de progresso e mensagens de etapa
+- [x] Task 2: Criar componente DiagnosticLoading em packages/web/src/components/diagnostic/ com animacao de processamento com mensagens rotativas
 - [x] Task 3: Criar componente ScoreGauge em packages/web/src/components/molecules/ScoreGauge.tsx com gauge visual semicircular para exibir overall_score (0-100) com cores por faixa
-- [x] Task 4: Criar componente DiagnosticResult em packages/web/src/components/organisms/DiagnosticResult.tsx com layout principal de resultados incluindo score, perda estimada, foto original vs staged preview (BeforeAfterSlider), issues e recomendacoes
-- [x] Task 5: Criar componente IssueList em packages/web/src/components/molecules/IssueList.tsx com issues agrupadas por categoria, badges de severidade, e recomendacoes
-- [x] Task 6: Criar componente DiagnosticCta em packages/web/src/components/molecules/DiagnosticCta.tsx com card CTA dinamico com estilo visual baseado no score, botao de acao, e tier recomendado
+- [x] Task 4: Criar componente DiagnosticResults em packages/web/src/components/organisms/DiagnosticResult.tsx com layout principal de resultados incluindo score, perda estimada, issues com icones por categoria ordenados por severidade, recomendacoes com titulo "O que fazer para melhorar", e CTA auth-aware
+- [x] Task 5: Criar componente IssueCard em packages/web/src/components/diagnostic/ com card individual para cada issue incluindo icone por categoria, badge de severidade, e descricao
+- [x] Task 6: Criar componente DiagnosticCTA em packages/web/src/components/diagnostic/ com card CTA dinamico com estilo visual baseado no score, botao de acao auth-aware, e tier recomendado
 - [x] Task 7: Criar hook useDiagnostic em packages/web/src/hooks/use-diagnostic.ts para gerenciar estado do fluxo de diagnostico (upload, processing, result), chamadas API, e polling
-- [x] Task 8: Criar pagina /diagnostico em packages/web/src/app/diagnostico/page.tsx como rota publica com layout proprio, QueryProvider, e orquestracao do fluxo upload -> loading -> resultado
-- [x] Task 9: Criar service diagnostics-service.ts em packages/web/src/services/ com chamadas API (create, upload, getResult) usando credentials: include para cookies
-- [x] Task 10: Escrever testes unitarios para componentes (DiagnosticUploader, ScoreGauge, IssueList, DiagnosticCta, DiagnosticResult)
-- [x] Task 11: Escrever teste de integracao para o fluxo completo: upload -> loading -> resultado -> CTA
-- [x] Task 12: Validar que npm run lint, npm run typecheck e npm test passam sem erros
+- [x] Task 8: Criar pagina /diagnostico em packages/web/src/app/diagnostico/page.tsx como rota publica com landing section "Descubra quanto seu imovel esta perdendo", DiagnosticLoading com mensagens rotativas, e auth-aware CTA
+- [x] Task 9: Criar pagina /diagnostico/:id em packages/web/src/app/diagnostico/[id]/page.tsx como pagina de resultado compartilhavel com OG metadata para social sharing
+- [x] Task 10: Implementar logica de compartilhamento (copiar link, WhatsApp) no componente DiagnosticShare
+- [x] Task 11: Implementar fluxo anonimo -> autenticado com rota publica no middleware e session_token via cookie
+- [x] Task 12: Escrever testes unitarios para componentes (DiagnosticLoading, ScoreGauge, IssueCard, DiagnosticCTA, DiagnosticResults)
+- [x] Task 13: Escrever testes de integracao para o fluxo completo: upload -> loading -> resultado -> CTA
+- [x] Task 14: Validar que npm run lint, npm run typecheck e npm test passam sem erros
 
 ## Dependencies
 - Story 5.1 (Reverse Staging Diagnostico API) -- endpoints POST /diagnostics, POST /diagnostics/:id/upload, GET /diagnostics/:id
@@ -129,9 +131,12 @@ Implemented core Story 5.2 functionality following existing codebase patterns (a
 ### Debug Log
 - Fixed test for DiagnosticResult where '30%' appeared in both score section and CTA (used getAllByText)
 - Fixed integration test for loading state by using delayed mock to observe transient state
+- Updated DiagnosticResult organism to use new IssueCard, DiagnosticCTA (auth-aware), DiagnosticShare components
+- Added supabase mock to existing integration tests after adding auth-awareness to page
 
 ### Change Log
-- 2026-03-09: Full implementation of Story 5.2 by @dev
+- 2026-03-09: Initial implementation of Story 5.2 (upload, loading, result, CTA) by @dev
+- 2026-03-09: Enhanced with AC-3 DiagnosticLoading (rotating messages), AC-5 IssueCard (icons per category), AC-6 recommendations title, AC-7 auth-aware CTA, AC-8 public route middleware, AC-9 share + /diagnostico/:id OG page, new tests by @dev
 
 ## Testing
 - Testes unitarios: componentes com React Testing Library, mock das APIs
@@ -141,20 +146,30 @@ Implemented core Story 5.2 functionality following existing codebase patterns (a
 - Testes de acessibilidade: verificar aria-labels nos componentes interativos
 
 ## File List
-- `packages/web/src/services/diagnostics-service.ts` (new)
-- `packages/web/src/hooks/use-diagnostic.ts` (new)
-- `packages/web/src/components/molecules/DiagnosticUploader.tsx` (new)
-- `packages/web/src/components/molecules/ScoreGauge.tsx` (new)
-- `packages/web/src/components/molecules/IssueList.tsx` (new)
-- `packages/web/src/components/molecules/DiagnosticCta.tsx` (new)
-- `packages/web/src/components/organisms/DiagnosticResult.tsx` (new)
-- `packages/web/src/app/diagnostico/layout.tsx` (new)
-- `packages/web/src/app/diagnostico/page.tsx` (new)
-- `packages/web/src/__tests__/molecules/diagnostic-uploader.test.tsx` (new)
-- `packages/web/src/__tests__/molecules/score-gauge.test.tsx` (new)
-- `packages/web/src/__tests__/molecules/issue-list.test.tsx` (new)
-- `packages/web/src/__tests__/molecules/diagnostic-cta.test.tsx` (new)
-- `packages/web/src/__tests__/organisms/diagnostic-result.test.tsx` (new)
-- `packages/web/src/__tests__/integration/diagnostic-page.test.tsx` (new)
+- `packages/web/src/services/diagnostics-service.ts` (existing)
+- `packages/web/src/hooks/use-diagnostic.ts` (existing)
+- `packages/web/src/components/molecules/DiagnosticUploader.tsx` (existing)
+- `packages/web/src/components/molecules/ScoreGauge.tsx` (existing)
+- `packages/web/src/components/molecules/IssueList.tsx` (existing)
+- `packages/web/src/components/molecules/DiagnosticCta.tsx` (existing, superseded by diagnostic/DiagnosticCTA)
+- `packages/web/src/components/organisms/DiagnosticResult.tsx` (modified — auth-aware CTA, IssueCard with icons, share)
+- `packages/web/src/components/diagnostic/DiagnosticLoading.tsx` (new — rotating analysis messages)
+- `packages/web/src/components/diagnostic/DiagnosticCTA.tsx` (new — auth-aware CTA with dynamic styling)
+- `packages/web/src/components/diagnostic/DiagnosticShare.tsx` (new — copy link + WhatsApp share)
+- `packages/web/src/components/diagnostic/IssueCard.tsx` (new — per-issue card with category icon)
+- `packages/web/src/components/diagnostic/DiagnosticResults.tsx` (new — standalone results container)
+- `packages/web/src/components/diagnostic/index.ts` (new — barrel export)
+- `packages/web/src/app/diagnostico/page.tsx` (modified — DiagnosticLoading, auth state, new title)
+- `packages/web/src/app/diagnostico/[id]/page.tsx` (new — SSR share page with OG metadata)
+- `packages/web/src/app/diagnostico/[id]/diagnostic-result-view.tsx` (new — client wrapper)
+- `packages/web/src/lib/supabase/middleware.ts` (modified — /diagnostico as public route)
+- `packages/web/src/__tests__/diagnostic/diagnostic-loading.test.tsx` (new)
+- `packages/web/src/__tests__/diagnostic/score-gauge.test.tsx` (new)
+- `packages/web/src/__tests__/diagnostic/issue-card.test.tsx` (new)
+- `packages/web/src/__tests__/diagnostic/diagnostic-cta.test.tsx` (new)
+- `packages/web/src/__tests__/diagnostic/diagnostic-results.test.tsx` (new)
+- `packages/web/src/__tests__/integration/diagnostic-flow.test.tsx` (new)
+- `packages/web/src/__tests__/organisms/diagnostic-result.test.tsx` (modified)
+- `packages/web/src/__tests__/integration/diagnostic-page.test.tsx` (modified)
 
 ## QA Results
