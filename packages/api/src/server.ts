@@ -1,12 +1,22 @@
 import Fastify from 'fastify';
+import multipart from '@fastify/multipart';
 import { env } from './config/env';
 import { logger } from './lib/logger';
 import { errorHandler } from './middleware/error-handler';
 import { authRoutes } from './routes/auth.routes';
+import { projectRoutes } from './routes/project.routes';
+import { spatialRoutes } from './routes/spatial.routes';
+import { referenceRoutes } from './routes/reference.routes';
 
 const server = Fastify({ logger: false });
 
 server.setErrorHandler(errorHandler);
+
+server.register(multipart, {
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 20MB
+  },
+});
 
 const corsOrigins = env.CORS_ORIGINS.split(',').map((o) => o.trim());
 server.addHook('onRequest', async (request, reply) => {
@@ -27,6 +37,9 @@ server.get('/health', async () => {
 });
 
 server.register(authRoutes, { prefix: '/auth' });
+server.register(projectRoutes, { prefix: '/projects' });
+server.register(spatialRoutes, { prefix: '/projects' });
+server.register(referenceRoutes, { prefix: '/projects' });
 
 const start = async () => {
   try {
