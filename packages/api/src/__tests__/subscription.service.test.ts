@@ -33,7 +33,7 @@ vi.mock('../config/env', () => ({
     STRIPE_WEBHOOK_SECRET: 'whsec_xxx',
     STRIPE_PRO_PRICE_ID: 'price_pro',
     STRIPE_BUSINESS_PRICE_ID: 'price_business',
-    ANTHROPIC_API_KEY: 'sk-ant-test',
+    OPENROUTER_API_KEY: 'sk-or-test',
     ASAAS_API_KEY: 'test-asaas-key',
     ASAAS_API_URL: 'https://sandbox.asaas.com/api',
     ASAAS_WEBHOOK_TOKEN: 'test-webhook-token',

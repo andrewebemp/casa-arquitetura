@@ -1,13 +1,11 @@
 import { createUserClient, supabaseAdmin } from '../lib/supabase';
-import { getAnthropicClient } from '../lib/anthropic';
+import { chatCompletion } from '../lib/llm';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
 import { enqueueRenderJob } from '../queue/render.queue';
 import { quotaService } from './quota.service';
 import { chatEvents } from '../queue/chat.events';
 import type { RefinementOperation } from '@decorai/shared';
-
-const NLU_MODEL = 'claude-sonnet-4-20250514';
 
 const NLU_SYSTEM_PROMPT = `You are a natural language understanding engine for DecorAI, an interior design application.
 Your job is to interpret user commands in Brazilian Portuguese and extract structured operations for room refinement.
@@ -59,36 +57,24 @@ async function verifyProjectOwnership(
 }
 
 async function extractOperations(message: string, spatialContext: string): Promise<RefinementOperation[]> {
-  const anthropic = getAnthropicClient();
-
   const userPrompt = spatialContext
     ? `Context about the room:\n${spatialContext}\n\nUser command: ${message}`
     : `User command: ${message}`;
 
-  const response = await anthropic.messages.create({
-    model: NLU_MODEL,
-    max_tokens: 1024,
+  const response = await chatCompletion({
     system: NLU_SYSTEM_PROMPT,
     messages: [{ role: 'user', content: userPrompt }],
+    maxTokens: 1024,
   });
 
-  const textBlock = response.content.find((block: { type: string }) => block.type === 'text');
-  if (!textBlock || textBlock.type !== 'text') {
-    throw new AppError({
-      code: 'NLU_EXTRACTION_FAILED',
-      message: 'Falha ao interpretar comando: resposta vazia do modelo',
-      statusCode: 500,
-    });
-  }
-
   try {
-    const operations = JSON.parse(textBlock.text.trim()) as RefinementOperation[];
+    const operations = JSON.parse(response.text.trim()) as RefinementOperation[];
     if (!Array.isArray(operations)) {
       throw new Error('Response is not an array');
     }
     return operations;
   } catch {
-    logger.error({ raw: textBlock.text }, 'Failed to parse NLU response as JSON');
+    logger.error({ raw: response.text }, 'Failed to parse NLU response as JSON');
     throw new AppError({
       code: 'NLU_PARSE_FAILED',
       message: 'Falha ao interpretar comando: resposta invalida do modelo',
@@ -127,7 +113,7 @@ export const chatService = {
       spatialContext = parts.join('. ');
     }
 
-    // Extract operations via Claude NLU
+    // Extract operations via LLM NLU
     const operations = await extractOperations(message, spatialContext);
 
     // Save user chat message

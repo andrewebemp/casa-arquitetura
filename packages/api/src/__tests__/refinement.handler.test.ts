@@ -20,7 +20,7 @@ vi.mock('../config/env', () => ({
     PORT: 3001,
     NODE_ENV: 'test',
     CORS_ORIGINS: 'http://localhost:3000',
-    ANTHROPIC_API_KEY: 'test-anthropic-key',
+    OPENROUTER_API_KEY: 'test-openrouter-key',
     AI_PIPELINE_URL: 'http://localhost:8000',
   },
 }));

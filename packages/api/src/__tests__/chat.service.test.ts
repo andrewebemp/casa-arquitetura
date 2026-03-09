@@ -19,7 +19,7 @@ vi.mock('../config/env', () => ({
     PORT: 3001,
     NODE_ENV: 'test',
     CORS_ORIGINS: 'http://localhost:3000',
-    ANTHROPIC_API_KEY: 'test-anthropic-key',
+    OPENROUTER_API_KEY: 'test-openrouter-key',
   },
 }));
 
@@ -32,11 +32,10 @@ vi.mock('../lib/logger', () => ({
   },
 }));
 
-const mockCreate = vi.fn();
-vi.mock('../lib/anthropic', () => ({
-  getAnthropicClient: vi.fn(() => ({
-    messages: { create: mockCreate },
-  })),
+const mockChatCompletion = vi.fn();
+vi.mock('../lib/llm', () => ({
+  chatCompletion: (...args: unknown[]) => mockChatCompletion(...args),
+  DEFAULT_MODEL: 'google/gemini-3-flash-preview',
 }));
 
 vi.mock('../queue/render.queue', () => ({
@@ -100,8 +99,10 @@ describe('chatService', () => {
 
   describe('extractOperations (NLU)', () => {
     it('should extract remove operation from PT-BR command', async () => {
-      mockCreate.mockResolvedValue({
-        content: [{ type: 'text', text: '[{"type":"remove","target":"tapete","params":{}}]' }],
+      mockChatCompletion.mockResolvedValue({
+        text: '[{"type":"remove","target":"tapete","params":{}}]',
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       const ops = await _extractOperations('tira o tapete', '');
@@ -111,11 +112,10 @@ describe('chatService', () => {
     });
 
     it('should extract change operation with params', async () => {
-      mockCreate.mockResolvedValue({
-        content: [{
-          type: 'text',
-          text: '[{"type":"change","target":"piso","params":{"material":"madeira clara"}}]',
-        }],
+      mockChatCompletion.mockResolvedValue({
+        text: '[{"type":"change","target":"piso","params":{"material":"madeira clara"}}]',
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       const ops = await _extractOperations('muda o piso para madeira clara', '');
@@ -126,11 +126,10 @@ describe('chatService', () => {
     });
 
     it('should extract multiple operations from compound command', async () => {
-      mockCreate.mockResolvedValue({
-        content: [{
-          type: 'text',
-          text: '[{"type":"remove","target":"tapete","params":{}},{"type":"change","target":"piso","params":{"material":"madeira clara"}}]',
-        }],
+      mockChatCompletion.mockResolvedValue({
+        text: '[{"type":"remove","target":"tapete","params":{}},{"type":"change","target":"piso","params":{"material":"madeira clara"}}]',
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       const ops = await _extractOperations('tira o tapete e muda o piso para madeira clara', '');
@@ -140,11 +139,10 @@ describe('chatService', () => {
     });
 
     it('should extract add operation', async () => {
-      mockCreate.mockResolvedValue({
-        content: [{
-          type: 'text',
-          text: '[{"type":"add","target":"planta","params":{"position":"canto"}}]',
-        }],
+      mockChatCompletion.mockResolvedValue({
+        text: '[{"type":"add","target":"planta","params":{"position":"canto"}}]',
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       const ops = await _extractOperations('coloca uma planta no canto', '');
@@ -155,11 +153,10 @@ describe('chatService', () => {
     });
 
     it('should extract adjust operation for ambiance', async () => {
-      mockCreate.mockResolvedValue({
-        content: [{
-          type: 'text',
-          text: '[{"type":"adjust","target":"ambiente","params":{"mood":"aconchegante","lighting":"quente"}}]',
-        }],
+      mockChatCompletion.mockResolvedValue({
+        text: '[{"type":"adjust","target":"ambiente","params":{"mood":"aconchegante","lighting":"quente"}}]',
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       const ops = await _extractOperations('deixa mais aconchegante com iluminacao quente', '');
@@ -168,20 +165,22 @@ describe('chatService', () => {
       expect(ops[0].params.mood).toBe('aconchegante');
     });
 
-    it('should throw NLU_EXTRACTION_FAILED when Claude returns empty response', async () => {
-      mockCreate.mockResolvedValue({ content: [] });
+    it('should throw when LLM returns empty response', async () => {
+      mockChatCompletion.mockRejectedValue(new Error('OpenRouter returned empty response'));
 
       try {
         await _extractOperations('test', '');
         expect.unreachable('Should have thrown');
       } catch (err) {
-        expect((err as AppError).code).toBe('NLU_EXTRACTION_FAILED');
+        expect((err as Error).message).toContain('empty response');
       }
     });
 
-    it('should throw NLU_PARSE_FAILED when Claude returns invalid JSON', async () => {
-      mockCreate.mockResolvedValue({
-        content: [{ type: 'text', text: 'not valid json' }],
+    it('should throw NLU_PARSE_FAILED when LLM returns invalid JSON', async () => {
+      mockChatCompletion.mockResolvedValue({
+        text: 'not valid json',
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 5 },
       });
 
       try {
@@ -192,13 +191,15 @@ describe('chatService', () => {
       }
     });
 
-    it('should include spatial context in Claude prompt when available', async () => {
-      mockCreate.mockResolvedValue({
-        content: [{ type: 'text', text: '[{"type":"remove","target":"sofa","params":{}}]' }],
+    it('should include spatial context in LLM prompt when available', async () => {
+      mockChatCompletion.mockResolvedValue({
+        text: '[{"type":"remove","target":"sofa","params":{}}]',
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       await _extractOperations('remove o sofa', 'Room: 4m x 6m. Items: Sofa, Mesa');
-      expect(mockCreate).toHaveBeenCalledWith(
+      expect(mockChatCompletion).toHaveBeenCalledWith(
         expect.objectContaining({
           messages: [
             expect.objectContaining({
@@ -240,8 +241,10 @@ describe('chatService', () => {
         });
       });
 
-      mockCreate.mockResolvedValue({
-        content: [{ type: 'text', text: '[{"type":"remove","target":"tapete","params":{}}]' }],
+      mockChatCompletion.mockResolvedValue({
+        text: '[{"type":"remove","target":"tapete","params":{}}]',
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       const result = await chatService.sendMessage(PROJECT_ID, USER_ID, 'tira o tapete', TOKEN);

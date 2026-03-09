@@ -32,7 +32,7 @@ describe('env config', () => {
     process.env.STRIPE_WEBHOOK_SECRET = 'whsec_xxx';
     process.env.STRIPE_PRO_PRICE_ID = 'price_pro';
     process.env.STRIPE_BUSINESS_PRICE_ID = 'price_business';
-    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
+    process.env.OPENROUTER_API_KEY = 'sk-or-test-key';
 
     const { env } = await import('../config/env');
 
@@ -47,6 +47,6 @@ describe('env config', () => {
     expect(env.STRIPE_WEBHOOK_SECRET).toBe('whsec_xxx');
     expect(env.STRIPE_PRO_PRICE_ID).toBe('price_pro');
     expect(env.STRIPE_BUSINESS_PRICE_ID).toBe('price_business');
-    expect(env.ANTHROPIC_API_KEY).toBe('sk-ant-test-key');
+    expect(env.OPENROUTER_API_KEY).toBe('sk-or-test-key');
   });
 });

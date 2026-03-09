@@ -19,7 +19,7 @@ vi.mock('../config/env', () => ({
     PORT: 3001,
     NODE_ENV: 'test',
     CORS_ORIGINS: 'http://localhost:3000',
-    ANTHROPIC_API_KEY: 'test-anthropic-key',
+    OPENROUTER_API_KEY: 'test-openrouter-key',
   },
 }));
 
@@ -32,11 +32,10 @@ vi.mock('../lib/logger', () => ({
   },
 }));
 
-const mockCreate = vi.fn();
-vi.mock('../lib/anthropic', () => ({
-  getAnthropicClient: vi.fn(() => ({
-    messages: { create: mockCreate },
-  })),
+const mockChatCompletion = vi.fn();
+vi.mock('../lib/llm', () => ({
+  chatCompletion: (...args: unknown[]) => mockChatCompletion(...args),
+  DEFAULT_MODEL: 'google/gemini-3-flash-preview',
 }));
 
 import { croquiService } from '../services/croqui.service';
@@ -88,8 +87,10 @@ describe('croquiService', () => {
         return mockChain({ data: spatialInput, error: null });
       });
 
-      mockCreate.mockResolvedValue({
-        content: [{ type: 'text', text: generatedCroqui }],
+      mockChatCompletion.mockResolvedValue({
+        text: generatedCroqui,
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       const updatedSpatial = { ...spatialInput, croqui_ascii: generatedCroqui, croqui_turn_number: 1 };
@@ -97,7 +98,7 @@ describe('croquiService', () => {
 
       const result = await croquiService.generate(PROJECT_ID, USER_ID, TOKEN);
       expect(result).toEqual(updatedSpatial);
-      expect(mockCreate).toHaveBeenCalledOnce();
+      expect(mockChatCompletion).toHaveBeenCalledOnce();
     });
 
     it('should throw SPATIAL_INPUT_NOT_FOUND when no spatial data', async () => {
@@ -226,8 +227,10 @@ describe('croquiService', () => {
         return mockChain({ data: spatialInput, error: null });
       });
 
-      mockCreate.mockResolvedValue({
-        content: [{ type: 'text', text: adjustedCroqui }],
+      mockChatCompletion.mockResolvedValue({
+        text: adjustedCroqui,
+        model: 'google/gemini-3-flash-preview',
+        usage: { prompt_tokens: 10, completion_tokens: 20 },
       });
 
       mockAdminFrom.mockReturnValue(

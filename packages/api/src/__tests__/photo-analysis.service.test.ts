@@ -19,7 +19,7 @@ vi.mock('../config/env', () => ({
     PORT: 3001,
     NODE_ENV: 'test',
     CORS_ORIGINS: 'http://localhost:3000',
-    ANTHROPIC_API_KEY: 'test-anthropic-key',
+    OPENROUTER_API_KEY: 'test-openrouter-key',
   },
 }));
 
@@ -32,11 +32,10 @@ vi.mock('../lib/logger', () => ({
   },
 }));
 
-const mockCreate = vi.fn();
-vi.mock('../lib/anthropic', () => ({
-  getAnthropicClient: vi.fn(() => ({
-    messages: { create: mockCreate },
-  })),
+const mockChatCompletion = vi.fn();
+vi.mock('../lib/llm', () => ({
+  chatCompletion: (...args: unknown[]) => mockChatCompletion(...args),
+  DEFAULT_MODEL: 'google/gemini-3-flash-preview',
 }));
 
 const mockAnalyzeDepth = vi.fn();
@@ -92,7 +91,7 @@ describe('photoAnalysisService', () => {
         ],
       });
 
-      // Mock Claude spatial interpretation
+      // Mock LLM spatial interpretation
       const spatialJson = JSON.stringify({
         dimensions: { width: 5, length: 7, height: 2.8 },
         openings: [
@@ -104,13 +103,21 @@ describe('photoAnalysisService', () => {
 
       const croquiAscii = '+----------+\n|    W     |\n|          |\n+----D-----+';
 
-      let claudeCallCount = 0;
-      mockCreate.mockImplementation(() => {
-        claudeCallCount++;
-        if (claudeCallCount === 1) {
-          return Promise.resolve({ content: [{ type: 'text', text: spatialJson }] });
+      let llmCallCount = 0;
+      mockChatCompletion.mockImplementation(() => {
+        llmCallCount++;
+        if (llmCallCount === 1) {
+          return Promise.resolve({
+            text: spatialJson,
+            model: 'google/gemini-3-flash-preview',
+            usage: { prompt_tokens: 10, completion_tokens: 20 },
+          });
         }
-        return Promise.resolve({ content: [{ type: 'text', text: croquiAscii }] });
+        return Promise.resolve({
+          text: croquiAscii,
+          model: 'google/gemini-3-flash-preview',
+          usage: { prompt_tokens: 10, completion_tokens: 30 },
+        });
       });
 
       // Mock admin DB calls
@@ -142,7 +149,7 @@ describe('photoAnalysisService', () => {
       expect(result.croqui.turn_number).toBe(1);
       expect(result.croqui.approved).toBe(false);
       expect(mockAnalyzeDepth).toHaveBeenCalledWith(IMAGE_URL);
-      expect(mockCreate).toHaveBeenCalledTimes(2);
+      expect(mockChatCompletion).toHaveBeenCalledTimes(2);
     });
 
     it('should throw PROJECT_NOT_FOUND when project not found', async () => {

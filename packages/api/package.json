@@ -11,7 +11,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
     "@decorai/shared": "workspace:*",
     "@fastify/multipart": "^8.3.1",
     "@supabase/supabase-js": "^2.98.0",

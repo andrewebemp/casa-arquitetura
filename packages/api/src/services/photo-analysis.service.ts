@@ -1,10 +1,8 @@
 import { createUserClient, supabaseAdmin } from '../lib/supabase';
-import { getAnthropicClient } from '../lib/anthropic';
+import { chatCompletion } from '../lib/llm';
 import { aiPipelineClient } from '../lib/ai-pipeline.client';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
-
-const CROQUI_MODEL = 'claude-sonnet-4-20250514';
 
 const SPATIAL_INTERPRETATION_PROMPT = `You are a spatial analysis AI for interior design.
 Given depth estimation data from a room photo, interpret it into structured spatial data.
@@ -92,8 +90,7 @@ export const photoAnalysisService = {
       });
     }
 
-    // Step 2: Use Claude to interpret depth data into spatial data
-    const anthropic = getAnthropicClient();
+    // Step 2: Use LLM to interpret depth data into spatial data
     const interpretationPrompt = `Depth estimation results for a room photo:
 - Estimated dimensions: ${depthResult.estimated_dimensions.width_m}m x ${depthResult.estimated_dimensions.length_m}m x ${depthResult.estimated_dimensions.height_m}m
 - Detected features: ${JSON.stringify(depthResult.detected_features)}
@@ -102,19 +99,13 @@ Interpret this into structured spatial data:`;
 
     let spatialData: SpatialInterpretation;
     try {
-      const message = await anthropic.messages.create({
-        model: CROQUI_MODEL,
-        max_tokens: 1024,
+      const response = await chatCompletion({
         system: SPATIAL_INTERPRETATION_PROMPT,
         messages: [{ role: 'user', content: interpretationPrompt }],
+        maxTokens: 1024,
       });
 
-      const textBlock = message.content.find((block: { type: string }) => block.type === 'text');
-      if (!textBlock || textBlock.type !== 'text') {
-        throw new Error('Empty response from Claude');
-      }
-
-      spatialData = JSON.parse((textBlock as { type: string; text: string }).text.trim());
+      spatialData = JSON.parse(response.text.trim());
     } catch (err) {
       logger.error({ err }, 'Spatial interpretation failed');
       throw new AppError({
@@ -165,19 +156,13 @@ ${spatialData.detected_elements.length > 0 ? `\nDetected elements: ${spatialData
 
     let croquiAscii: string;
     try {
-      const croquiMessage = await anthropic.messages.create({
-        model: CROQUI_MODEL,
-        max_tokens: 2048,
+      const croquiResponse = await chatCompletion({
         system: CROQUI_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: croquiPrompt }],
+        maxTokens: 2048,
       });
 
-      const textBlock = croquiMessage.content.find((block: { type: string }) => block.type === 'text');
-      if (!textBlock || textBlock.type !== 'text') {
-        throw new Error('Empty croqui response');
-      }
-
-      croquiAscii = (textBlock as { type: string; text: string }).text.trim();
+      croquiAscii = croquiResponse.text.trim();
     } catch (err) {
       logger.error({ err }, 'Croqui generation from photo failed');
       throw new AppError({

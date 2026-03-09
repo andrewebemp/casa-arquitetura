@@ -1,9 +1,7 @@
 import { createUserClient, supabaseAdmin } from '../lib/supabase';
-import { getAnthropicClient } from '../lib/anthropic';
+import { chatCompletion } from '../lib/llm';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
-
-const CROQUI_MODEL = 'claude-sonnet-4-20250514';
 const MAX_TURNS = 3;
 
 const SYSTEM_PROMPT = `You are an ASCII floor plan generator for interior design.
@@ -84,26 +82,14 @@ function buildAdjustPrompt(currentCroqui: string, instructions: string): string 
   return `Current floor plan:\n\`\`\`\n${currentCroqui}\n\`\`\`\n\nAdjustment instructions: ${instructions}\n\nGenerate the updated floor plan:`;
 }
 
-async function callClaude(systemPrompt: string, userPrompt: string): Promise<string> {
-  const anthropic = getAnthropicClient();
-
-  const message = await anthropic.messages.create({
-    model: CROQUI_MODEL,
-    max_tokens: 2048,
+async function callLlm(systemPrompt: string, userPrompt: string): Promise<string> {
+  const response = await chatCompletion({
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
+    maxTokens: 2048,
   });
 
-  const textBlock = message.content.find((block: { type: string }) => block.type === 'text');
-  if (!textBlock || textBlock.type !== 'text') {
-    throw new AppError({
-      code: 'CROQUI_GENERATION_FAILED',
-      message: 'Falha ao gerar croqui: resposta vazia do modelo',
-      statusCode: 500,
-    });
-  }
-
-  return textBlock.text.trim();
+  return response.text.trim();
 }
 
 async function verifyProjectOwnership(
@@ -165,7 +151,7 @@ export const croquiService = {
       items: spatial.items ?? [],
     });
 
-    const croquiAscii = await callClaude(SYSTEM_PROMPT, prompt);
+    const croquiAscii = await callLlm(SYSTEM_PROMPT, prompt);
 
     const { data: updated, error } = await supabaseAdmin
       .from('spatial_inputs')
@@ -275,7 +261,7 @@ export const croquiService = {
     }
 
     const prompt = buildAdjustPrompt(spatial.croqui_ascii, instructions);
-    const updatedCroqui = await callClaude(ADJUST_SYSTEM_PROMPT, prompt);
+    const updatedCroqui = await callLlm(ADJUST_SYSTEM_PROMPT, prompt);
 
     const newTurn = currentTurn + 1;
     const { error } = await supabaseAdmin

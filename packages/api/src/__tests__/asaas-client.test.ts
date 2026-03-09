@@ -18,7 +18,7 @@ vi.mock('../config/env', () => ({
     STRIPE_WEBHOOK_SECRET: 'whsec_xxx',
     STRIPE_PRO_PRICE_ID: 'price_pro',
     STRIPE_BUSINESS_PRICE_ID: 'price_business',
-    ANTHROPIC_API_KEY: 'test-anthropic-key',
+    OPENROUTER_API_KEY: 'test-openrouter-key',
   },
 }));
 

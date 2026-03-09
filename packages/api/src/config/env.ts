@@ -12,7 +12,7 @@ export const env = cleanEnv(process.env, {
   STRIPE_WEBHOOK_SECRET: str({ desc: 'Stripe webhook signing secret' }),
   STRIPE_PRO_PRICE_ID: str({ desc: 'Stripe Price ID for Pro tier' }),
   STRIPE_BUSINESS_PRICE_ID: str({ desc: 'Stripe Price ID for Business tier' }),
-  ANTHROPIC_API_KEY: str({ desc: 'Anthropic API key for Claude croqui generation' }),
+  OPENROUTER_API_KEY: str({ desc: 'OpenRouter API key for LLM (Gemini Flash)' }),
   ASAAS_API_KEY: str({ default: '', desc: 'Asaas API key (sandbox or production)' }),
   ASAAS_WEBHOOK_TOKEN: str({ default: '', desc: 'Asaas webhook authentication token' }),
   ASAAS_API_URL: str({ default: 'https://sandbox.asaas.com/api', desc: 'Asaas API base URL' }),
