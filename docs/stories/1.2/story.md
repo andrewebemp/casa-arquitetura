@@ -1,6 +1,6 @@
 # Story 1.2 - Croqui ASCII: Geracao, Refinamento 3-Turn e Aprovacao API
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a user who uploaded a room photo or provided spatial input data,
@@ -121,19 +121,19 @@ User Approves ──→ POST /croqui/approve ──→ Marks approved
 | POST | `/projects/:id/croqui/approve` | Approve croqui, unlock generation | FR-31 |
 
 ## Tasks
-- [ ] Task 1: Create Zod schemas for croqui endpoints (analyze, adjust, approve request/response)
-- [ ] Task 2: Implement croqui generation service (`croqui.service.ts`) with Claude API integration
-- [ ] Task 3: Implement photo analysis service (`photo-analysis.service.ts`) integrating ZoeDepth + Claude spatial interpretation
-- [ ] Task 4: Implement croqui state management (turn tracking, approval status) in spatial_inputs table
-- [ ] Task 5: Create `POST /projects/:id/analyze` route — photo analysis + auto croqui generation
-- [ ] Task 6: Create `GET /projects/:id/croqui` route — retrieve current croqui
-- [ ] Task 7: Create `POST /projects/:id/croqui/adjust` route — 3-turn refinement
-- [ ] Task 8: Create `POST /projects/:id/croqui/approve` route — approval gate
-- [ ] Task 9: Add croqui approval check to existing `POST /projects/:id/generate` route (Story 7.5)
-- [ ] Task 10: Write unit tests for croqui service (generation, adjustment, turn limits)
-- [ ] Task 11: Write unit tests for photo analysis service
-- [ ] Task 12: Write route integration tests for all 4 endpoints
-- [ ] Task 13: Run lint, typecheck, and full test suite
+- [x] Task 1: Create Zod schemas for croqui endpoints (analyze, adjust, approve request/response)
+- [x] Task 2: Implement croqui generation service (`croqui.service.ts`) with Claude API integration
+- [x] Task 3: Implement photo analysis service (`photo-analysis.service.ts`) integrating ZoeDepth + Claude spatial interpretation
+- [x] Task 4: Implement croqui state management (turn tracking, approval status) in spatial_inputs table
+- [x] Task 5: Create `POST /projects/:id/analyze` route — photo analysis + auto croqui generation
+- [x] Task 6: Create `GET /projects/:id/croqui` route — retrieve current croqui
+- [x] Task 7: Create `POST /projects/:id/croqui/adjust` route — 3-turn refinement
+- [x] Task 8: Create `POST /projects/:id/croqui/approve` route — approval gate
+- [x] Task 9: Add croqui approval check to existing `POST /projects/:id/generate` route (Story 7.5)
+- [x] Task 10: Write unit tests for croqui service (generation, adjustment, turn limits)
+- [x] Task 11: Write unit tests for photo analysis service
+- [x] Task 12: Write route integration tests for all 4 endpoints
+- [x] Task 13: Run lint, typecheck, and full test suite
 
 ## Dependencies
 - **Story 7.1** (Done) — Monorepo structure, shared types
@@ -152,8 +152,13 @@ User Approves ──→ POST /croqui/approve ──→ Marks approved
 
 ## Dev Agent Record
 ### Implementation Plan
+Implemented croqui ASCII generation, 3-turn refinement, and approval API using Claude API (claude-sonnet-4-20250514) via @anthropic-ai/sdk. Photo analysis integrates ZoeDepth depth estimation from AI pipeline with Claude spatial interpretation.
+
 ### Debug Log
+No issues encountered.
+
 ### Change Log
+- 2026-03-09: Story 1.2 implementation complete — all 13 tasks done, 299 tests passing
 
 ## Testing
 - Unit tests for croqui generation logic (ASCII rendering from spatial data)
@@ -165,5 +170,23 @@ User Approves ──→ POST /croqui/approve ──→ Marks approved
 - Mock Claude API responses for deterministic testing
 
 ## File List
+- `packages/api/src/schemas/croqui.schema.ts` — Zod schemas for adjust endpoint
+- `packages/api/src/lib/anthropic.ts` — Anthropic client singleton
+- `packages/api/src/services/croqui.service.ts` — Croqui generation, retrieval, adjustment, approval
+- `packages/api/src/services/photo-analysis.service.ts` — Photo analysis with ZoeDepth + Claude
+- `packages/api/src/routes/croqui.routes.ts` — All 4 croqui endpoints
+- `packages/api/src/server.ts` — (modified) Registered croqui routes
+- `packages/api/src/services/render.service.ts` — (modified) Added croqui approval gate (AC6)
+- `packages/api/src/config/env.ts` — (modified) Added ANTHROPIC_API_KEY
+- `packages/shared/src/types/spatial-input.ts` — (modified) Added croqui_turn_number
+- `packages/shared/src/types/database.types.ts` — (modified) Added croqui_turn_number column
+- `packages/api/package.json` — (modified) Added @anthropic-ai/sdk dependency
+- `packages/api/src/__tests__/croqui.service.test.ts` — Croqui service unit tests
+- `packages/api/src/__tests__/photo-analysis.service.test.ts` — Photo analysis unit tests
+- `packages/api/src/__tests__/croqui.routes.test.ts` — Route integration tests
+- `packages/api/src/__tests__/render.service.test.ts` — (modified) Added croqui approval gate test
 
 ## QA Results
+- `npm run lint` ✅ — 0 errors
+- `npm run typecheck` ✅ — 0 errors
+- `npm test` ✅ — 299 tests passing (31 test files)
