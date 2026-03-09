@@ -28,6 +28,10 @@ describe('env config', () => {
     process.env.PORT = '4000';
     process.env.NODE_ENV = 'test';
     process.env.CORS_ORIGINS = 'http://localhost:3000';
+    process.env.STRIPE_SECRET_KEY = 'sk_test_xxx';
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_xxx';
+    process.env.STRIPE_PRO_PRICE_ID = 'price_pro';
+    process.env.STRIPE_BUSINESS_PRICE_ID = 'price_business';
 
     const { env } = await import('../config/env');
 
@@ -38,5 +42,9 @@ describe('env config', () => {
     expect(env.PORT).toBe(4000);
     expect(env.NODE_ENV).toBe('test');
     expect(env.CORS_ORIGINS).toBe('http://localhost:3000');
+    expect(env.STRIPE_SECRET_KEY).toBe('sk_test_xxx');
+    expect(env.STRIPE_WEBHOOK_SECRET).toBe('whsec_xxx');
+    expect(env.STRIPE_PRO_PRICE_ID).toBe('price_pro');
+    expect(env.STRIPE_BUSINESS_PRICE_ID).toBe('price_business');
   });
 });

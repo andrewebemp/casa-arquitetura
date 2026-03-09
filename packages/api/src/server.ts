@@ -9,6 +9,8 @@ import { profileRoutes } from './routes/profile.routes';
 import { spatialRoutes } from './routes/spatial.routes';
 import { referenceRoutes } from './routes/reference.routes';
 import { renderRoutes } from './routes/render.routes';
+import { subscriptionRoutes } from './routes/subscription.routes';
+import { webhookRoutes } from './routes/webhook.routes';
 
 const server = Fastify({ logger: false });
 
@@ -44,6 +46,8 @@ server.register(projectRoutes, { prefix: '/projects' });
 server.register(spatialRoutes, { prefix: '/projects' });
 server.register(referenceRoutes, { prefix: '/projects' });
 server.register(renderRoutes);
+server.register(subscriptionRoutes, { prefix: '/subscriptions' });
+server.register(webhookRoutes, { prefix: '/webhooks' });
 
 const start = async () => {
   try {
