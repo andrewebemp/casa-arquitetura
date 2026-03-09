@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-03-08T19:28:26Z",
-  "updated_at": "2026-03-09T20:11:51Z",
+  "updated_at": "2026-03-09T20:30:54Z",
   "current_phase": "phase-8",
   "phases": {
     "phase-2": {
@@ -251,6 +251,17 @@
       "error": "QA failed after 3 attempts",
       "completed_at": "2026-03-09T20:11:50Z",
       "attempts": 1
+    },
+    "6.7": {
+      "status": "done",
+      "created_at": "2026-03-09T20:14:11Z",
+      "started_at": "2026-03-09T20:16:50Z",
+      "completed_at": "2026-03-09T20:30:53Z",
+      "attempts": 1
+    },
+    "7.8": {
+      "status": "created",
+      "created_at": "2026-03-09T20:16:47Z"
     }
   },
   "dev_cycles": {
