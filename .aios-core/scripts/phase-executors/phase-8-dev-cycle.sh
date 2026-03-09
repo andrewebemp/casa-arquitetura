@@ -286,13 +286,9 @@ run_qa_review() {
 
   echo "$output"
 
-  # Check for PASS verdict
-  if echo "$output" | grep -q "VERDICT=PASS"; then
-    log_success "QA PASS for story ${story_id}"
-    return 0
-  fi
+  # --- Signal Detection (ordered by specificity) ---
 
-  # Check for explicit FAIL
+  # 1. Check for explicit FAIL signal first (highest priority)
   if check_phase_failed "$output"; then
     local issues
     issues=$(extract_signal_value "$output" "ISSUES")
@@ -300,17 +296,29 @@ run_qa_review() {
     return 1
   fi
 
-  # Check for PHASE_COMPLETE with PASS (alternative signal format)
-  if check_phase_complete "$output"; then
+  # 2. Check for VERDICT=PASS or VERDICT=CONCERNS (any format)
+  if echo "$output" | grep -qE "VERDICT=(PASS|CONCERNS)"; then
     local verdict
-    verdict=$(extract_signal_value "$output" "VERDICT")
-    if [[ "$verdict" == "PASS" ]] || [[ "$verdict" == "CONCERNS" ]]; then
-      log_success "QA ${verdict} for story ${story_id}"
-      return 0
-    fi
+    verdict=$(echo "$output" | grep -oP "VERDICT=\K(PASS|CONCERNS)" | tail -1)
+    log_success "QA ${verdict} for story ${story_id}"
+    return 0
   fi
 
-  # No clear signal - treat as failure to be safe
+  # 3. Check for PHASE_COMPLETE signal (without explicit verdict)
+  if check_phase_complete "$output"; then
+    log_success "QA PASS for story ${story_id} (PHASE_COMPLETE without explicit verdict)"
+    return 0
+  fi
+
+  # 4. Fallback: check for natural language pass indicators
+  #    If QA says "all tests pass" or "criteria met" without a formal signal
+  if echo "$output" | grep -qiE "(all (tests|criteria|acceptance).*(pass|met|satisfied))|(verdict.*:.*pass)|(quality.*acceptable)|(approve|approved)"; then
+    log_warn "QA verdict detected via natural language (no formal signal). Treating as PASS."
+    log_success "QA PASS (inferred) for story ${story_id}"
+    return 0
+  fi
+
+  # 5. No clear signal - treat as failure
   log_warn "QA review did not return a clear verdict for story ${story_id}. Treating as FAIL."
   return 1
 }

@@ -71,19 +71,33 @@ npm test
 ## Verdict
 After review, provide ONE of:
 - **PASS** — All criteria met, quality acceptable
-- **CONCERNS** — Passed with documented concerns
+- **CONCERNS** — Passed with documented concerns (still counts as PASS)
 - **FAIL** — Criteria not met, generate fix request
 
-## Completion Signal
+## Completion Signal — CRITICAL REQUIREMENT
 
-If PASS or CONCERNS:
+**YOU MUST emit the completion signal as the VERY LAST LINE of your entire response.**
+**This is NON-NEGOTIABLE. Without this exact signal, the automation pipeline will treat your review as FAILED.**
+
+After your review analysis, emit EXACTLY ONE of these signals as the final line:
+
+For PASS verdict:
 ```
 PHASE_COMPLETE:STORY_ID={{STORY_ID}}:VERDICT=PASS
 ```
 
-If FAIL (include specific issues):
+For CONCERNS verdict (minor issues, still acceptable):
 ```
-PHASE_FAILED:STORY_ID={{STORY_ID}}:VERDICT=FAIL:ISSUES={list of issues}
+PHASE_COMPLETE:STORY_ID={{STORY_ID}}:VERDICT=CONCERNS
 ```
+
+For FAIL verdict (blocking issues that must be fixed):
+```
+PHASE_FAILED:STORY_ID={{STORY_ID}}:VERDICT=FAIL:ISSUES={comma-separated list of blocking issues}
+```
+
+**REMINDER:** The signal MUST be the very last line. Do NOT add any text, explanation, or summary after the signal line. The automation parser reads the last lines of your output to detect the signal.
+
+**IMPORTANT:** If quality gates (lint, typecheck, test) all pass and acceptance criteria are met, the verdict MUST be PASS or CONCERNS, never FAIL. Reserve FAIL only for blocking issues: tests failing, criteria unmet, or security vulnerabilities.
 
 {{LEARNINGS}}
