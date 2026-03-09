@@ -26,7 +26,7 @@ export const validate = (schemas: ValidationSchemas) => {
           code: 'VALIDATION_ERROR',
           message: 'Dados de entrada invalidos',
           statusCode: 400,
-          details: err.errors,
+          details: err.issues,
         });
         return reply.status(400).send({
           error: {

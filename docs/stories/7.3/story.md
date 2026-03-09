@@ -1,6 +1,6 @@
 # Story 7.3 - Supabase Client, Auth Middleware e Infraestrutura da API
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a developer, I want the Fastify API package configured with typed environment variables, Supabase client library (admin + per-user), JWT auth middleware, global error handler, Pino logger, and Zod validation middleware so that all future API routes can be built on a solid, secure, and consistent foundation.
@@ -20,23 +20,23 @@ As a developer, I want the Fastify API package configured with typed environment
 - Given the api package, when I run `pnpm turbo test`, then all unit tests pass covering auth middleware, error handler, validation middleware, env config, and AppError class
 
 ## Tasks
-- [ ] Task 1: Create `packages/api/src/config/env.ts` — typed environment variables validated at startup with envalid (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, REDIS_URL, PORT, NODE_ENV, CORS_ORIGINS)
-- [ ] Task 2: Create `packages/api/src/lib/errors.ts` — AppError class with code, message, statusCode, and details
-- [ ] Task 3: Create `packages/api/src/lib/logger.ts` — Pino logger configured for dev (pretty, debug) and production (json, info)
-- [ ] Task 4: Create `packages/api/src/lib/supabase.ts` — supabaseAdmin (service role) and createUserClient(accessToken) with Database typing from shared
-- [ ] Task 5: Augment Fastify types to include `request.user` with Supabase User type (declaration merging in `src/types/fastify.d.ts`)
-- [ ] Task 6: Create `packages/api/src/middleware/auth.middleware.ts` — JWT extraction, validation via Supabase, user attachment to request
-- [ ] Task 7: Create `packages/api/src/middleware/validation.middleware.ts` — Zod-based validation for body, params, and querystring
-- [ ] Task 8: Create `packages/api/src/middleware/error-handler.ts` — global error handler with AppError recognition, Pino logging, and standardized error responses
-- [ ] Task 9: Update `packages/api/src/server.ts` — integrate error handler, logger, CORS, and env config into Fastify server setup
-- [ ] Task 10: Add `@supabase/supabase-js`, `envalid`, `pino`, `pino-pretty`, and `zod` as dependencies to api package
-- [ ] Task 11: Generate `packages/shared/src/types/database.types.ts` — Database type stub matching Supabase schema (tables, columns) for typed queries
-- [ ] Task 12: Write unit tests for auth middleware (valid token, missing token, invalid token)
-- [ ] Task 13: Write unit tests for error handler (AppError, unknown error, validation error)
-- [ ] Task 14: Write unit tests for validation middleware (valid body, invalid body, missing params)
-- [ ] Task 15: Write unit tests for env config (missing vars, valid config)
-- [ ] Task 16: Write unit tests for AppError class (construction, properties, inheritance)
-- [ ] Task 17: Verify `pnpm turbo lint`, `pnpm turbo typecheck`, and `pnpm turbo test` pass
+- [x] Task 1: Create `packages/api/src/config/env.ts` — typed environment variables validated at startup with envalid (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, REDIS_URL, PORT, NODE_ENV, CORS_ORIGINS)
+- [x] Task 2: Create `packages/api/src/lib/errors.ts` — AppError class with code, message, statusCode, and details
+- [x] Task 3: Create `packages/api/src/lib/logger.ts` — Pino logger configured for dev (pretty, debug) and production (json, info)
+- [x] Task 4: Create `packages/api/src/lib/supabase.ts` — supabaseAdmin (service role) and createUserClient(accessToken) with Database typing from shared
+- [x] Task 5: Augment Fastify types to include `request.user` with Supabase User type (declaration merging in `src/types/fastify.d.ts`)
+- [x] Task 6: Create `packages/api/src/middleware/auth.middleware.ts` — JWT extraction, validation via Supabase, user attachment to request
+- [x] Task 7: Create `packages/api/src/middleware/validation.middleware.ts` — Zod-based validation for body, params, and querystring
+- [x] Task 8: Create `packages/api/src/middleware/error-handler.ts` — global error handler with AppError recognition, Pino logging, and standardized error responses
+- [x] Task 9: Update `packages/api/src/server.ts` — integrate error handler, logger, CORS, and env config into Fastify server setup
+- [x] Task 10: Add `@supabase/supabase-js`, `envalid`, `pino`, `pino-pretty`, and `zod` as dependencies to api package
+- [x] Task 11: Generate `packages/shared/src/types/database.types.ts` — Database type stub matching Supabase schema (tables, columns) for typed queries
+- [x] Task 12: Write unit tests for auth middleware (valid token, missing token, invalid token)
+- [x] Task 13: Write unit tests for error handler (AppError, unknown error, validation error)
+- [x] Task 14: Write unit tests for validation middleware (valid body, invalid body, missing params)
+- [x] Task 15: Write unit tests for env config (missing vars, valid config)
+- [x] Task 16: Write unit tests for AppError class (construction, properties, inheritance)
+- [x] Task 17: Verify `pnpm turbo lint`, `pnpm turbo typecheck`, and `pnpm turbo test` pass
 
 ## Dependencies
 - Story 7.1 — Monorepo scaffolding (provides api package structure and shared types)
@@ -62,8 +62,13 @@ As a developer, I want the Fastify API package configured with typed environment
 
 ## Dev Agent Record
 ### Implementation Plan
+Implemented all 17 tasks sequentially: env config, errors, logger, database types, supabase clients, fastify type augmentation, auth middleware, validation middleware, error handler, server integration, dependencies, and 19 unit tests.
+
 ### Debug Log
+- Zod v4 uses `.issues` instead of `.errors` on ZodError — fixed in validation.middleware.ts
+
 ### Change Log
+- 2026-03-09: Implemented complete API infrastructure (env, auth, errors, logger, supabase, validation, error handler) with 19 passing unit tests
 
 ## Testing
 - Auth middleware: Unit tests with mocked Supabase client (valid token returns user, missing token returns 401, invalid token returns 401)
@@ -73,5 +78,28 @@ As a developer, I want the Fastify API package configured with typed environment
 - AppError: Unit tests for construction, Error inheritance, property access
 
 ## File List
+- `packages/api/package.json` — Updated with new dependencies and test script
+- `packages/api/src/config/env.ts` — Typed env vars with envalid
+- `packages/api/src/lib/errors.ts` — AppError class
+- `packages/api/src/lib/logger.ts` — Pino logger (dev/production)
+- `packages/api/src/lib/supabase.ts` — supabaseAdmin + createUserClient
+- `packages/api/src/types/fastify.d.ts` — Fastify request.user augmentation
+- `packages/api/src/middleware/auth.middleware.ts` — JWT auth middleware
+- `packages/api/src/middleware/validation.middleware.ts` — Zod validation middleware
+- `packages/api/src/middleware/error-handler.ts` — Global error handler
+- `packages/api/src/server.ts` — Updated with env, logger, CORS, error handler
+- `packages/shared/src/types/database.types.ts` — Database type stub (10 tables)
+- `packages/shared/src/types/index.ts` — Added Database export
+- `packages/api/src/__tests__/errors.test.ts` — AppError tests (4)
+- `packages/api/src/__tests__/env.test.ts` — Env config tests (2)
+- `packages/api/src/__tests__/auth.middleware.test.ts` — Auth middleware tests (4)
+- `packages/api/src/__tests__/error-handler.test.ts` — Error handler tests (4)
+- `packages/api/src/__tests__/validation.middleware.test.ts` — Validation tests (5)
+- `packages/api/vitest.config.ts` — Vitest configuration
+- `packages/api/tsconfig.json` — Updated to exclude test files
 
 ## QA Results
+- `pnpm turbo lint --filter=@decorai/api` — PASS
+- `pnpm turbo typecheck --filter=@decorai/api` — PASS
+- `pnpm turbo test --filter=@decorai/api` — PASS (5 test files, 19 tests)
+- `pnpm turbo test --filter=@decorai/shared` — PASS (7 test files, 121 tests)
