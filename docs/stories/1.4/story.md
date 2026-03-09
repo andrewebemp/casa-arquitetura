@@ -189,9 +189,10 @@ Nenhum bug encontrado durante implementacao.
 
 ### Change Log
 - 2026-03-09: Implementacao completa de todos os 16 tasks da Story 1.4
+- 2026-03-09: Fix test croqui-preview (multiline text match), added integration test for wizard page, added updateProjectStyle to service
 
 ## Testing
-- 26 test suites, 132 tests passing
+- 27 test suites, 142 tests passing
 - Lint: 0 errors, 2 warnings (img elements for blob URLs - acceptable)
 - Typecheck: passes with no errors
 
@@ -216,5 +217,6 @@ Nenhum bug encontrado durante implementacao.
 - `packages/web/src/__tests__/molecules/style-grid.test.tsx` — StyleGrid tests
 - `packages/web/src/__tests__/molecules/croqui-preview.test.tsx` — CroquiPreview tests
 - `packages/web/src/__tests__/molecules/generation-progress.test.tsx` — GenerationProgress tests
+- `packages/web/src/__tests__/new-project-page.test.tsx` — Wizard page integration tests
 
 ## QA Results
