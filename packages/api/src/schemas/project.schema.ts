@@ -36,6 +36,7 @@ export const listProjectsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
   cursor: z.string().uuid('cursor deve ser um UUID valido').optional(),
   status: z.enum(PROJECT_STATUSES, { message: 'Status invalido' }).optional(),
+  favorite: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
 });
 
 export const projectIdParamsSchema = z.object({

@@ -5,6 +5,7 @@ import { logger } from './lib/logger';
 import { errorHandler } from './middleware/error-handler';
 import { authRoutes } from './routes/auth.routes';
 import { projectRoutes } from './routes/project.routes';
+import { profileRoutes } from './routes/profile.routes';
 import { spatialRoutes } from './routes/spatial.routes';
 import { referenceRoutes } from './routes/reference.routes';
 
@@ -37,6 +38,7 @@ server.get('/health', async () => {
 });
 
 server.register(authRoutes, { prefix: '/auth' });
+server.register(profileRoutes, { prefix: '/profile' });
 server.register(projectRoutes, { prefix: '/projects' });
 server.register(spatialRoutes, { prefix: '/projects' });
 server.register(referenceRoutes, { prefix: '/projects' });

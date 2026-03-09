@@ -40,7 +40,7 @@ export const projectService = {
   async list(
     userId: string,
     accessToken: string,
-    options: { limit: number; cursor?: string; status?: string },
+    options: { limit: number; cursor?: string; status?: string; favorite?: boolean },
   ) {
     const client = createUserClient(accessToken);
 
@@ -53,6 +53,10 @@ export const projectService = {
 
     if (options.status) {
       query = query.eq('status', options.status as ProjectStatus);
+    }
+
+    if (options.favorite !== undefined) {
+      query = query.eq('is_favorite', options.favorite);
     }
 
     if (options.cursor) {

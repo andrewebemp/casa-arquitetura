@@ -41,6 +41,7 @@ export async function projectRoutes(server: FastifyInstance): Promise<void> {
       limit: request.query.limit,
       cursor: request.query.cursor,
       status: request.query.status,
+      favorite: request.query.favorite,
     });
     return reply.status(200).send(result);
   });

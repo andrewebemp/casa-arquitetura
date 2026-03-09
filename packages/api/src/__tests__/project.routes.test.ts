@@ -250,7 +250,46 @@ describe('project routes', () => {
       expect(mockProjectService.list).toHaveBeenCalledWith(
         'user-123',
         'valid-token',
-        { limit: 10, cursor: undefined, status: 'draft' },
+        { limit: 10, cursor: undefined, status: 'draft', favorite: undefined },
+      );
+    });
+
+    it('should pass favorite=true filter to service', async () => {
+      mockProjectService.list.mockResolvedValue({
+        data: [{ id: 'proj-1', name: 'Fav', is_favorite: true }],
+        pagination: { cursor: null, has_more: false, total: 1 },
+      } as never);
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/projects?favorite=true',
+        headers: authHeaders,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(mockProjectService.list).toHaveBeenCalledWith(
+        'user-123',
+        'valid-token',
+        { limit: 20, cursor: undefined, status: undefined, favorite: true },
+      );
+    });
+
+    it('should pass favorite=false filter to service', async () => {
+      mockProjectService.list.mockResolvedValue({
+        data: [],
+        pagination: { cursor: null, has_more: false, total: 0 },
+      } as never);
+
+      await app.inject({
+        method: 'GET',
+        url: '/projects?favorite=false',
+        headers: authHeaders,
+      });
+
+      expect(mockProjectService.list).toHaveBeenCalledWith(
+        'user-123',
+        'valid-token',
+        { limit: 20, cursor: undefined, status: undefined, favorite: false },
       );
     });
 

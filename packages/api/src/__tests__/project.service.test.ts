@@ -63,13 +63,14 @@ function mockChain(result: { data?: unknown; error?: unknown; count?: number }) 
   chain.limit = vi.fn().mockReturnValue(chain);
   chain.single = vi.fn().mockResolvedValue(result);
 
-  // For list queries with count
+  // For list queries with count — make chain thenable but still chainable
   if (result.count !== undefined) {
-    chain.limit = vi.fn().mockResolvedValue({
-      data: result.data,
-      error: result.error,
-      count: result.count,
-    });
+    chain.then = (resolve: (v: unknown) => unknown) =>
+      Promise.resolve({
+        data: result.data,
+        error: result.error,
+        count: result.count,
+      }).then(resolve);
   }
 
   return chain;
@@ -289,6 +290,36 @@ describe('projectService', () => {
       expect(result.data).toHaveLength(2);
       expect(result.pagination.has_more).toBe(false);
       expect(result.pagination.total).toBe(2);
+    });
+
+    it('should filter by is_favorite when favorite option is true', async () => {
+      const projects = [
+        { id: 'proj-1', name: 'Fav Project', is_favorite: true, created_at: '2026-01-03' },
+      ];
+
+      const chain = mockChain({ data: projects, error: null, count: 1 });
+      mockFrom.mockReturnValue(chain);
+
+      const result = await projectService.list(USER_ID, TOKEN, { limit: 20, favorite: true });
+
+      expect(result.data).toHaveLength(1);
+      expect(chain.eq).toHaveBeenCalledWith('is_favorite', true);
+    });
+
+    it('should not filter by is_favorite when favorite option is undefined', async () => {
+      const projects = [
+        { id: 'proj-1', name: 'P1', created_at: '2026-01-03' },
+      ];
+
+      const chain = mockChain({ data: projects, error: null, count: 1 });
+      mockFrom.mockReturnValue(chain);
+
+      await projectService.list(USER_ID, TOKEN, { limit: 20 });
+
+      // eq should be called for user_id but NOT for is_favorite
+      const eqCalls = (chain.eq as ReturnType<typeof vi.fn>).mock.calls;
+      const favoriteCall = eqCalls.find((call: unknown[]) => call[0] === 'is_favorite');
+      expect(favoriteCall).toBeUndefined();
     });
 
     it('should indicate has_more when more items exist', async () => {
