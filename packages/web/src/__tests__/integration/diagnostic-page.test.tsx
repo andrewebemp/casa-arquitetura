@@ -21,6 +21,11 @@ jest.mock('next/link', () => {
   };
 });
 
+// Mock BeforeAfterSlider
+jest.mock('@/components/molecules/BeforeAfterSlider', () => ({
+  BeforeAfterSlider: () => <div data-testid="before-after-slider" role="slider" />,
+}));
+
 jest.mock('@/services/diagnostics-service');
 
 const mockedService = diagnosticsService as jest.Mocked<typeof diagnosticsService>;
