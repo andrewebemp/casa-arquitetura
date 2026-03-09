@@ -14,3 +14,4 @@ export type { Subscription, SubscriptionTier, SubscriptionStatus, PaymentGateway
 export type { Diagnostic, DiagnosticAnalysis, DiagnosticIssue } from './diagnostic';
 export type { RenderJob, RenderJobType, RenderJobStatus } from './render-job';
 export type { ShareLink } from './share-link';
+export type { Database } from './database.types';
