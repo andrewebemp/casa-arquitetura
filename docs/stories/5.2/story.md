@@ -137,6 +137,7 @@ Implemented core Story 5.2 functionality following existing codebase patterns (a
 ### Change Log
 - 2026-03-09: Initial implementation of Story 5.2 (upload, loading, result, CTA) by @dev
 - 2026-03-09: Enhanced with AC-3 DiagnosticLoading (rotating messages), AC-5 IssueCard (icons per category), AC-6 recommendations title, AC-7 auth-aware CTA, AC-8 public route middleware, AC-9 share + /diagnostico/:id OG page, new tests by @dev
+- 2026-03-09: QA fixes — added BeforeAfterSlider mock to integration test, removed dead code (molecules/DiagnosticCta, molecules/IssueList + their tests) by @dev
 
 ## Testing
 - Testes unitarios: componentes com React Testing Library, mock das APIs
@@ -150,8 +151,8 @@ Implemented core Story 5.2 functionality following existing codebase patterns (a
 - `packages/web/src/hooks/use-diagnostic.ts` (existing)
 - `packages/web/src/components/molecules/DiagnosticUploader.tsx` (existing)
 - `packages/web/src/components/molecules/ScoreGauge.tsx` (existing)
-- `packages/web/src/components/molecules/IssueList.tsx` (existing)
-- `packages/web/src/components/molecules/DiagnosticCta.tsx` (existing, superseded by diagnostic/DiagnosticCTA)
+- `packages/web/src/components/molecules/IssueList.tsx` (removed — dead code, superseded by diagnostic/IssueCard)
+- `packages/web/src/components/molecules/DiagnosticCta.tsx` (removed — dead code, superseded by diagnostic/DiagnosticCTA)
 - `packages/web/src/components/organisms/DiagnosticResult.tsx` (modified — auth-aware CTA, IssueCard with icons, share)
 - `packages/web/src/components/diagnostic/DiagnosticLoading.tsx` (new — rotating analysis messages)
 - `packages/web/src/components/diagnostic/DiagnosticCTA.tsx` (new — auth-aware CTA with dynamic styling)
