@@ -21,6 +21,7 @@ import { objectRemovalRoutes } from './routes/object-removal.routes';
 import { shareLinkRoutes, publicShareRoutes } from './routes/share-link.routes';
 import { diagnosticsRoutes } from './routes/diagnostics.routes';
 import { consentRoutes } from './routes/consent.routes';
+import { asaasWebhookRoutes } from './routes/asaas-webhook.routes';
 
 const server = Fastify({ logger: false });
 
@@ -70,6 +71,7 @@ server.register(diagnosticsRoutes, { prefix: '/api' });
 server.register(subscriptionRoutes, { prefix: '/subscriptions' });
 server.register(consentRoutes, { prefix: '/users/me' });
 server.register(webhookRoutes, { prefix: '/webhooks' });
+server.register(asaasWebhookRoutes, { prefix: '/webhooks' });
 
 const start = async () => {
   try {

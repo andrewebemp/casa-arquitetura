@@ -3,14 +3,21 @@ import { supabaseAdmin } from '../lib/supabase';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
 import { env } from '../config/env';
-import { TIER_LIMITS } from '@decorai/shared';
-import type { Database, SubscriptionTier } from '@decorai/shared';
+import { TIER_LIMITS, BILLING_TYPE_MAP } from '@decorai/shared';
+import type { Database, SubscriptionTier, PaymentGateway, AsaasPaymentMethod } from '@decorai/shared';
+import { asaasCustomerService } from './asaas-customer.service';
+import { asaasClient } from '../lib/asaas';
 
 type SubscriptionRow = Database['public']['Tables']['subscriptions']['Row'];
 
 const PRICE_IDS: Record<string, string> = {
   pro: env.STRIPE_PRO_PRICE_ID,
   business: env.STRIPE_BUSINESS_PRICE_ID,
+};
+
+const ASAAS_VALUES: Record<string, string> = {
+  pro: env.ASAAS_PRO_VALUE,
+  business: env.ASAAS_BUSINESS_VALUE,
 };
 
 const GRACE_PERIOD_DAYS = 3;
@@ -30,22 +37,35 @@ export const subscriptionService = {
     return data as SubscriptionRow;
   },
 
-  async createCheckoutSession(userId: string, tier: string) {
-    const priceId = PRICE_IDS[tier];
-    if (!priceId) {
-      throw new AppError({
-        code: 'INVALID_TIER',
-        message: `Tier invalido: ${tier}`,
-        statusCode: 400,
-      });
-    }
-
+  async createCheckoutSession(
+    userId: string,
+    tier: string,
+    gateway: string = 'stripe',
+    paymentMethod?: string,
+  ) {
     const existing = await this.getByUserId(userId);
     if (existing && existing.status === 'active' && existing.tier !== 'free') {
       throw new AppError({
         code: 'ALREADY_SUBSCRIBED',
         message: 'Usuario ja possui uma assinatura ativa',
         statusCode: 409,
+      });
+    }
+
+    if (gateway === 'asaas') {
+      return this.createAsaasCheckout(userId, tier, paymentMethod as AsaasPaymentMethod);
+    }
+
+    return this.createStripeCheckout(userId, tier);
+  },
+
+  async createStripeCheckout(userId: string, tier: string) {
+    const priceId = PRICE_IDS[tier];
+    if (!priceId) {
+      throw new AppError({
+        code: 'INVALID_TIER',
+        message: `Tier invalido: ${tier}`,
+        statusCode: 400,
       });
     }
 
@@ -60,6 +80,44 @@ export const subscriptionService = {
     });
 
     return { checkout_url: session.url };
+  },
+
+  async createAsaasCheckout(userId: string, tier: string, paymentMethod: AsaasPaymentMethod) {
+    const value = ASAAS_VALUES[tier];
+    if (!value) {
+      throw new AppError({
+        code: 'INVALID_TIER',
+        message: `Tier invalido: ${tier}`,
+        statusCode: 400,
+      });
+    }
+
+    const customer = await asaasCustomerService.findOrCreate(userId);
+    const billingType = BILLING_TYPE_MAP[paymentMethod];
+
+    const nextDueDate = new Date();
+    nextDueDate.setDate(nextDueDate.getDate() + 1);
+
+    const subscription = await asaasClient.createSubscription({
+      customer: customer.id,
+      billingType,
+      value: parseFloat(value),
+      nextDueDate: nextDueDate.toISOString().split('T')[0],
+      cycle: 'MONTHLY',
+      description: `DecorAI ${tier.charAt(0).toUpperCase() + tier.slice(1)} - ${billingType}`,
+      externalReference: userId,
+    });
+
+    logger.info({ userId, tier, subscriptionId: subscription.id, paymentMethod }, 'Asaas subscription created');
+
+    return {
+      checkout_url: null,
+      gateway: 'asaas' as const,
+      subscription_id: subscription.id,
+      customer_id: customer.id,
+      billing_type: billingType,
+      payment_method: paymentMethod,
+    };
   },
 
   async createPortalSession(userId: string) {
@@ -88,6 +146,7 @@ export const subscriptionService = {
     subscriptionId: string,
     periodStart: string,
     periodEnd: string,
+    paymentGateway: PaymentGateway = 'stripe',
   ) {
     const limits = TIER_LIMITS[tier];
 
@@ -103,7 +162,7 @@ export const subscriptionService = {
         .update({
           tier,
           status: 'active',
-          payment_gateway: 'stripe',
+          payment_gateway: paymentGateway,
           gateway_customer_id: customerId,
           gateway_subscription_id: subscriptionId,
           renders_used: 0,
@@ -129,7 +188,7 @@ export const subscriptionService = {
           user_id: userId,
           tier,
           status: 'active',
-          payment_gateway: 'stripe',
+          payment_gateway: paymentGateway,
           gateway_customer_id: customerId,
           gateway_subscription_id: subscriptionId,
           renders_used: 0,

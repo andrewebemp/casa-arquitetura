@@ -13,4 +13,9 @@ export const env = cleanEnv(process.env, {
   STRIPE_PRO_PRICE_ID: str({ desc: 'Stripe Price ID for Pro tier' }),
   STRIPE_BUSINESS_PRICE_ID: str({ desc: 'Stripe Price ID for Business tier' }),
   ANTHROPIC_API_KEY: str({ desc: 'Anthropic API key for Claude croqui generation' }),
+  ASAAS_API_KEY: str({ default: '', desc: 'Asaas API key (sandbox or production)' }),
+  ASAAS_WEBHOOK_TOKEN: str({ default: '', desc: 'Asaas webhook authentication token' }),
+  ASAAS_API_URL: str({ default: 'https://sandbox.asaas.com/api', desc: 'Asaas API base URL' }),
+  ASAAS_PRO_VALUE: str({ default: '79.00', desc: 'Monthly value for Pro tier in BRL' }),
+  ASAAS_BUSINESS_VALUE: str({ default: '299.00', desc: 'Monthly value for Business tier in BRL' }),
 });

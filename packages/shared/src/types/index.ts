@@ -15,3 +15,15 @@ export type { Diagnostic, DiagnosticAnalysis, DiagnosticIssue, DiagnosticCta, Di
 export type { RenderJob, RenderJobType, RenderJobStatus, RenderJobOutputParams } from './render-job';
 export type { ShareLink } from './share-link';
 export type { Database } from './database.types';
+export type {
+  AsaasBillingType,
+  AsaasPaymentMethod,
+  AsaasCustomer,
+  AsaasCreateCustomerRequest,
+  AsaasSubscription,
+  AsaasCreateSubscriptionRequest,
+  AsaasPayment,
+  AsaasWebhookEventType,
+  AsaasWebhookPayload,
+} from './asaas';
+export { BILLING_TYPE_MAP } from './asaas';

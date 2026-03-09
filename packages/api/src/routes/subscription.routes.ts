@@ -7,12 +7,13 @@ import { stripe } from '../lib/stripe';
 import type { CheckoutInput } from '../schemas/subscription.schema';
 
 export async function subscriptionRoutes(server: FastifyInstance): Promise<void> {
-  // POST /subscriptions/checkout - Create Stripe checkout session
+  // POST /subscriptions/checkout - Create checkout session (Stripe or Asaas)
   server.post<{ Body: CheckoutInput }>('/checkout', {
     preHandler: [authMiddleware, validate({ body: checkoutSchema })],
   }, async (request, reply) => {
     const userId = request.user!.id;
-    const result = await subscriptionService.createCheckoutSession(userId, request.body.tier);
+    const { tier, gateway, payment_method } = request.body;
+    const result = await subscriptionService.createCheckoutSession(userId, tier, gateway, payment_method);
     return reply.status(200).send({ data: result });
   });
 
@@ -31,12 +32,13 @@ export async function subscriptionRoutes(server: FastifyInstance): Promise<void>
           renders_used: 0,
           renders_limit: 3,
           portal_url: null,
+          gateway: null,
         },
       });
     }
 
     let portalUrl: string | null = null;
-    if (subscription.gateway_customer_id) {
+    if (subscription.payment_gateway === 'stripe' && subscription.gateway_customer_id) {
       try {
         const session = await stripe.billingPortal.sessions.create({
           customer: subscription.gateway_customer_id,
@@ -51,6 +53,7 @@ export async function subscriptionRoutes(server: FastifyInstance): Promise<void>
     return reply.status(200).send({
       data: {
         ...subscription,
+        gateway: subscription.payment_gateway,
         portal_url: portalUrl,
       },
     });

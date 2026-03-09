@@ -33,6 +33,12 @@ vi.mock('../config/env', () => ({
     STRIPE_WEBHOOK_SECRET: 'whsec_xxx',
     STRIPE_PRO_PRICE_ID: 'price_pro',
     STRIPE_BUSINESS_PRICE_ID: 'price_business',
+    ANTHROPIC_API_KEY: 'sk-ant-test',
+    ASAAS_API_KEY: 'test-asaas-key',
+    ASAAS_API_URL: 'https://sandbox.asaas.com/api',
+    ASAAS_WEBHOOK_TOKEN: 'test-webhook-token',
+    ASAAS_PRO_VALUE: '79.00',
+    ASAAS_BUSINESS_VALUE: '299.00',
   },
 }));
 
@@ -42,6 +48,23 @@ vi.mock('../lib/logger', () => ({
     info: vi.fn(),
     debug: vi.fn(),
     warn: vi.fn(),
+  },
+}));
+
+vi.mock('../lib/asaas', () => ({
+  asaasClient: {
+    createCustomer: vi.fn(),
+    findCustomerByEmail: vi.fn(),
+    createSubscription: vi.fn(),
+    getSubscription: vi.fn(),
+    cancelSubscription: vi.fn(),
+    getPayment: vi.fn(),
+  },
+}));
+
+vi.mock('../services/asaas-customer.service', () => ({
+  asaasCustomerService: {
+    findOrCreate: vi.fn(),
   },
 }));
 
