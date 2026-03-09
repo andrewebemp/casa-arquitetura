@@ -142,3 +142,10 @@ Story 7.6 (AI Pipeline Core: SDXL Generation, Depth Estimation e Style Extractio
 
 ---
 
+
+### [phase-8] - 2026-03-09T14:11:46Z
+
+Story 1.2 (Croqui ASCII: Geracao, Refinamento 3-Turn e Aprovacao API) completed in 2 attempt(s).
+
+---
+
