@@ -8,11 +8,9 @@ import {
   History,
   X,
 } from 'lucide-react';
-import { RenderRating } from './RenderRating';
 
 interface RenderViewerProps {
   imageUrl: string | null;
-  renderId?: string;
   onToggleHistory: () => void;
   onCompare?: () => void;
   onShare?: () => void;
@@ -28,7 +26,6 @@ const TOOLBAR_ACTIONS = [
 
 export function RenderViewer({
   imageUrl,
-  renderId,
   onToggleHistory,
   onCompare,
   onShare,
@@ -85,8 +82,6 @@ export function RenderViewer({
           <span className="hidden sm:inline">Historico</span>
         </button>
       </div>
-
-      {renderId && imageUrl && <RenderRating renderId={renderId} />}
     </div>
   );
 }

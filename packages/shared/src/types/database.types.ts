@@ -14,7 +14,6 @@ export interface Database {
           preferred_style: string | null;
           lgpd_consent_at: string | null;
           training_opt_in: boolean;
-          nps_last_prompted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -24,7 +23,6 @@ export interface Database {
           avatar_url?: string | null;
           preferred_style?: string | null;
           lgpd_consent_at?: string | null;
-          nps_last_prompted_at?: string | null;
           training_opt_in?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -35,36 +33,8 @@ export interface Database {
           avatar_url?: string | null;
           preferred_style?: string | null;
           lgpd_consent_at?: string | null;
-          nps_last_prompted_at?: string | null;
           training_opt_in?: boolean;
           updated_at?: string;
-        };
-        Relationships: [];
-      };
-      user_data_exports: {
-        Row: {
-          id: string;
-          user_id: string;
-          status: 'pending' | 'processing' | 'completed' | 'failed';
-          requested_at: string;
-          completed_at: string | null;
-          download_url: string | null;
-          expires_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          status?: string;
-          requested_at?: string;
-          completed_at?: string | null;
-          download_url?: string | null;
-          expires_at?: string | null;
-        };
-        Update: {
-          status?: string;
-          completed_at?: string | null;
-          download_url?: string | null;
-          expires_at?: string | null;
         };
         Relationships: [];
       };
@@ -419,62 +389,6 @@ export interface Database {
           event_id?: string;
           event_type?: string;
           processed_at?: string;
-        };
-        Relationships: [];
-      };
-      render_ratings: {
-        Row: {
-          id: string;
-          render_id: string;
-          user_id: string;
-          score: number;
-          tags: string[];
-          comment: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          render_id: string;
-          user_id: string;
-          score: number;
-          tags?: string[];
-          comment?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          score?: number;
-          tags?: string[];
-          comment?: string | null;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      nps_responses: {
-        Row: {
-          id: string;
-          user_id: string;
-          score: number;
-          comment: string | null;
-          user_tier: string;
-          total_renders: number;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          score: number;
-          comment?: string | null;
-          user_tier?: string;
-          total_renders?: number;
-          created_at?: string;
-        };
-        Update: {
-          score?: number;
-          comment?: string | null;
-          user_tier?: string;
-          total_renders?: number;
         };
         Relationships: [];
       };

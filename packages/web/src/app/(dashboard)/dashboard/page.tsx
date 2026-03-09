@@ -1,6 +1,5 @@
 import { FolderOpen, PlusCircle, Palette, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
-import { NpsSurvey } from '@/components/molecules/NpsSurvey';
 
 const quickActions = [
   {
@@ -61,8 +60,6 @@ export default function DashboardPage() {
           );
         })}
       </div>
-
-      <NpsSurvey />
     </div>
   );
 }
