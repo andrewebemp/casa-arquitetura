@@ -23,11 +23,11 @@ describe('Migration files', () => {
       .sort();
   });
 
-  it('has exactly 13 migration files', () => {
-    expect(migrationFiles).toHaveLength(13);
+  it('has exactly 14 migration files', () => {
+    expect(migrationFiles).toHaveLength(14);
   });
 
-  it('files are ordered sequentially 001-013', () => {
+  it('files are ordered sequentially 001-014', () => {
     const expected = [
       '001_extensions.sql',
       '002_user_profiles.sql',
@@ -42,6 +42,7 @@ describe('Migration files', () => {
       '011_share_links.sql',
       '012_triggers.sql',
       '013_handle_new_user.sql',
+      '014_webhook_events.sql',
     ];
     expect(migrationFiles).toEqual(expected);
   });
@@ -60,7 +61,7 @@ describe('001_extensions', () => {
   });
 });
 
-describe('Table creation — all 10 tables', () => {
+describe('Table creation — all 11 tables', () => {
   let allSql: string;
   beforeAll(() => { allSql = allMigrationsSql(); });
 
@@ -75,15 +76,16 @@ describe('Table creation — all 10 tables', () => {
     'diagnostics',
     'render_jobs',
     'share_links',
+    'webhook_events',
   ];
 
   it.each(tables)('creates table %s', (table) => {
     expect(allSql).toContain(`CREATE TABLE ${table}`);
   });
 
-  it('all 10 tables are created', () => {
+  it('all 11 tables are created', () => {
     const createTableMatches = allSql.match(/CREATE TABLE \w+/g) || [];
-    expect(createTableMatches.length).toBe(10);
+    expect(createTableMatches.length).toBe(11);
   });
 });
 
