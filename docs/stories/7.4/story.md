@@ -1,6 +1,6 @@
 # Story 7.4 - Project CRUD API e Upload de Imagens
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a authenticated user, I want to create, view, update and delete decoration projects and upload room photos so that I can manage my renovation projects and provide images for AI-powered staging.
@@ -80,15 +80,15 @@ With the API infrastructure (Story 7.3), auth routes (Story 6.1), and database s
 - And `npm run lint`, `npm run typecheck`, and `npm test` all pass
 
 ## Tasks
-- [ ] Task 1: Create Zod validation schemas for project endpoints (`packages/api/src/schemas/project.schema.ts`)
-- [ ] Task 2: Implement project service with CRUD operations (`packages/api/src/services/project.service.ts`)
-- [ ] Task 3: Implement storage service for Supabase Storage file upload (`packages/api/src/services/storage.service.ts`)
-- [ ] Task 4: Create project routes with all endpoints (`packages/api/src/routes/project.routes.ts`)
-- [ ] Task 5: Register project routes in server and add multipart support (`packages/api/src/server.ts`)
-- [ ] Task 6: Write unit tests for project service (`packages/api/src/__tests__/services/project.service.test.ts`)
-- [ ] Task 7: Write unit tests for storage service (`packages/api/src/__tests__/services/storage.service.test.ts`)
-- [ ] Task 8: Write route integration tests (`packages/api/src/__tests__/routes/project.routes.test.ts`)
-- [ ] Task 9: Verify lint, typecheck, and all tests pass
+- [x] Task 1: Create Zod validation schemas for project endpoints (`packages/api/src/schemas/project.schema.ts`)
+- [x] Task 2: Implement project service with CRUD operations (`packages/api/src/services/project.service.ts`)
+- [x] Task 3: Implement storage service for Supabase Storage file upload (`packages/api/src/services/storage.service.ts`)
+- [x] Task 4: Create project routes with all endpoints (`packages/api/src/routes/project.routes.ts`)
+- [x] Task 5: Register project routes in server and add multipart support (`packages/api/src/server.ts`)
+- [x] Task 6: Write unit tests for project service (`packages/api/src/__tests__/project.service.test.ts`)
+- [x] Task 7: Write unit tests for storage service (`packages/api/src/__tests__/storage.service.test.ts`)
+- [x] Task 8: Write route integration tests (`packages/api/src/__tests__/project.routes.test.ts`)
+- [x] Task 9: Verify lint, typecheck, and all tests pass
 
 ## Technical Notes
 
@@ -143,25 +143,36 @@ With the API infrastructure (Story 7.3), auth routes (Story 6.1), and database s
 
 ## Dev Agent Record
 ### Implementation Plan
+Implemented following existing auth patterns: schema -> service -> routes -> server registration.
+
 ### Debug Log
+- Fixed Database type stub: added `Relationships: []` to all table definitions for supabase-js v2.98.0 compatibility
+- Fixed `@fastify/multipart` version: v9.x requires Fastify 5, downgraded to v8.x for Fastify 4 compat
+- Fixed pre-existing type errors in reference.service.ts by adding `ReferenceItemRow` type casts
+
 ### Change Log
+- 2026-03-09: Implemented all 9 tasks, all quality gates pass (158 API tests, 121 shared tests)
 
 ## Testing
-- Unit tests for project service (CRUD operations, error handling)
-- Unit tests for storage service (upload, validation, cleanup)
-- Route tests for all 6 endpoints (success + error cases)
-- RLS isolation tests (user A cannot access user B's projects)
-- File validation tests (size, type, magic bytes)
-- Pagination tests (cursor, limit, empty results)
+- Unit tests for project service (CRUD operations, error handling) - 10 tests
+- Unit tests for storage service (upload, validation, cleanup) - 10 tests
+- Route tests for all 6 endpoints (success + error cases) - 23 tests
+- RLS isolation tests (user A cannot access user B's projects) - via createUserClient
+- File validation tests (size, type, magic bytes) - covered in storage service tests
+- Pagination tests (cursor, limit, empty results) - covered in project service tests
 
 ## File List
-- [ ] `packages/api/src/schemas/project.schema.ts`
-- [ ] `packages/api/src/services/project.service.ts`
-- [ ] `packages/api/src/services/storage.service.ts`
-- [ ] `packages/api/src/routes/project.routes.ts`
-- [ ] `packages/api/src/server.ts` (modified - register routes)
-- [ ] `packages/api/src/__tests__/services/project.service.test.ts`
-- [ ] `packages/api/src/__tests__/services/storage.service.test.ts`
-- [ ] `packages/api/src/__tests__/routes/project.routes.test.ts`
+- [x] `packages/api/src/schemas/project.schema.ts` (new)
+- [x] `packages/api/src/services/project.service.ts` (new)
+- [x] `packages/api/src/services/storage.service.ts` (new)
+- [x] `packages/api/src/routes/project.routes.ts` (new)
+- [x] `packages/api/src/server.ts` (modified - register routes + multipart)
+- [x] `packages/api/src/__tests__/project.service.test.ts` (new)
+- [x] `packages/api/src/__tests__/storage.service.test.ts` (new)
+- [x] `packages/api/src/__tests__/project.routes.test.ts` (new)
+- [x] `packages/api/package.json` (modified - added @fastify/multipart)
+- [x] `packages/shared/src/types/database.types.ts` (modified - added Relationships, render_url)
+- [x] `packages/api/src/services/reference.service.ts` (modified - type cast fixes)
+- [x] `packages/api/src/__tests__/reference.service.test.ts` (modified - lint fix)
 
 ## QA Results
