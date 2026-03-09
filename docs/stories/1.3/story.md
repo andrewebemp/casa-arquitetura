@@ -96,3 +96,18 @@ Implemented full Staging Generation API with styles registry, orchestrator servi
 - `packages/api/src/__tests__/staging.routes.test.ts` — NEW: Integration tests for staging endpoints
 
 ## QA Results
+
+### Verdict: CONCERNS
+
+**Quality Gates:** All PASS (lint, typecheck, 383/383 tests)
+
+**Acceptance Criteria:** 4/6 PASS, 2 with documented concerns
+
+**Concerns:**
+1. **AC4**: Progress broadcasts missing `stage` field (depth/controlnet/generation/storage) — only percentage is sent
+2. **AC6**: Watermark placeholder for Free tier not implemented — only resolution (1024x1024) is applied
+3. **AC6**: Quota exceeded returns 429 instead of 403 as specified in AC (429 is semantically valid)
+
+**Overall:** Implementation is solid, well-tested (34 dedicated tests), and follows architecture patterns. Concerns are minor and acceptable for MVP with documented tracking.
+
+**Reviewed by:** Quinn (@qa) — 2026-03-09

@@ -163,3 +163,10 @@ Story 2.1 (Chat de Refinamento API: NLU, Operacoes e Historico de Versoes) FAILE
 
 ---
 
+
+### [phase-8] - 2026-03-09T14:46:47Z
+
+Story 1.3 (Staging Generation API: Upload de Foto, Selecao de Estilo e Orquestracao do Pipeline) completed in 1 attempt(s).
+
+---
+
