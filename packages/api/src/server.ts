@@ -23,6 +23,7 @@ import { diagnosticsRoutes } from './routes/diagnostics.routes';
 import { asaasWebhookRoutes } from './routes/asaas-webhook.routes';
 import { rateLimitMiddleware } from './middleware/rate-limit.middleware';
 import { cacheRoutes } from './routes/cache.routes';
+import { ratingRoutes, analyticsRoutes } from './routes/rating.routes';
 
 const server = Fastify({ logger: false });
 
@@ -75,6 +76,8 @@ server.register(subscriptionRoutes, { prefix: '/subscriptions' });
 server.register(webhookRoutes, { prefix: '/webhooks' });
 server.register(asaasWebhookRoutes, { prefix: '/webhooks' });
 server.register(cacheRoutes, { prefix: '/api' });
+server.register(ratingRoutes, { prefix: '/api' });
+server.register(analyticsRoutes, { prefix: '/api/admin/analytics' });
 
 const start = async () => {
   try {

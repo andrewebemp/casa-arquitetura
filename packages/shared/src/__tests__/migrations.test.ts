@@ -23,11 +23,11 @@ describe('Migration files', () => {
       .sort();
   });
 
-  it('has exactly 14 migration files', () => {
-    expect(migrationFiles).toHaveLength(14);
+  it('has exactly 17 migration files', () => {
+    expect(migrationFiles).toHaveLength(17);
   });
 
-  it('files are ordered sequentially 001-014', () => {
+  it('files are ordered sequentially 001-017', () => {
     const expected = [
       '001_extensions.sql',
       '002_user_profiles.sql',
@@ -43,6 +43,9 @@ describe('Migration files', () => {
       '012_triggers.sql',
       '013_handle_new_user.sql',
       '014_webhook_events.sql',
+      '015_render_ratings.sql',
+      '016_nps_responses.sql',
+      '017_profiles_nps_field.sql',
     ];
     expect(migrationFiles).toEqual(expected);
   });
@@ -61,7 +64,7 @@ describe('001_extensions', () => {
   });
 });
 
-describe('Table creation — all 11 tables', () => {
+describe('Table creation — all 13 tables', () => {
   let allSql: string;
   beforeAll(() => { allSql = allMigrationsSql(); });
 
@@ -77,15 +80,17 @@ describe('Table creation — all 11 tables', () => {
     'render_jobs',
     'share_links',
     'webhook_events',
+    'render_ratings',
+    'nps_responses',
   ];
 
   it.each(tables)('creates table %s', (table) => {
     expect(allSql).toContain(`CREATE TABLE ${table}`);
   });
 
-  it('all 11 tables are created', () => {
+  it('all 13 tables are created', () => {
     const createTableMatches = allSql.match(/CREATE TABLE \w+/g) || [];
-    expect(createTableMatches.length).toBe(11);
+    expect(createTableMatches.length).toBe(13);
   });
 });
 
@@ -104,6 +109,8 @@ describe('RLS policies', () => {
     'diagnostics',
     'render_jobs',
     'share_links',
+    'render_ratings',
+    'nps_responses',
   ];
 
   it.each(tables)('enables RLS on %s', (table) => {
@@ -232,6 +239,16 @@ describe('CHECK constraints', () => {
     const sql = readMigration('007_chat_messages.sql');
     expect(sql).toContain('role IN (\'user\', \'assistant\', \'system\')');
   });
+
+  it('render_ratings.score has CHECK constraint', () => {
+    const sql = readMigration('015_render_ratings.sql');
+    expect(sql).toContain('score >= 1 AND score <= 5');
+  });
+
+  it('nps_responses.score has CHECK constraint', () => {
+    const sql = readMigration('016_nps_responses.sql');
+    expect(sql).toContain('score >= 0 AND score <= 10');
+  });
 });
 
 describe('Triggers', () => {
@@ -247,6 +264,11 @@ describe('Triggers', () => {
     expect(sql).toContain('trg_projects_updated');
     expect(sql).toContain('trg_spatial_inputs_updated');
     expect(sql).toContain('trg_subscriptions_updated');
+  });
+
+  it('creates trigger for render_ratings updated_at', () => {
+    const sql = readMigration('015_render_ratings.sql');
+    expect(sql).toContain('trg_render_ratings_updated');
   });
 });
 
@@ -350,5 +372,15 @@ describe('Column-level schema validation', () => {
     expect(sql).toContain('attempts INTEGER NOT NULL DEFAULT 0');
     expect(sql).toContain('started_at TIMESTAMPTZ');
     expect(sql).toContain('completed_at TIMESTAMPTZ');
+  });
+
+  it('render_ratings has UNIQUE(render_id, user_id)', () => {
+    const sql = readMigration('015_render_ratings.sql');
+    expect(sql).toContain('UNIQUE(render_id, user_id)');
+  });
+
+  it('017_profiles_nps_field adds nps_last_prompted_at', () => {
+    const sql = readMigration('017_profiles_nps_field.sql');
+    expect(sql).toContain('nps_last_prompted_at TIMESTAMPTZ');
   });
 });

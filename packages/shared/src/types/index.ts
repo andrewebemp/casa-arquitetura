@@ -27,3 +27,11 @@ export type {
   AsaasWebhookPayload,
 } from './asaas';
 export { BILLING_TYPE_MAP } from './asaas';
+export type {
+  RenderRating,
+  NpsResponse,
+  RatingAnalytics,
+  NpsAnalytics,
+  QualityTag,
+} from './render-rating';
+export { QUALITY_TAGS } from './render-rating';
