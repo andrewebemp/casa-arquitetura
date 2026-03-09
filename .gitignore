@@ -17,6 +17,22 @@ build/
 *.log
 logs/
 
+# Next.js
+.next/
+out/
+
+# Turborepo
+.turbo/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
 # IDE & OS (AIOS)
 .DS_Store
 Thumbs.db

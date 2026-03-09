@@ -1,17 +1,19 @@
 {
-  "name": "aios-pessoal",
-  "version": "1.7.0",
-  "description": "Fork personalizado do Synkra AIOS - AI-Orchestrated System para desenvolvimento full-stack",
+  "name": "decorai-brasil",
+  "version": "0.1.0",
+  "description": "DecorAI Brasil — AI-powered interior design platform",
   "private": true,
+  "packageManager": "pnpm@9.15.0",
   "bin": {
     "aios-graph": "bin/aios-graph.js"
   },
   "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
     "postinstall": "cd .aios-core && npm install",
-    "test": "npm run test --prefix .aios-core",
-    "lint": "npm run lint --prefix .aios-core",
-    "typecheck": "npm run typecheck --prefix .aios-core",
-    "build": "npm run build --prefix .aios-core",
     "version:bump": "node scripts/version-bump.js",
     "graph": "node bin/aios-graph.js",
     "entity-registry": "node scripts/generate-entity-registry.js"
@@ -26,7 +28,8 @@
     "node": ">=20.0.0"
   },
   "devDependencies": {
-    "supabase": "^2.76.15"
+    "supabase": "^2.76.15",
+    "turbo": "^2.3.0"
   },
   "dependencies": {
     "asciichart": "^1.5.25"
