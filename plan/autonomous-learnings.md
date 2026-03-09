@@ -149,3 +149,17 @@ Story 1.2 (Croqui ASCII: Geracao, Refinamento 3-Turn e Aprovacao API) completed 
 
 ---
 
+
+### [phase-8] - 2026-03-09T14:28:40Z
+
+Story 2.1 (Chat de Refinamento API: NLU, Operacoes e Historico de Versoes) completed in 2 attempt(s).
+
+---
+
+
+### [phase-8] - 2026-03-09T14:32:15Z
+
+Story 2.1 (Chat de Refinamento API: NLU, Operacoes e Historico de Versoes) FAILED after 3 attempts. Last QA feedback: 
+
+---
+
