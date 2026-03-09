@@ -1,4 +1,4 @@
-export type RenderJobType = 'initial' | 'refinement' | 'style_change' | 'segmentation' | 'diagnostic' | 'upscale' | 'lighting_enhancement';
+export type RenderJobType = 'initial' | 'refinement' | 'style_change' | 'segmentation' | 'diagnostic' | 'upscale' | 'lighting_enhancement' | 'object_removal';
 export type RenderJobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'canceled';
 
 export interface RenderJob {

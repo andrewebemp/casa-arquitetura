@@ -8,6 +8,7 @@ import { processRefinementJob } from './refinement.handler';
 import { processStagingJob } from './staging.handler';
 import { processSegmentationJob } from './segmentation.handler';
 import { processLightingJob } from './lighting.handler';
+import { processObjectRemovalJob } from './object-removal.handler';
 import type { RenderJobData } from './render.queue';
 
 const updateJobStatus = async (
@@ -107,6 +108,8 @@ export const startRenderWorker = (): Worker<RenderJobData> => {
         await processSegmentationJob(job);
       } else if (job.data.type === 'lighting_enhancement') {
         await processLightingJob(job);
+      } else if (job.data.type === 'object_removal') {
+        await processObjectRemovalJob(job);
       } else {
         await processRenderJob(job);
       }

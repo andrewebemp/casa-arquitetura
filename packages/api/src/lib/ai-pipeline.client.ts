@@ -314,6 +314,33 @@ export const aiPipelineClient = {
   },
 
   /**
+   * Story 3.3: Object removal via LaMa inpainting.
+   * Calls the ai-pipeline's /remove-object endpoint which uses LaMa
+   * (Large Mask Inpainting with Fourier Convolutions) for contextual fill.
+   */
+  async removeObject(input: {
+    image_url: string;
+    mask_url: string;
+  }): Promise<InpaintResult> {
+    const url = `${this._baseUrl}/remove-object`;
+    logger.info({ url }, 'AI Pipeline: LaMa object removal');
+
+    const response = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: this._headers(),
+      body: JSON.stringify(input),
+      timeoutMs: this._timeoutMs,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`AI Pipeline object removal failed (${response.status}): ${errorBody}`);
+    }
+
+    return response.json() as Promise<InpaintResult>;
+  },
+
+  /**
    * AC6: Health check.
    */
   async health(): Promise<HealthResult> {
