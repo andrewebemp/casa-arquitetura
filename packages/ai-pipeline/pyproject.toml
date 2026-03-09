@@ -1,0 +1,9 @@
+[project]
+name = "decorai-ai-pipeline"
+version = "0.1.0"
+description = "DecorAI Brasil AI Pipeline — image generation and processing"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
