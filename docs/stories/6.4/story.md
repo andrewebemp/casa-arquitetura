@@ -1,6 +1,6 @@
 # Story 6.4 - Dashboard UI: Listagem de Projetos, Favoritos e Acoes Rapidas
 
-## Status: Draft
+## Status: Done
 
 ## Story
 As a corretor de imoveis ou arquiteto autenticado, I want to see a dashboard with all my projects displayed as visual cards with thumbnails, filter by style or date, access favorites, and quickly start a new project so that I can manage my staging work efficiently and pick up where I left off.
@@ -101,21 +101,21 @@ As a corretor de imoveis ou arquiteto autenticado, I want to see a dashboard wit
 - `@tanstack/react-query` — Server state management (cache, refetch, optimistic updates)
 
 ## Tasks
-- [ ] Task 1: Install `@tanstack/react-query` in `packages/web` and set up QueryClientProvider in root layout or app layout
-- [ ] Task 2: Create `hooks/use-projects.ts` — React Query hook wrapping `GET /profile/projects` with filtering/sorting params and `DELETE /projects/:id` mutation
-- [ ] Task 3: Create `hooks/use-subscription.ts` — React Query hook wrapping `GET /subscriptions/me` for tier info and render quota
-- [ ] Task 4: Create `hooks/use-favorites.ts` — React Query hook with optimistic mutations for `POST /profile/favorites` and `DELETE /profile/favorites/:id`
-- [ ] Task 5: Create `services/project-service.ts` — API service functions for project listing, deletion, and duplication
-- [ ] Task 6: Create `components/molecules/ProjectCard.tsx` — thumbnail, name, style badge, date, status badge, favorite toggle, action dropdown
-- [ ] Task 7: Create `components/molecules/SkeletonCard.tsx` — animated loading placeholder matching ProjectCard dimensions
-- [ ] Task 8: Create `components/molecules/EmptyState.tsx` — illustration/icon, message text, CTA button (reusable for any empty state)
-- [ ] Task 9: Create `components/molecules/FilterBar.tsx` — style filter dropdown, sort dropdown, favorites toggle — updates URL searchParams
-- [ ] Task 10: Create `components/molecules/RenderQuotaBanner.tsx` — progress bar renders used/limit, upgrade CTA when depleted
-- [ ] Task 11: Create `components/molecules/DeleteConfirmModal.tsx` — modal with PT-BR text, cancel and confirm buttons
-- [ ] Task 12: Implement dashboard page `app/app/projetos/page.tsx` — compose FilterBar, ProjectGrid (ProjectCards), EmptyState, RenderQuotaBanner, loading/error states
-- [ ] Task 13: Write unit tests for ProjectCard (render with data, favorite toggle, action menu), EmptyState, FilterBar (filter changes update URL), RenderQuotaBanner, DeleteConfirmModal
-- [ ] Task 14: Write unit tests for hooks (useProjects fetches and filters, useFavorites optimistic update, useSubscription renders quota)
-- [ ] Task 15: Run lint, typecheck, and all tests — fix any issues
+- [x] Task 1: Install `@tanstack/react-query` in `packages/web` and set up QueryClientProvider in dashboard layout
+- [x] Task 2: Create `hooks/use-projects.ts` — React Query hook wrapping project listing with filtering/sorting params and delete/duplicate mutations
+- [x] Task 3: Create `hooks/use-subscription.ts` — React Query hook wrapping subscription for tier info and render quota
+- [x] Task 4: Create `hooks/use-favorites.ts` — React Query hook with optimistic mutations for toggling favorites
+- [x] Task 5: Create `services/project-service.ts` — API service functions for project listing, deletion, duplication, favorites, and subscription
+- [x] Task 6: Create `components/molecules/ProjectCard.tsx` — thumbnail, name, style badge, date, status badge, favorite toggle, action dropdown
+- [x] Task 7: Create `components/molecules/SkeletonCard.tsx` — animated loading placeholder matching ProjectCard dimensions
+- [x] Task 8: Create `components/molecules/EmptyState.tsx` — illustration/icon, message text, CTA button (reusable for any empty state)
+- [x] Task 9: Create `components/molecules/FilterBar.tsx` — style filter dropdown, sort dropdown, favorites toggle — updates URL searchParams
+- [x] Task 10: Create `components/molecules/RenderQuotaBanner.tsx` — progress bar renders used/limit, upgrade CTA when depleted
+- [x] Task 11: Create `components/molecules/DeleteConfirmModal.tsx` — modal with PT-BR text, cancel and confirm buttons
+- [x] Task 12: Implement dashboard page `(dashboard)/projects/page.tsx` — compose FilterBar, ProjectGrid (ProjectCards), EmptyState, RenderQuotaBanner, loading/error states
+- [x] Task 13: Write unit tests for ProjectCard (render with data, favorite toggle, action menu), EmptyState, FilterBar (filter changes update URL), RenderQuotaBanner, DeleteConfirmModal, SkeletonCard
+- [x] Task 14: Write unit tests for hooks (useProjects fetches and filters, useFavorites optimistic update, useSubscription renders quota)
+- [x] Task 15: Run lint, typecheck, and all tests — fix any issues
 
 ## Dependencies
 - Story 7.7 (Frontend Shell — layouts, auth UI, atoms, API client, route structure) — provides foundation components and protected layout
@@ -125,12 +125,24 @@ As a corretor de imoveis ou arquiteto autenticado, I want to see a dashboard wit
 
 ## Dev Agent Record
 ### Implementation Plan
+- Used existing `(dashboard)` route group with `/projects` route (matches sidebar navigation from Story 7.7)
+- Added QueryClientProvider to dashboard layout to provide React Query context
+- Used Supabase client directly for API calls (no separate REST endpoints needed)
+- Implemented optimistic updates for favorites using React Query mutations
+- Used URL searchParams for filter state (style, sort, favorites toggle)
+- Responsive grid: 3 cols desktop (lg), 2 cols tablet (sm), 1 col mobile
+- All UI text in PT-BR as required
+
 ### Debug Log
+- Fixed lint warning: replaced `<img>` with `next/image` `<Image>` component in ProjectCard
+- Fixed next/image mock in tests to avoid `fill` prop warning on native `<img>`
+
 ### Change Log
+- 2026-03-09: Implemented all 15 tasks — full dashboard UI with project cards, filters, favorites, render quota banner, empty state, loading/error states, and comprehensive test suite (17 suites, 64 tests passing)
 
 ## Testing
 - Unit tests for ProjectCard molecule (renders thumbnail, name, style, date, status; favorite toggle calls API; action menu shows options)
-- Unit tests for EmptyState (renders message and CTA; CTA navigates to /app/novo)
+- Unit tests for EmptyState (renders message and CTA; CTA navigates to /projects/new)
 - Unit tests for FilterBar (filter selection updates searchParams; sort changes order; favorites toggle filters list)
 - Unit tests for RenderQuotaBanner (shows progress bar with correct ratio; shows upgrade CTA when renders depleted; hidden when renders available in paid tier)
 - Unit tests for DeleteConfirmModal (renders PT-BR text; cancel closes modal; confirm calls delete mutation)
@@ -141,26 +153,28 @@ As a corretor de imoveis ou arquiteto autenticado, I want to see a dashboard wit
 - Integration: dashboard page renders ProjectGrid with mocked data; shows EmptyState when no projects; shows loading skeletons during fetch
 
 ## File List
-- `packages/web/package.json` — Added @tanstack/react-query
-- `packages/web/src/app/app/layout.tsx` — Updated with QueryClientProvider (if not in root layout)
-- `packages/web/src/services/project-service.ts` — NEW: Project API service
-- `packages/web/src/hooks/use-projects.ts` — NEW: Projects React Query hook
-- `packages/web/src/hooks/use-subscription.ts` — NEW: Subscription hook
+- `packages/web/package.json` — Added @tanstack/react-query dependency
+- `packages/web/src/lib/query-client.tsx` — NEW: QueryClient provider component
+- `packages/web/src/app/(dashboard)/layout.tsx` — Updated with QueryClientProvider wrapper
+- `packages/web/src/services/project-service.ts` — NEW: Project API service (fetch, delete, duplicate, favorites, subscription)
+- `packages/web/src/hooks/use-projects.ts` — NEW: Projects React Query hook with delete/duplicate mutations
+- `packages/web/src/hooks/use-subscription.ts` — NEW: Subscription hook for tier/quota
 - `packages/web/src/hooks/use-favorites.ts` — NEW: Favorites hook with optimistic updates
 - `packages/web/src/components/molecules/ProjectCard.tsx` — NEW: Project card molecule
 - `packages/web/src/components/molecules/SkeletonCard.tsx` — NEW: Loading skeleton
 - `packages/web/src/components/molecules/EmptyState.tsx` — NEW: Empty state component
 - `packages/web/src/components/molecules/FilterBar.tsx` — NEW: Filter/sort bar
 - `packages/web/src/components/molecules/RenderQuotaBanner.tsx` — NEW: Render quota display
-- `packages/web/src/components/molecules/DeleteConfirmModal.tsx` — NEW: Delete confirmation
-- `packages/web/src/app/app/projetos/page.tsx` — Updated from placeholder to full implementation
-- `packages/web/src/__tests__/molecules/project-card.test.tsx` — NEW: ProjectCard tests
-- `packages/web/src/__tests__/molecules/empty-state.test.tsx` — NEW: EmptyState tests
-- `packages/web/src/__tests__/molecules/filter-bar.test.tsx` — NEW: FilterBar tests
-- `packages/web/src/__tests__/molecules/render-quota-banner.test.tsx` — NEW: Quota banner tests
-- `packages/web/src/__tests__/molecules/delete-confirm-modal.test.tsx` — NEW: Modal tests
-- `packages/web/src/__tests__/hooks/use-projects.test.ts` — NEW: Projects hook tests
-- `packages/web/src/__tests__/hooks/use-favorites.test.ts` — NEW: Favorites hook tests
-- `packages/web/src/__tests__/hooks/use-subscription.test.ts` — NEW: Subscription hook tests
+- `packages/web/src/components/molecules/DeleteConfirmModal.tsx` — NEW: Delete confirmation modal
+- `packages/web/src/app/(dashboard)/projects/page.tsx` — NEW: Projects dashboard page
+- `packages/web/src/__tests__/molecules/project-card.test.tsx` — NEW: ProjectCard tests (8 tests)
+- `packages/web/src/__tests__/molecules/empty-state.test.tsx` — NEW: EmptyState tests (3 tests)
+- `packages/web/src/__tests__/molecules/filter-bar.test.tsx` — NEW: FilterBar tests (6 tests)
+- `packages/web/src/__tests__/molecules/render-quota-banner.test.tsx` — NEW: Quota banner tests (5 tests)
+- `packages/web/src/__tests__/molecules/delete-confirm-modal.test.tsx` — NEW: Modal tests (5 tests)
+- `packages/web/src/__tests__/molecules/skeleton-card.test.tsx` — NEW: SkeletonCard tests (1 test)
+- `packages/web/src/__tests__/hooks/use-projects.test.ts` — NEW: Projects hook tests (4 tests)
+- `packages/web/src/__tests__/hooks/use-favorites.test.ts` — NEW: Favorites hook tests (2 tests)
+- `packages/web/src/__tests__/hooks/use-subscription.test.ts` — NEW: Subscription hook tests (2 tests)
 
 ## QA Results

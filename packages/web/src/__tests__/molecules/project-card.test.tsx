@@ -8,7 +8,9 @@ jest.mock('next/navigation', () => ({
 }));
 
 jest.mock('next/image', () => {
-  return function MockImage(props: Record<string, unknown>) {
+  return function MockImage({ fill, sizes, ...props }: Record<string, unknown>) {
+    void fill;
+    void sizes;
     // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
     return <img {...props} />;
   };
