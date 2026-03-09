@@ -373,3 +373,10 @@ Story 7.7 (Frontend Shell: Layout Base, Autenticacao UI e Navegacao) completed i
 
 ---
 
+
+### [phase-8] - 2026-03-09T16:51:12Z
+
+Story 6.4 (Dashboard UI: Listagem de Projetos, Favoritos e Acoes Rapidas) completed in 1 attempt(s).
+
+---
+
