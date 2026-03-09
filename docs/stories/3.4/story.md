@@ -163,6 +163,9 @@ As a corretor de imoveis ou arquiteto autenticado, I want an intuitive visual ed
 
 ### Change Log
 - 2026-03-09: Implemented Story 3.4 — full editing UI with segmentation, lighting, and object removal
+- 2026-03-09: Added AC-6 pending removal confirmation overlay with Remover/Cancelar buttons
+- 2026-03-09: Fixed EditingToolbar type alignment ('remove' → 'removal'), store uses DetectObjectResponse directly
+- 2026-03-09: Added 6 editing mode integration tests to workspace page test suite
 
 ## Testing
 - Test click-to-segment with various element types and verify correct overlay colors
@@ -202,6 +205,9 @@ As a corretor de imoveis ou arquiteto autenticado, I want an intuitive visual ed
 
 ### Modified Files
 - `packages/web/src/components/molecules/RenderViewer.tsx` — Added onEditElements prop, enabled "Editar Elementos" button
-- `packages/web/src/app/(dashboard)/projects/[id]/page.tsx` — Integrated full editing UI with edit mode toggle
+- `packages/web/src/components/molecules/EditingToolbar.tsx` — Aligned EditingTool type to use 'removal' from store
+- `packages/web/src/hooks/use-editing-store.ts` — Replaced SelectedObject with DetectObjectResponse for consistency
+- `packages/web/src/app/(dashboard)/projects/[id]/page.tsx` — Integrated full editing UI with edit mode toggle, AC-6 pending removal flow
+- `packages/web/src/__tests__/project-workspace-page.test.tsx` — Added 6 editing mode integration tests
 
 ## QA Results
