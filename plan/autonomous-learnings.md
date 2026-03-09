@@ -387,3 +387,10 @@ Story 7.7 (Frontend Shell: Layout Base, Autenticacao UI e Navegacao) completed i
 
 ---
 
+
+### [phase-8] - 2026-03-09T17:07:41Z
+
+Story 1.4 (Staging UI: Wizard de Novo Projeto, Upload, Selecao de Estilo e Geracao com Progresso) completed in 1 attempt(s).
+
+---
+
