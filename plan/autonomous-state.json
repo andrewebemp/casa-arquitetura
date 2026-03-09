@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-03-08T19:28:26Z",
-  "updated_at": "2026-03-09T12:59:44Z",
+  "updated_at": "2026-03-09T13:15:24Z",
   "current_phase": "phase-8",
   "phases": {
     "phase-2": {
@@ -91,9 +91,11 @@
       "attempts": 1
     },
     "7.5": {
-      "status": "in-progress",
+      "status": "done",
       "created_at": "2026-03-09T12:51:51Z",
-      "started_at": "2026-03-09T12:59:44Z"
+      "started_at": "2026-03-09T12:59:44Z",
+      "completed_at": "2026-03-09T13:15:23Z",
+      "attempts": 1
     }
   },
   "dev_cycles": {
