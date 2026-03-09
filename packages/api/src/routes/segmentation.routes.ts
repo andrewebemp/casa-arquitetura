@@ -5,7 +5,6 @@
 
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { requireLgpdConsent } from '../middleware/lgpd-consent.middleware';
 import { validate } from '../middleware/validation.middleware';
 import {
   segmentProjectParamsSchema,
@@ -32,7 +31,6 @@ export async function segmentationRoutes(server: FastifyInstance): Promise<void>
     {
       preHandler: [
         authMiddleware,
-        requireLgpdConsent,
         validate({ params: segmentProjectParamsSchema, body: segmentPointBodySchema }),
       ],
     },
@@ -61,7 +59,6 @@ export async function segmentationRoutes(server: FastifyInstance): Promise<void>
     {
       preHandler: [
         authMiddleware,
-        requireLgpdConsent,
         validate({ params: segmentProjectParamsSchema }),
       ],
     },
@@ -86,7 +83,6 @@ export async function segmentationRoutes(server: FastifyInstance): Promise<void>
     {
       preHandler: [
         authMiddleware,
-        requireLgpdConsent,
         validate({ params: segmentProjectParamsSchema, body: segmentApplyBodySchema }),
       ],
     },

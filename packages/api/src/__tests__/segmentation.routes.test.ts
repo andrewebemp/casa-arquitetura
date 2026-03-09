@@ -39,10 +39,6 @@ vi.mock('../services/segmentation.service', () => ({
   },
 }));
 
-vi.mock('../middleware/lgpd-consent.middleware', () => ({
-  requireLgpdConsent: vi.fn().mockImplementation(async () => {}),
-}));
-
 import { segmentationRoutes } from '../routes/segmentation.routes';
 import { errorHandler } from '../middleware/error-handler';
 import { supabaseAdmin } from '../lib/supabase';

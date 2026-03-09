@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { requireLgpdConsent } from '../middleware/lgpd-consent.middleware';
 import { validate } from '../middleware/validation.middleware';
 import {
   stagingProjectIdParamsSchema,
@@ -34,7 +33,7 @@ export async function stagingRoutes(server: FastifyInstance): Promise<void> {
   server.post<{ Params: StagingProjectIdParams }>(
     '/:projectId/staging/generate',
     {
-      preHandler: [authMiddleware, requireLgpdConsent, validate({ params: stagingProjectIdParamsSchema })],
+      preHandler: [authMiddleware, validate({ params: stagingProjectIdParamsSchema })],
     },
     async (request: FastifyRequest<{ Params: StagingProjectIdParams }>, reply: FastifyReply) => {
       const userId = request.user!.id;
@@ -91,7 +90,6 @@ export async function stagingRoutes(server: FastifyInstance): Promise<void> {
     {
       preHandler: [
         authMiddleware,
-        requireLgpdConsent,
         validate({ params: stagingProjectIdParamsSchema, body: variationStagingSchema }),
       ],
     },

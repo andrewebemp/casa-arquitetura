@@ -36,12 +36,6 @@ vi.mock('../services/lighting.service', () => ({
   },
 }));
 
-vi.mock('../services/consent.service', () => ({
-  consentService: {
-    hasConsent: vi.fn().mockResolvedValue(true),
-  },
-}));
-
 import { lightingRoutes } from '../routes/lighting.routes';
 import { errorHandler } from '../middleware/error-handler';
 import { supabaseAdmin } from '../lib/supabase';

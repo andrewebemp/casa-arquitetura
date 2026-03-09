@@ -4,13 +4,10 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
-
 export default function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [lgpdConsent, setLgpdConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,12 +18,6 @@ export default function SignupPage() {
     setError(null);
     setLoading(true);
 
-    if (!lgpdConsent) {
-      setError('Voce deve concordar com o processamento de imagens para criar sua conta.');
-      setLoading(false);
-      return;
-    }
-
     if (password.length < 8) {
       setError('A senha deve ter pelo menos 8 caracteres.');
       setLoading(false);
@@ -34,7 +25,7 @@ export default function SignupPage() {
     }
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -47,22 +38,6 @@ export default function SignupPage() {
       if (authError) {
         setError('Erro ao criar conta. Tente novamente.');
         return;
-      }
-
-      // Grant LGPD consent after signup
-      if (authData.session?.access_token) {
-        try {
-          await fetch(`${API_BASE}/users/me/consent`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${authData.session.access_token}`,
-            },
-            body: JSON.stringify({ consent_version: '1.0' }),
-          });
-        } catch {
-          // Consent will be granted on next login if this fails
-        }
       }
 
       setSuccess(true);
@@ -143,23 +118,6 @@ export default function SignupPage() {
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
             placeholder="Minimo 8 caracteres"
           />
-        </div>
-
-        <div className="flex items-start gap-2">
-          <input
-            id="lgpd-consent"
-            name="lgpd-consent"
-            type="checkbox"
-            checked={lgpdConsent}
-            onChange={(e) => setLgpdConsent(e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-          />
-          <label htmlFor="lgpd-consent" className="text-sm text-gray-600">
-            Concordo com o processamento das minhas imagens conforme a{' '}
-            <Link href="/privacidade" className="font-medium text-brand-600 hover:text-brand-500 underline">
-              Politica de Privacidade
-            </Link>
-          </label>
         </div>
 
         {error && (

@@ -5,7 +5,6 @@
 
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { requireLgpdConsent } from '../middleware/lgpd-consent.middleware';
 import { validate } from '../middleware/validation.middleware';
 import {
   enhanceLightingParamsSchema,
@@ -28,7 +27,6 @@ export async function lightingRoutes(server: FastifyInstance): Promise<void> {
     {
       preHandler: [
         authMiddleware,
-        requireLgpdConsent,
         validate({ params: enhanceLightingParamsSchema, body: enhanceLightingBodySchema }),
       ],
     },

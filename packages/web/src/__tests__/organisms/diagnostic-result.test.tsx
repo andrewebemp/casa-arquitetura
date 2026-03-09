@@ -93,7 +93,6 @@ describe('DiagnosticResult', () => {
 
     render(<DiagnosticResult result={resultWithPreview} />);
 
-    const disclaimers = screen.getAllByText('Imagem ilustrativa gerada por IA');
-    expect(disclaimers.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Imagem ilustrativa gerada por IA')).toBeInTheDocument();
   });
 });
