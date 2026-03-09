@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-03-08T19:28:26Z",
-  "updated_at": "2026-03-09T20:30:54Z",
+  "updated_at": "2026-03-09T20:32:01Z",
   "current_phase": "phase-8",
   "phases": {
     "phase-2": {
@@ -256,12 +256,13 @@
       "status": "done",
       "created_at": "2026-03-09T20:14:11Z",
       "started_at": "2026-03-09T20:16:50Z",
-      "completed_at": "2026-03-09T20:30:53Z",
+      "completed_at": "2026-03-09T20:32:01Z",
       "attempts": 1
     },
     "7.8": {
-      "status": "created",
-      "created_at": "2026-03-09T20:16:47Z"
+      "status": "in-progress",
+      "created_at": "2026-03-09T20:16:47Z",
+      "started_at": "2026-03-09T20:30:57Z"
     }
   },
   "dev_cycles": {
