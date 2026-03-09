@@ -12,6 +12,6 @@ export type { ReferenceItem } from './reference-item';
 export type { ChatMessage, ChatRole, RefinementOperation } from './chat-message';
 export type { Subscription, SubscriptionTier, SubscriptionStatus, PaymentGateway } from './subscription';
 export type { Diagnostic, DiagnosticAnalysis, DiagnosticIssue, DiagnosticCta, DiagnosticResponse } from './diagnostic';
-export type { RenderJob, RenderJobType, RenderJobStatus } from './render-job';
+export type { RenderJob, RenderJobType, RenderJobStatus, RenderJobOutputParams } from './render-job';
 export type { ShareLink } from './share-link';
 export type { Database } from './database.types';

@@ -210,9 +210,29 @@ export const shareLinkService = {
     const versionRow = version as VersionRow | null;
     const projectRow = project as Pick<ProjectRow, 'name' | 'style' | 'original_image_url'> | null;
 
+    // AC-5: Use processed_image_url (baked-in watermark) from render job output
+    // instead of client-side watermark overlay
+    let renderedUrl = versionRow?.render_url ?? versionRow?.image_url ?? null;
+
+    if (row.include_watermark && versionRow) {
+      const { data: renderJob } = await supabaseAdmin
+        .from('render_jobs')
+        .select('output_params')
+        .eq('version_id', row.version_id)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      const outputParams = (renderJob as { output_params: Record<string, unknown> } | null)?.output_params;
+      if (outputParams?.processed_image_url) {
+        renderedUrl = outputParams.processed_image_url as string;
+      }
+    }
+
     return {
       original_url: projectRow?.original_image_url ?? null,
-      rendered_url: versionRow?.render_url ?? versionRow?.image_url ?? null,
+      rendered_url: renderedUrl,
       project_name: projectRow?.name ?? '',
       style: projectRow?.style ?? '',
       created_at: row.created_at,
@@ -220,7 +240,7 @@ export const shareLinkService = {
       og: {
         title: `${projectRow?.name ?? 'Projeto'} | DecorAI`,
         description: 'Veja a transformacao do ambiente',
-        image: versionRow?.render_url ?? versionRow?.image_url ?? null,
+        image: renderedUrl,
         url: `/share/${row.share_token}`,
       },
     };
