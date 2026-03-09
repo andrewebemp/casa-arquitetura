@@ -79,3 +79,10 @@ Story 1.1 (Spatial Input API e Reference Items CRUD) completed in 1 attempt(s).
 
 ---
 
+
+### [phase-8] - 2026-03-09T12:45:12Z
+
+Story 7.4 (Project CRUD API e Upload de Imagens) completed in 1 attempt(s).
+
+---
+
