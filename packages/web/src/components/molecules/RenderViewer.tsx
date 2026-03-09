@@ -14,11 +14,12 @@ interface RenderViewerProps {
   onToggleHistory: () => void;
   onCompare?: () => void;
   onShare?: () => void;
+  onEditElements?: () => void;
 }
 
 const TOOLBAR_ACTIONS = [
   { label: 'Trocar Estilo', icon: Palette, action: undefined as string | undefined },
-  { label: 'Editar Elementos', icon: Pencil, action: undefined as string | undefined },
+  { label: 'Editar Elementos', icon: Pencil, action: 'edit' as string | undefined },
   { label: 'Comparar Antes/Depois', icon: GitCompare, action: 'compare' as string | undefined },
   { label: 'Compartilhar', icon: Share2, action: 'share' as string | undefined },
 ];
@@ -28,8 +29,10 @@ export function RenderViewer({
   onToggleHistory,
   onCompare,
   onShare,
+  onEditElements,
 }: RenderViewerProps) {
   const handleAction = (action: string | undefined) => {
+    if (action === 'edit' && onEditElements) onEditElements();
     if (action === 'compare' && onCompare) onCompare();
     if (action === 'share' && onShare) onShare();
   };
