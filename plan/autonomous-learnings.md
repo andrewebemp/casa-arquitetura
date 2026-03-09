@@ -310,3 +310,10 @@ Story 3.1 (Segmentation API: SAM Element Segmentation, Material Swap e Inpaintin
 
 ---
 
+
+### [phase-8] - 2026-03-09T15:38:14Z
+
+Story 3.2 (Lighting Correction API: IC-Light Auto-Enhancement e Correcao de Exposicao) completed in 1 attempt(s).
+
+---
+
