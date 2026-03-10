@@ -16,13 +16,13 @@ import { shareLinkRoutes, publicShareRoutes } from '../src/routes/share-link.rou
 import { diagnosticsRoutes } from '../src/routes/diagnostics.routes';
 import { asaasWebhookRoutes } from '../src/routes/asaas-webhook.routes';
 import { cacheRoutes } from '../src/routes/cache.routes';
-// Routes that depend on bullmq (render queue):
-import { renderRoutes } from '../src/routes/render.routes';
-import { chatRoutes } from '../src/routes/chat.routes';
-import { stagingRoutes, stagingStylesRoutes } from '../src/routes/staging.routes';
-import { segmentationRoutes } from '../src/routes/segmentation.routes';
-import { lightingRoutes } from '../src/routes/lighting.routes';
-import { objectRemovalRoutes } from '../src/routes/object-removal.routes';
+// Skip bullmq-dependent routes for now
+// import { renderRoutes } from '../src/routes/render.routes';
+// import { chatRoutes } from '../src/routes/chat.routes';
+// import { stagingRoutes, stagingStylesRoutes } from '../src/routes/staging.routes';
+// import { segmentationRoutes } from '../src/routes/segmentation.routes';
+// import { lightingRoutes } from '../src/routes/lighting.routes';
+// import { objectRemovalRoutes } from '../src/routes/object-removal.routes';
 import { rateLimitMiddleware } from '../src/middleware/rate-limit.middleware';
 
 console.log('[vercel] All modules imported');
@@ -58,14 +58,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       app.register(spatialRoutes, { prefix: '/projects' });
       app.register(referenceRoutes, { prefix: '/projects' });
       app.register(croquiRoutes, { prefix: '/projects' });
-      app.register(chatRoutes, { prefix: '/projects' });
+      // app.register(chatRoutes, { prefix: '/projects' });
       app.register(versionRoutes, { prefix: '/projects' });
-      app.register(renderRoutes);
-      app.register(stagingStylesRoutes, { prefix: '/api/staging' });
-      app.register(stagingRoutes, { prefix: '/api/projects' });
-      app.register(segmentationRoutes, { prefix: '/api/projects' });
-      app.register(lightingRoutes, { prefix: '/api/projects' });
-      app.register(objectRemovalRoutes, { prefix: '/api/projects' });
+      // app.register(renderRoutes);
+      // app.register(stagingStylesRoutes, { prefix: '/api/staging' });
+      // app.register(stagingRoutes, { prefix: '/api/projects' });
+      // app.register(segmentationRoutes, { prefix: '/api/projects' });
+      // app.register(lightingRoutes, { prefix: '/api/projects' });
+      // app.register(objectRemovalRoutes, { prefix: '/api/projects' });
       app.register(shareLinkRoutes, { prefix: '/api/projects' });
       app.register(publicShareRoutes, { prefix: '/api/share' });
       app.register(diagnosticsRoutes, { prefix: '/api' });
