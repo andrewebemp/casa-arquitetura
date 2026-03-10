@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "pnpm turbo run build --filter=@decorai/web",
+  "outputDirectory": "packages/web/.next",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "ignoreCommand": "npx turbo-ignore --fallback=HEAD~1"
+}
