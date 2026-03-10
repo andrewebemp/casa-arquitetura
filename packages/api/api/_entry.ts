@@ -5,18 +5,22 @@ let app: any = null;
 async function getApp() {
   if (app) return app;
 
-  console.log('[vercel] Step 1: requiring fastify...');
-  const Fastify = require('fastify');
+  console.log('[vercel] Step 1: requiring env...');
+  const { env } = require('../src/config/env');
+  console.log('[vercel] Step 1 done. NODE_ENV:', env.NODE_ENV);
 
-  console.log('[vercel] Step 2: creating fastify instance...');
+  console.log('[vercel] Step 2: requiring logger...');
+  const { logger } = require('../src/lib/logger');
+  console.log('[vercel] Step 2 done.');
+
+  console.log('[vercel] Step 3: requiring fastify...');
+  const Fastify = require('fastify');
   app = Fastify.default ? Fastify.default({ logger: false }) : Fastify({ logger: false });
 
-  console.log('[vercel] Step 3: registering health route...');
-  app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+  app.get('/health', async () => ({ status: 'ok', env: env.NODE_ENV, timestamp: new Date().toISOString() }));
 
   console.log('[vercel] Step 4: calling app.ready()...');
   await app.ready();
-
   console.log('[vercel] Step 5: App ready!');
   return app;
 }
