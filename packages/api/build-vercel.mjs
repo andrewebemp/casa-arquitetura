@@ -1,8 +1,14 @@
-import { build } from 'esbuild';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const rootDir = resolve(__dirname, '../..');
+
+// Use createRequire from monorepo root to resolve esbuild
+// (pnpm strict hoisting means esbuild may not be in packages/api/node_modules)
+const rootRequire = createRequire(resolve(rootDir, 'package.json'));
+const { build } = rootRequire('esbuild');
 
 await build({
   entryPoints: [resolve(__dirname, 'api/index.ts')],
@@ -12,7 +18,6 @@ await build({
   format: 'cjs',
   outfile: resolve(__dirname, 'api/index.js'),
   external: [
-    // Keep native modules external (they'll be in node_modules)
     'sharp',
     'ioredis',
     'bullmq',
@@ -21,7 +26,6 @@ await build({
   ],
   sourcemap: false,
   minify: false,
-  // Resolve workspace packages from source (esbuild handles TS natively)
   alias: {
     '@decorai/shared': resolve(__dirname, '../shared/src/index.ts'),
   },
