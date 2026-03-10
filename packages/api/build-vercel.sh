@@ -15,7 +15,8 @@ npx esbuild api/index.ts \
   --external:pino-pretty \
   "--alias:@decorai/shared=../shared/src/index.ts"
 
-# Create public dir for Vercel static output requirement
+# Create public dir with placeholder for Vercel output requirement
 mkdir -p public
+echo '{"status":"api"}' > public/index.json
 
 echo "API bundled successfully for Vercel"
