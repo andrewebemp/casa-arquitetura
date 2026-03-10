@@ -37,13 +37,9 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/signup') ||
     request.nextUrl.pathname.startsWith('/auth');
 
-  // TODO: Remove /dashboard, /projects, /plano from public routes after enabling auth
   const isPublicRoute = request.nextUrl.pathname === '/' ||
     request.nextUrl.pathname.startsWith('/diagnostico') ||
-    request.nextUrl.pathname.startsWith('/compartilhar') ||
-    request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/projects') ||
-    request.nextUrl.pathname.startsWith('/plano');
+    request.nextUrl.pathname.startsWith('/compartilhar');
 
   if (!user && !isAuthRoute && !isPublicRoute) {
     const url = request.nextUrl.clone();
