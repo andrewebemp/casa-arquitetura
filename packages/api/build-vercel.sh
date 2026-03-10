@@ -2,7 +2,7 @@
 set -e
 
 # Bundle API with esbuild for Vercel serverless deployment
-npx esbuild api/index.ts \
+npx esbuild api/_entry.ts \
   --bundle \
   --platform=node \
   --target=node20 \

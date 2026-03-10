@@ -11,7 +11,7 @@ const rootRequire = createRequire(resolve(rootDir, 'package.json'));
 const { build } = rootRequire('esbuild');
 
 await build({
-  entryPoints: [resolve(__dirname, 'api/index.ts')],
+  entryPoints: [resolve(__dirname, 'api/_entry.ts')],
   bundle: true,
   platform: 'node',
   target: 'node20',
