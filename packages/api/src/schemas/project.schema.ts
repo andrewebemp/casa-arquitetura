@@ -21,7 +21,7 @@ const PROJECT_STATUSES = ['draft', 'analyzing', 'croqui_review', 'generating', '
 export const createProjectSchema = z.object({
   name: z.string().min(1, 'Nome e obrigatorio').max(100, 'Nome deve ter no maximo 100 caracteres'),
   input_type: z.enum(INPUT_TYPES, { message: 'input_type deve ser photo, text ou combined' }),
-  style: z.enum(DECOR_STYLES, { message: 'Estilo invalido' }),
+  style: z.enum(DECOR_STYLES, { message: 'Estilo invalido' }).optional(),
   room_type: z.enum(ROOM_TYPES, { message: 'Tipo de comodo invalido' }).optional(),
 });
 

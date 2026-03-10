@@ -18,7 +18,7 @@ export const projectService = {
         user_id: userId,
         name: input.name,
         input_type: input.input_type,
-        style: input.style,
+        style: input.style ?? null,
         room_type: input.room_type ?? null,
         status: 'draft',
         is_favorite: false,

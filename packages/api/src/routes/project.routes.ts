@@ -22,13 +22,51 @@ function getAccessToken(request: FastifyRequest): string {
 }
 
 export async function projectRoutes(server: FastifyInstance): Promise<void> {
-  // POST /projects - Create new project
-  server.post<{ Body: CreateProjectInput }>('/', {
-    preHandler: [authMiddleware, validate({ body: createProjectSchema })],
+  // POST /projects - Create new project (accepts multipart with optional photo)
+  server.post('/', {
+    preHandler: [authMiddleware],
   }, async (request, reply) => {
     const userId = request.user!.id;
     const token = getAccessToken(request);
-    const project = await projectService.create(userId, request.body, token);
+
+    let fields: Record<string, string> = {};
+    let photoBuffer: Buffer | null = null;
+    let photoMimeType = '';
+
+    if (request.isMultipart()) {
+      const parts = request.parts();
+      for await (const part of parts) {
+        if (part.type === 'file' && part.fieldname === 'photo') {
+          photoBuffer = await part.toBuffer();
+          photoMimeType = part.mimetype;
+        } else if (part.type === 'field' && typeof part.value === 'string') {
+          fields[part.fieldname] = part.value;
+        }
+      }
+    } else {
+      fields = request.body as Record<string, string>;
+    }
+
+    const parsed = createProjectSchema.safeParse(fields);
+    if (!parsed.success) {
+      return reply.status(400).send({
+        error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0]?.message ?? 'Dados invalidos' },
+      });
+    }
+
+    const project = await projectService.create(userId, parsed.data, token);
+
+    // If photo was included, upload it and link to the project
+    if (photoBuffer && photoMimeType) {
+      storageService.validateFile(photoBuffer, photoMimeType);
+      const uploadResult = await storageService.upload(photoBuffer, photoMimeType, userId, project.id);
+      await projectService.updateImageUrl(project.id, userId, uploadResult.image_url, token);
+      const resolvedUrl = await imageCdnService.resolveImageUrl(uploadResult.image_url);
+      return reply.status(201).send({
+        data: { ...project, original_image_url: resolvedUrl ?? uploadResult.image_url },
+      });
+    }
+
     return reply.status(201).send({ data: project });
   });
 

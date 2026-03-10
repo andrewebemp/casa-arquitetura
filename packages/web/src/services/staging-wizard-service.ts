@@ -90,11 +90,12 @@ export async function createProject(params: CreateProjectParams): Promise<string
   );
 
   if (!response.ok) {
-    throw new Error('Falha ao criar projeto');
+    const err = await response.json().catch(() => null);
+    throw new Error(err?.error?.message ?? 'Falha ao criar projeto');
   }
 
-  const data = await response.json();
-  return data.id;
+  const json = await response.json();
+  return json.data?.id ?? json.id;
 }
 
 export async function submitSpatialInput(params: SpatialInputParams): Promise<void> {
