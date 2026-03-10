@@ -36,7 +36,17 @@ export default function SignupPage() {
       });
 
       if (authError) {
-        setError('Erro ao criar conta. Tente novamente.');
+        if (authError.message.includes('not authorized') || authError.message.includes('signups not allowed')) {
+          setError('Cadastro por email esta desabilitado. Contate o administrador.');
+        } else if (authError.message.includes('already registered')) {
+          setError('Este email ja esta cadastrado. Tente fazer login.');
+        } else if (authError.message.includes('invalid') && authError.message.includes('email')) {
+          setError('Email invalido. Verifique e tente novamente.');
+        } else if (authError.message.includes('weak_password') || authError.message.includes('password')) {
+          setError('Senha fraca. Use pelo menos 8 caracteres com letras e numeros.');
+        } else {
+          setError(`Erro ao criar conta: ${authError.message}`);
+        }
         return;
       }
 
