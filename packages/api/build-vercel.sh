@@ -22,7 +22,9 @@ npx esbuild api/_entry.ts \
 cat > "$FUNC_DIR/.vc-config.json" << 'EOF'
 {
   "runtime": "nodejs20.x",
-  "handler": "index.handler",
+  "handler": "index.js",
+  "launcherType": "Nodejs",
+  "shouldAddHelpers": true,
   "maxDuration": 60,
   "memory": 1024
 }
