@@ -22,6 +22,7 @@ import { diagnosticsRoutes } from './routes/diagnostics.routes';
 import { asaasWebhookRoutes } from './routes/asaas-webhook.routes';
 import { rateLimitMiddleware } from './middleware/rate-limit.middleware';
 import { cacheRoutes } from './routes/cache.routes';
+import { imageProxyRoutes } from './routes/image-proxy.routes';
 
 export function buildApp() {
   const server = Fastify({ logger: false });
@@ -75,6 +76,7 @@ export function buildApp() {
   server.register(webhookRoutes, { prefix: '/webhooks' });
   server.register(asaasWebhookRoutes, { prefix: '/webhooks' });
   server.register(cacheRoutes, { prefix: '/api' });
+  server.register(imageProxyRoutes, { prefix: '/api' });
 
   return server;
 }

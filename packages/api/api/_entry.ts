@@ -22,6 +22,7 @@ import { shareLinkRoutes, publicShareRoutes } from '../src/routes/share-link.rou
 import { diagnosticsRoutes } from '../src/routes/diagnostics.routes';
 import { asaasWebhookRoutes } from '../src/routes/asaas-webhook.routes';
 import { cacheRoutes } from '../src/routes/cache.routes';
+import { imageProxyRoutes } from '../src/routes/image-proxy.routes';
 // NOTE: rateLimitMiddleware is intentionally excluded — its import chain
 // (subscription service → stripe SDK) causes the bundled module to hang.
 // Vercel provides edge-level rate limiting instead.
@@ -68,6 +69,7 @@ function buildServerlessApp() {
   server.register(webhookRoutes, { prefix: '/webhooks' });
   server.register(asaasWebhookRoutes, { prefix: '/webhooks' });
   server.register(cacheRoutes, { prefix: '/api' });
+  server.register(imageProxyRoutes, { prefix: '/api' });
 
   return server;
 }
