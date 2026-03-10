@@ -6,8 +6,8 @@ FUNC_DIR=".vercel/output/functions/api/index.func"
 # Clean previous output
 rm -rf .vercel/output
 
-# Bundle API with esbuild
-# Keep native/complex modules external to avoid bundling issues
+# Bundle API with esbuild - only sharp is external (native bindings)
+# Everything else (ioredis, bullmq, pino, etc.) is bundled inline
 npx esbuild api/_entry.ts \
   --bundle \
   --platform=node \
@@ -16,10 +16,6 @@ npx esbuild api/_entry.ts \
   --minify \
   --outfile="$FUNC_DIR/index.js" \
   --external:sharp \
-  --external:ioredis \
-  --external:bullmq \
-  --external:pino \
-  --external:pino-pretty \
   "--alias:@decorai/shared=../shared/src/index.ts"
 
 # Create .vc-config.json for the serverless function
@@ -33,27 +29,15 @@ cat > "$FUNC_DIR/.vc-config.json" << 'EOF'
 }
 EOF
 
-# Copy external node_modules needed at runtime
-# pnpm uses symlinks, so we need to follow them (-L)
+# Copy sharp (native module) - find it in pnpm store
 mkdir -p "$FUNC_DIR/node_modules"
-MODULES="../../node_modules"
-
-echo "Copying external modules..."
-for pkg in sharp ioredis bullmq pino pino-pretty; do
-  if [ -e "$MODULES/$pkg" ]; then
-    cp -rL "$MODULES/$pkg" "$FUNC_DIR/node_modules/$pkg" 2>/dev/null && echo "  + $pkg" || true
-  fi
-done
-
-# Copy common transitive deps needed by ioredis/bullmq/pino
-for pkg in denque cluster-key-slot standard-as-callback redis-errors redis-parser \
-           sonic-boom fast-redact atomic-sleep on-exit-leak-free thread-stream \
-           real-require pino-abstract-transport safe-stable-stringify quick-format-unescaped \
-           msgpackr msgpackr-extract cron-parser semver lodash; do
-  if [ -e "$MODULES/$pkg" ]; then
-    cp -rL "$MODULES/$pkg" "$FUNC_DIR/node_modules/$pkg" 2>/dev/null || true
-  fi
-done
+SHARP_SRC=$(find ../../node_modules/.pnpm -maxdepth 3 -type d -name "sharp" 2>/dev/null | grep "node_modules/sharp$" | head -1)
+if [ -n "$SHARP_SRC" ]; then
+  cp -rL "$SHARP_SRC" "$FUNC_DIR/node_modules/sharp"
+  echo "Copied sharp from $SHARP_SRC"
+else
+  echo "WARNING: sharp not found in node_modules"
+fi
 
 # Create static output directory
 mkdir -p .vercel/output/static
@@ -73,4 +57,3 @@ EOF
 
 echo "API bundled successfully for Vercel (Build Output API v3)"
 ls -lh "$FUNC_DIR/index.js"
-du -sh "$FUNC_DIR/node_modules" 2>/dev/null || echo "No node_modules"
