@@ -39,7 +39,7 @@ function NewProjectContent() {
   const searchParams = useSearchParams();
   const { state, dispatch, nextStep, prevStep, canAdvance } = useNewProjectWizard();
 
-  // Sync step from URL
+  // Sync step from URL on initial load only
   useEffect(() => {
     const stepParam = searchParams.get('step');
     if (stepParam) {
@@ -48,15 +48,17 @@ function NewProjectContent() {
         dispatch({ type: 'SET_STEP', step });
       }
     }
-  }, [searchParams, dispatch, state.currentStep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Update URL when step changes
+  // Update URL when step changes (without triggering re-renders)
   useEffect(() => {
-    const currentUrlStep = searchParams.get('step');
-    if (currentUrlStep !== String(state.currentStep)) {
-      router.replace(`/projects/new?step=${state.currentStep}`, { scroll: false });
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('step') !== String(state.currentStep)) {
+      url.searchParams.set('step', String(state.currentStep));
+      window.history.replaceState(null, '', url.toString());
     }
-  }, [state.currentStep, router, searchParams]);
+  }, [state.currentStep]);
 
   // Create project mutation (called at end of Step 2)
   const createProjectMutation = useMutation({
