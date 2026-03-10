@@ -1,70 +1,13 @@
 import type { IncomingMessage, ServerResponse } from 'http';
-import Fastify from 'fastify';
-import multipart from '@fastify/multipart';
+import Stripe from 'stripe';
 import { env } from '../src/config/env';
-import { errorHandler } from '../src/middleware/error-handler';
-import { authRoutes } from '../src/routes/auth.routes';
-import { projectRoutes } from '../src/routes/project.routes';
-import { profileRoutes } from '../src/routes/profile.routes';
-// import { spatialRoutes } from '../src/routes/spatial.routes';
-// import { referenceRoutes } from '../src/routes/reference.routes';
-// import { croquiRoutes } from '../src/routes/croqui.routes';
-// import { subscriptionRoutes } from '../src/routes/subscription.routes';
-// import { webhookRoutes } from '../src/routes/webhook.routes';
-// import { versionRoutes } from '../src/routes/version.routes';
-// import { shareLinkRoutes, publicShareRoutes } from '../src/routes/share-link.routes';
-// import { diagnosticsRoutes } from '../src/routes/diagnostics.routes';
-// import { asaasWebhookRoutes } from '../src/routes/asaas-webhook.routes';
-// import { cacheRoutes } from '../src/routes/cache.routes';
-// Skip bullmq-dependent routes for now
-// import { renderRoutes } from '../src/routes/render.routes';
-// import { chatRoutes } from '../src/routes/chat.routes';
-// import { stagingRoutes, stagingStylesRoutes } from '../src/routes/staging.routes';
-// import { segmentationRoutes } from '../src/routes/segmentation.routes';
-// import { lightingRoutes } from '../src/routes/lighting.routes';
-// import { objectRemovalRoutes } from '../src/routes/object-removal.routes';
-// import { rateLimitMiddleware } from '../src/middleware/rate-limit.middleware';
 
-console.log('[vercel] All modules imported');
-
-let app: any = null;
+console.log('[vercel] Creating Stripe instance...');
+const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-02-24.acacia' as any });
+console.log('[vercel] Stripe created OK');
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
-  try {
-    if (!app) {
-      console.log('[vercel] Building app...');
-      app = Fastify({ logger: false });
-      app.setErrorHandler(errorHandler);
-      app.register(multipart, { limits: { fileSize: 20 * 1024 * 1024 } });
-
-      const corsOrigins = (env.CORS_ORIGINS || '').split(',').map((o: string) => o.trim());
-      app.addHook('onRequest', async (request: any, reply: any) => {
-        const origin = request.headers.origin;
-        if (origin && corsOrigins.includes(origin)) {
-          reply.header('Access-Control-Allow-Origin', origin);
-          reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-          reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-          reply.header('Access-Control-Allow-Credentials', 'true');
-        }
-        if (request.method === 'OPTIONS') return reply.status(204).send();
-      });
-      // app.addHook('onRequest', rateLimitMiddleware);
-
-      app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
-
-      app.register(authRoutes, { prefix: '/auth' });
-      app.register(profileRoutes, { prefix: '/profile' });
-      app.register(projectRoutes, { prefix: '/projects' });
-      // All other routes disabled for testing
-
-      console.log('[vercel] Calling ready...');
-      await app.ready();
-      console.log('[vercel] Ready!');
-    }
-    app.server.emit('request', req, res);
-  } catch (err: any) {
-    console.error('[vercel] Error:', err?.message || err);
-    res.writeHead(500, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ error: err?.message || 'Internal server error' }));
-  }
+  console.log('[vercel] handler called');
+  res.writeHead(200, { 'content-type': 'application/json' });
+  res.end(JSON.stringify({ status: 'ok', stripeOk: !!stripe }));
 }
