@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { Suspense, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -27,6 +27,14 @@ import {
 import type { InputType } from '@decorai/shared';
 
 export default function NewProjectPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-4xl animate-pulse space-y-8"><div className="h-8 w-48 rounded bg-gray-200" /><div className="h-64 rounded-xl bg-gray-100" /></div>}>
+      <NewProjectContent />
+    </Suspense>
+  );
+}
+
+function NewProjectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { state, dispatch, nextStep, prevStep, canAdvance } = useNewProjectWizard();
