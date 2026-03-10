@@ -23,7 +23,7 @@ import { profileRoutes } from '../src/routes/profile.routes';
 // import { segmentationRoutes } from '../src/routes/segmentation.routes';
 // import { lightingRoutes } from '../src/routes/lighting.routes';
 // import { objectRemovalRoutes } from '../src/routes/object-removal.routes';
-import { rateLimitMiddleware } from '../src/middleware/rate-limit.middleware';
+// import { rateLimitMiddleware } from '../src/middleware/rate-limit.middleware';
 
 console.log('[vercel] All modules imported');
 
@@ -48,7 +48,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         }
         if (request.method === 'OPTIONS') return reply.status(204).send();
       });
-      app.addHook('onRequest', rateLimitMiddleware);
+      // app.addHook('onRequest', rateLimitMiddleware);
 
       app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 
