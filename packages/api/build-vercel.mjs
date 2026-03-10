@@ -21,9 +21,9 @@ await build({
   ],
   sourcemap: false,
   minify: false,
-  // Resolve workspace packages
+  // Resolve workspace packages from source (esbuild handles TS natively)
   alias: {
-    '@decorai/shared': resolve(__dirname, '../shared/dist/index.js'),
+    '@decorai/shared': resolve(__dirname, '../shared/src/index.ts'),
   },
 });
 
