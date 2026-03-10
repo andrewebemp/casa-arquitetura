@@ -1,28 +1,31 @@
 import type { IncomingMessage, ServerResponse } from 'http';
+import { buildApp } from '../src/app';
 
 let app: any = null;
+let initError: string | null = null;
 
 async function getApp() {
+  if (initError) throw new Error(initError);
   if (app) return app;
 
-  console.log('[vercel] Step 1: requiring env...');
-  const { env } = require('../src/config/env');
-  console.log('[vercel] Step 1 done. NODE_ENV:', env.NODE_ENV);
+  try {
+    console.log('[vercel] buildApp()...');
+    app = buildApp();
+    console.log('[vercel] app.ready()...');
 
-  console.log('[vercel] Step 2: requiring logger...');
-  const { logger } = require('../src/lib/logger');
-  console.log('[vercel] Step 2 done.');
+    // Race against a 8-second timeout
+    await Promise.race([
+      app.ready(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('app.ready() timeout 8s')), 8000))
+    ]);
 
-  console.log('[vercel] Step 3: requiring fastify...');
-  const Fastify = require('fastify');
-  app = Fastify.default ? Fastify.default({ logger: false }) : Fastify({ logger: false });
-
-  app.get('/health', async () => ({ status: 'ok', env: env.NODE_ENV, timestamp: new Date().toISOString() }));
-
-  console.log('[vercel] Step 4: calling app.ready()...');
-  await app.ready();
-  console.log('[vercel] Step 5: App ready!');
-  return app;
+    console.log('[vercel] Ready!');
+    return app;
+  } catch (err: any) {
+    initError = err?.message || 'Unknown init error';
+    app = null;
+    throw err;
+  }
 }
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
@@ -30,7 +33,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const fastify = await getApp();
     fastify.server.emit('request', req, res);
   } catch (err: any) {
-    console.error('[vercel] Handler error:', err?.message || err);
+    console.error('[vercel] Error:', err?.message || err);
     res.writeHead(500, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ error: err?.message || 'Internal server error' }));
   }
