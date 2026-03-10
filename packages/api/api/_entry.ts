@@ -1,37 +1,56 @@
 import type { IncomingMessage, ServerResponse } from 'http';
-import { buildApp } from '../src/app';
+import Fastify from 'fastify';
+import multipart from '@fastify/multipart';
+import { env } from '../src/config/env';
+import { authRoutes } from '../src/routes/auth.routes';
+import { projectRoutes } from '../src/routes/project.routes';
+import { profileRoutes } from '../src/routes/profile.routes';
+
+console.log('[vercel] Module loading...');
 
 let app: any = null;
-let initError: string | null = null;
 
-async function getApp() {
-  if (initError) throw new Error(initError);
-  if (app) return app;
+function buildServerlessApp() {
+  const server = Fastify({ logger: false });
 
-  try {
-    console.log('[vercel] buildApp()...');
-    app = buildApp();
-    console.log('[vercel] app.ready()...');
+  server.register(multipart, { limits: { fileSize: 20 * 1024 * 1024 } });
 
-    // Race against a 8-second timeout
-    await Promise.race([
-      app.ready(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('app.ready() timeout 8s')), 8000))
-    ]);
+  const corsOrigins = (env.CORS_ORIGINS || '').split(',').map((o: string) => o.trim());
+  server.addHook('onRequest', async (request: any, reply: any) => {
+    const origin = request.headers.origin;
+    if (origin && corsOrigins.includes(origin)) {
+      reply.header('Access-Control-Allow-Origin', origin);
+      reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+      reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      reply.header('Access-Control-Allow-Credentials', 'true');
+    }
+    if (request.method === 'OPTIONS') {
+      return reply.status(204).send();
+    }
+  });
 
-    console.log('[vercel] Ready!');
-    return app;
-  } catch (err: any) {
-    initError = err?.message || 'Unknown init error';
-    app = null;
-    throw err;
-  }
+  server.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+
+  // Only register a few routes to test
+  server.register(authRoutes, { prefix: '/auth' });
+  server.register(profileRoutes, { prefix: '/profile' });
+  server.register(projectRoutes, { prefix: '/projects' });
+
+  return server;
 }
+
+console.log('[vercel] Module loaded successfully');
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   try {
-    const fastify = await getApp();
-    fastify.server.emit('request', req, res);
+    if (!app) {
+      console.log('[vercel] Creating Fastify app...');
+      app = buildServerlessApp();
+      console.log('[vercel] Calling ready()...');
+      await app.ready();
+      console.log('[vercel] App ready!');
+    }
+    app.server.emit('request', req, res);
   } catch (err: any) {
     console.error('[vercel] Error:', err?.message || err);
     res.writeHead(500, { 'content-type': 'application/json' });
