@@ -163,7 +163,7 @@ function updateChangelog(newEntry, newVersion, prevVersion) {
   }
 
   // Add comparison link at the bottom
-  const compareLink = `[${newVersion}]: https://github.com/andrewebemp/aios-pessoal/compare/v${prevVersion}...v${newVersion}`;
+  const compareLink = `[${newVersion}]: https://github.com/andrewebemp/casa-arquitetura/compare/v${prevVersion}...v${newVersion}`;
   if (!content.includes(`[${newVersion}]:`)) {
     content = content.trimEnd() + '\n' + compareLink + '\n';
   }

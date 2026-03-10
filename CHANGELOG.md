@@ -163,11 +163,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Controle de versões com semantic versioning
 - Repositório privado no GitHub
 
-[1.7.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.6.0...v1.7.0
-[1.6.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.5.0...v1.6.0
-[1.5.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.4.0...v1.5.0
-[1.4.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/andrewebemp/aios-pessoal/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/andrewebemp/aios-pessoal/releases/tag/v1.0.0
+[1.7.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.6.0...v1.7.0
+[1.6.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/andrewebemp/casa-arquitetura/releases/tag/v1.0.0

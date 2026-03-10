@@ -1476,4 +1476,4 @@ Fase 8 (Dev Cycle)
 ---
 
 *Synkra AIOS - Da Ideia ao Deploy (10 Fases) | Greenfield & Brownfield*
-*Fork pessoal v1.6.0 | Baseado em AIOS-Core v3.11.3*
+*Casa Arquitetura v1.7.0 | Baseado em AIOS-Core v3.11.3*

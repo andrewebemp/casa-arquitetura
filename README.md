@@ -1,6 +1,6 @@
-# Synkra AIOS - Pessoal
+# Casa Arquitetura
 
-> Fork personalizado do **Synkra AIOS** (AI-Orchestrated System) para desenvolvimento full-stack orquestrado por agentes de IA.
+> Assistente de arquitetura residencial com IA, construido sobre o **Synkra AIOS** (AI-Orchestrated System) para desenvolvimento full-stack orquestrado por agentes de IA.
 
 ## O que e o Synkra AIOS?
 
@@ -393,8 +393,8 @@ CHANGELOG.md                        # Historico de versoes
 
 ```bash
 # 1. Clonar o repositorio
-git clone https://github.com/andrewebemp/aios-pessoal.git
-cd aios-pessoal
+git clone https://github.com/andrewebemp/casa-arquitetura.git
+cd casa-arquitetura
 
 # 2. Instalar dependencias
 npm install
@@ -413,10 +413,10 @@ Se voce quer usar o AIOS como base para um novo projeto:
 
 ```bash
 # 1. Criar repositorio a partir do template no GitHub
-# Acesse https://github.com/andrewebemp/aios-pessoal e clique "Use this template"
+# Acesse https://github.com/andrewebemp/casa-arquitetura e clique "Use this template"
 
 # OU clone manualmente e reconfigure o remote
-git clone https://github.com/andrewebemp/aios-pessoal.git meu-projeto
+git clone https://github.com/andrewebemp/casa-arquitetura.git meu-projeto
 cd meu-projeto
 rm -rf .git
 git init
@@ -737,4 +737,4 @@ BROWNFIELD         ANALISE                                PLANEJAMENTO BF       
 
 ---
 
-*Synkra AIOS v3.11.3 — Fork pessoal customizado v1.6.0*
+*Synkra AIOS v3.11.3 — Casa Arquitetura v1.7.0*
