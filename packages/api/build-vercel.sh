@@ -81,8 +81,7 @@ npx esbuild api/_entry.ts \
   --outfile="$FUNC_DIR/index.js" \
   --external:sharp \
   "--alias:bullmq=/tmp/bullmq-shim/index.js" \
-  "--alias:@decorai/shared=../shared/src/index.ts" \
-  "--alias:./middleware/rate-limit.middleware=../../api/rate-limit-noop.ts"
+  "--alias:@decorai/shared=../shared/src/index.ts"
 
 # Create .vc-config.json for the serverless function
 cat > "$FUNC_DIR/.vc-config.json" << 'EOF'
