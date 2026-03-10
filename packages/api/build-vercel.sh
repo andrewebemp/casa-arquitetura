@@ -31,27 +31,14 @@ cat > "$FUNC_DIR/.vc-config.json" << 'EOF'
 }
 EOF
 
-# Copy external native/complex modules from pnpm store
-mkdir -p "$FUNC_DIR/node_modules"
-
-copy_from_pnpm() {
-  local name=$1
-  local src=$(find ../../node_modules/.pnpm -maxdepth 3 -type d -name "$name" 2>/dev/null | grep "node_modules/$name$" | head -1)
-  if [ -n "$src" ]; then
-    cp -rL "$src" "$FUNC_DIR/node_modules/$name"
-    echo "Copied $name from $src"
-  else
-    echo "WARNING: $name not found in pnpm store"
-  fi
-}
-
-copy_from_pnpm "sharp"
-copy_from_pnpm "bullmq"
-
-# bullmq needs these peer/transitive dependencies at runtime
-for dep in cron-parser glob lodash msgpackr; do
-  copy_from_pnpm "$dep"
-done
+# Install external modules directly into function's node_modules
+# This is more reliable than copying from pnpm store since it resolves all transitive deps
+mkdir -p "$FUNC_DIR"
+cd "$FUNC_DIR"
+npm init -y > /dev/null 2>&1
+npm install --production sharp@0.33.5 bullmq@5.70.4 2>&1 | tail -5
+rm -f package.json package-lock.json
+cd - > /dev/null
 
 # Create static output directory
 mkdir -p .vercel/output/static
