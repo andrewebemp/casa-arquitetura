@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { IncomingMessage, ServerResponse } from 'http';
 import { buildApp } from '../src/app';
 import type { FastifyInstance } from 'fastify';
 
@@ -14,7 +14,8 @@ async function getApp(): Promise<FastifyInstance> {
   return app;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+// Lambda-style handler for Vercel Build Output API v3
+export async function handler(req: IncomingMessage, res: ServerResponse) {
   try {
     const fastify = await getApp();
 
@@ -24,37 +25,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (val) headers[key] = Array.isArray(val) ? val.join(', ') : val;
     }
 
-    // Determine payload: Vercel already parses JSON body for us
-    let payload: string | Buffer | undefined;
-    if (req.body !== undefined && req.body !== null) {
-      const ct = headers['content-type'] || '';
-      if (ct.includes('application/json')) {
-        payload = JSON.stringify(req.body);
-      } else if (typeof req.body === 'string') {
-        payload = req.body;
-      } else if (Buffer.isBuffer(req.body)) {
-        payload = req.body;
-      } else {
-        payload = JSON.stringify(req.body);
-      }
-    }
-
     // Use fastify.inject() — works in serverless without native HTTP server
     const response = await fastify.inject({
       method: req.method as any,
       url: req.url || '/',
       headers,
-      payload,
+      payload: req,
     });
 
     // Forward status and headers
-    res.status(response.statusCode);
-    for (const [key, val] of Object.entries(response.headers)) {
-      if (val) res.setHeader(key, val as string);
-    }
+    res.writeHead(response.statusCode, response.headers as any);
     res.end(response.rawPayload);
   } catch (err) {
     console.error('[vercel] Handler error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.writeHead(500, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Internal server error' }));
   }
 }
