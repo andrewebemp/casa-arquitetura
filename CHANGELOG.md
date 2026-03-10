@@ -5,6 +5,60 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [2.0.0] - 2026-03-10
+
+### Adicionado — DecorAI Product (Full Stack)
+
+#### Backend (packages/api)
+- **Story 7.1** — Scaffolding do monorepo pnpm com Turborepo (web, api, shared, ai-pipeline)
+- **Story 7.2** — Database schema e Supabase migrations (user_profiles, projects, subscriptions, render_jobs, etc.)
+- **Story 7.3** — Supabase client, auth middleware e infraestrutura Fastify
+- **Story 7.4** — Project CRUD API e upload de imagens para Supabase Storage
+- **Story 7.5** — Render job queue, quota check e progresso em tempo real via Realtime
+- **Story 7.6** — AI Pipeline core: SDXL generation, depth estimation, style extraction
+- **Story 6.1** — Auth routes: signup, login, Google OAuth e sessao
+- **Story 6.2** — User profile API: favoritos, preferencias e historico
+- **Story 6.3** — Subscription e payment API: Stripe integration, tier management e webhooks
+- **Story 6.5** — Pricing UI: pagina de planos, comparativo de features e checkout Stripe
+- **Story 6.6** — Image post-processing: watermark rendering no free tier e disclaimer AI
+- **Story 6.7** — Brazilian payment gateway: Asaas integration para PIX, boleto e cartao nacional
+- **Story 7.8** — API rate limiting: per-tier request throttling via Redis
+- **Story 7.9** — Image CDN delivery e semantic render caching via Redis
+- **Story 1.1** — Spatial input API e reference items CRUD
+- **Story 1.2** — Croqui ASCII: geracao, refinamento 3-turn e aprovacao API
+- **Story 1.3** — Staging generation API: upload de foto, selecao de estilo e orquestracao do pipeline
+- **Story 2.1** — Chat de refinamento API: NLU, operacoes e historico de versoes
+- **Story 3.1** — Segmentation API: SAM element segmentation, material swap e inpainting
+- **Story 3.2** — Lighting correction API: IC-Light auto-enhancement
+- **Story 3.3** — Object removal API: LaMa inpainting para remocao de objetos
+- **Story 4.1** — Before/after slider API e compartilhamento via link
+- **Story 5.1** — Reverse staging diagnostico API: analise de valor e funil freemium
+
+#### Frontend (packages/web)
+- **Story 7.7** — Frontend shell: layout base Next.js 14, autenticacao UI e navegacao
+- **Story 6.4** — Dashboard UI: listagem de projetos, favoritos e acoes rapidas
+- **Story 1.4** — Staging UI: wizard de novo projeto, upload, selecao de estilo e geracao com progresso
+- **Story 2.2** — Chat de refinamento UI: interface conversacional, historico visual e navegacao de versoes
+- **Story 3.4** — Editing UI: segmentacao de elementos, correcao de iluminacao e remocao de objetos
+- **Story 4.2** — Before/after slider UI, modal de compartilhamento e pagina publica de share
+- **Story 5.2** — Reverse staging UI: diagnostico gratuito, upload de foto e resultado com CTA
+
+#### Infraestrutura e Deploy
+- **Vercel deploy** — Frontend (decorai-chi.vercel.app) e API (decorai-api-theta.vercel.app) como serverless functions
+- **Image CDN proxy** — Rota `/api/images/*` com Vercel Edge cache headers (1 ano)
+- **CDN URL resolution** — API responses resolvem storage paths para URLs assinadas em tempo de resposta
+- **Supabase auth config** — site_url, autoconfirm, redirect URIs configurados para producao
+- **Trigger handle_new_user** — Corrigido com SET search_path e fallback display_name
+- **CI/CD** — GitHub Actions workflow (lint, typecheck, test, build)
+- **LLM migration** — Anthropic Claude Sonnet para Gemini Flash via OpenRouter
+
+### Corrigido
+- Wizard step oscillation entre steps 1 e 2 (useEffects competindo)
+- Serverless entry com todas as rotas exceto rateLimitMiddleware
+- Signup error messages — mensagens especificas em vez de generico
+- Auth middleware — redirect home para /login
+- BullMQ worker_threads hang em serverless — shim lightweight
+
 ## [1.7.0] - 2026-03-08
 
 ### Adicionado
@@ -163,6 +217,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Controle de versões com semantic versioning
 - Repositório privado no GitHub
 
+[2.0.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.7.0...v2.0.0
 [1.7.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/andrewebemp/casa-arquitetura/compare/v1.4.0...v1.5.0
