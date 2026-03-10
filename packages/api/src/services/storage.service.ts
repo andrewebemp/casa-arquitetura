@@ -81,14 +81,10 @@ export const storageService = {
       });
     }
 
-    const { data: signedUrl } = await supabaseAdmin.storage
-      .from('project-images')
-      .createSignedUrl(path, 3600);
-
-    const imageUrl = signedUrl?.signedUrl ?? path;
-
+    // Store the storage path (not a signed URL) so it never expires
+    // The image-cdn.service will generate fresh signed URLs at response time
     return {
-      image_url: imageUrl,
+      image_url: path,
       file_size: buffer.length,
       mime_type: mimeType,
     };

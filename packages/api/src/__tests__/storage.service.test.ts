@@ -101,15 +101,12 @@ describe('storageService', () => {
   });
 
   describe('upload', () => {
-    it('should upload file and return signed URL', async () => {
+    it('should upload file and return storage path', async () => {
       mockUpload.mockResolvedValue({ data: { path: 'user-1/proj-1/original.jpg' }, error: null });
-      mockCreateSignedUrl.mockResolvedValue({
-        data: { signedUrl: 'https://storage.supabase.co/signed/url' },
-      });
 
       const result = await storageService.upload(JPEG_BUFFER, 'image/jpeg', 'user-1', 'proj-1');
 
-      expect(result.image_url).toBe('https://storage.supabase.co/signed/url');
+      expect(result.image_url).toBe('user-1/proj-1/original.jpg');
       expect(result.file_size).toBe(JPEG_BUFFER.length);
       expect(result.mime_type).toBe('image/jpeg');
       expect(mockUpload).toHaveBeenCalledWith(

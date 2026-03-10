@@ -9,6 +9,7 @@ import {
 } from '../schemas/project.schema';
 import { projectService } from '../services/project.service';
 import { storageService } from '../services/storage.service';
+import { imageCdnService } from '../services/image-cdn.service';
 import type {
   CreateProjectInput,
   UpdateProjectInput,
@@ -104,8 +105,17 @@ export async function projectRoutes(server: FastifyInstance): Promise<void> {
 
     const result = await storageService.upload(buffer, mimeType, userId, projectId);
 
+    // Store the storage path in DB (never expires)
     await projectService.updateImageUrl(projectId, userId, result.image_url, token);
 
-    return reply.status(201).send({ data: result });
+    // Return a resolved URL to the frontend for immediate display
+    const resolvedUrl = await imageCdnService.resolveImageUrl(result.image_url);
+
+    return reply.status(201).send({
+      data: {
+        ...result,
+        image_url: resolvedUrl ?? result.image_url,
+      },
+    });
   });
 }

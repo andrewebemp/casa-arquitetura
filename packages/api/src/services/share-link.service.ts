@@ -2,6 +2,7 @@ import { createUserClient, supabaseAdmin } from '../lib/supabase';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
 import { subscriptionService } from './subscription.service';
+import { imageCdnService } from './image-cdn.service';
 import type { Database } from '@decorai/shared';
 
 type ShareLinkRow = Database['public']['Tables']['share_links']['Row'];
@@ -79,9 +80,12 @@ export const shareLinkService = {
       });
     }
 
+    const resolvedOriginal = await imageCdnService.resolveImageUrl(project.original_image_url);
+    const resolvedRendered = await imageCdnService.resolveImageUrl(version.render_url ?? version.image_url);
+
     return {
-      original_url: project.original_image_url,
-      rendered_url: version.render_url ?? version.image_url,
+      original_url: resolvedOriginal,
+      rendered_url: resolvedRendered,
       version_id: version.id,
       project_name: project.name,
       style: project.style,
@@ -230,9 +234,12 @@ export const shareLinkService = {
       }
     }
 
+    const resolvedOriginal = await imageCdnService.resolveImageUrl(projectRow?.original_image_url);
+    const resolvedRendered = await imageCdnService.resolveImageUrl(renderedUrl);
+
     return {
-      original_url: projectRow?.original_image_url ?? null,
-      rendered_url: renderedUrl,
+      original_url: resolvedOriginal,
+      rendered_url: resolvedRendered,
       project_name: projectRow?.name ?? '',
       style: projectRow?.style ?? '',
       created_at: row.created_at,
@@ -240,7 +247,7 @@ export const shareLinkService = {
       og: {
         title: `${projectRow?.name ?? 'Projeto'} | DecorAI`,
         description: 'Veja a transformacao do ambiente',
-        image: renderedUrl,
+        image: resolvedRendered,
         url: `/share/${row.share_token}`,
       },
     };

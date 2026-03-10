@@ -1,6 +1,7 @@
 import { createUserClient, supabaseAdmin } from '../lib/supabase';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
+import { imageCdnService } from './image-cdn.service';
 import type { Database } from '@decorai/shared';
 import type { CreateProjectInput, UpdateProjectInput } from '../schemas/project.schema';
 
@@ -87,8 +88,16 @@ export const projectService = {
     const items = hasMore ? projects.slice(0, options.limit) : projects;
     const nextCursor = hasMore && items.length > 0 ? items[items.length - 1].id : null;
 
+    // Resolve image URLs (storage paths → fresh signed URLs with CDN)
+    const resolvedItems = await Promise.all(
+      items.map(async (p) => ({
+        ...p,
+        original_image_url: await imageCdnService.resolveImageUrl(p.original_image_url),
+      })),
+    );
+
     return {
-      data: items,
+      data: resolvedItems,
       pagination: {
         cursor: nextCursor,
         has_more: hasMore,
@@ -115,6 +124,8 @@ export const projectService = {
       });
     }
 
+    const proj = project as ProjectRow;
+
     const { count: versionsCount } = await client
       .from('project_versions')
       .select('*', { count: 'exact', head: true })
@@ -135,11 +146,17 @@ export const projectService = {
       .limit(1)
       .single();
 
+    const resolvedImageUrl = await imageCdnService.resolveImageUrl(proj.original_image_url);
+    const resolvedThumbnail = await imageCdnService.resolveImageUrl(
+      (latestVersion as { render_url: string | null } | null)?.render_url,
+    );
+
     return {
-      ...project,
+      ...proj,
+      original_image_url: resolvedImageUrl,
       versions_count: versionsCount ?? 0,
       has_spatial_input: !!spatialInput,
-      latest_version_thumbnail: latestVersion?.render_url ?? null,
+      latest_version_thumbnail: resolvedThumbnail,
     };
   },
 

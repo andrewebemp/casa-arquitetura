@@ -81,4 +81,28 @@ export const imageCdnService = {
   async getAuthenticatedImageUrl(storagePath: string): Promise<string> {
     return this.generateSignedUrl({ storagePath, isPublic: false });
   },
+
+  /**
+   * Resolve an image URL for API responses.
+   * Handles both storage paths (new) and legacy signed URLs (old data).
+   * - Storage path (e.g. "userId/projectId/original.jpg") → fresh signed URL with CDN rewrite
+   * - Full URL (https://...) → return as-is (legacy data, still valid or already expired)
+   * - null/undefined → null
+   */
+  async resolveImageUrl(urlOrPath: string | null | undefined): Promise<string | null> {
+    if (!urlOrPath) return null;
+
+    // If it's already a full URL, return as-is (legacy data)
+    if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+      return urlOrPath;
+    }
+
+    // It's a storage path — generate a fresh signed URL
+    try {
+      return await this.generateSignedUrl({ storagePath: urlOrPath, isPublic: true });
+    } catch (err) {
+      logger.error({ err, path: urlOrPath }, 'Failed to resolve image URL');
+      return null;
+    }
+  },
 };

@@ -47,6 +47,12 @@ vi.mock('../services/subscription.service', () => ({
   },
 }));
 
+vi.mock('../services/image-cdn.service', () => ({
+  imageCdnService: {
+    resolveImageUrl: vi.fn((url: string | null | undefined) => Promise.resolve(url ?? null)),
+  },
+}));
+
 import { shareLinkService } from '../services/share-link.service';
 import { AppError } from '../lib/errors';
 
