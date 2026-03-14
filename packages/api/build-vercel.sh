@@ -72,16 +72,52 @@ module.exports = { Queue, Worker, FlowProducer };
 SHIMEOF
 
 # Bundle API with esbuild using the bullmq shim
-npx esbuild api/_entry.ts \
-  --bundle \
-  --platform=node \
-  --target=node20 \
-  --format=cjs \
-  --minify \
-  --outfile="$FUNC_DIR/index.js" \
-  --external:sharp \
-  "--alias:bullmq=/tmp/bullmq-shim/index.js" \
-  "--alias:@decorai/shared=../shared/src/index.ts"
+# Use esbuild JS API via inline script — avoids pnpm hoisting issues
+# with native binaries and broken .bin symlinks on Vercel
+ESBUILD_OUTFILE="$FUNC_DIR/index.js" node << 'BUILDEOF'
+const path = require('path');
+
+// Try multiple resolution strategies for esbuild in pnpm monorepo
+function resolveEsbuild() {
+  // 1. Standard require (works if pnpm hoists or shamefully-hoist is on)
+  try { return require('esbuild'); } catch {}
+
+  // 2. Resolve from monorepo root node_modules
+  const rootNM = path.resolve(process.cwd(), '../../node_modules');
+  try { return require(path.join(rootNM, 'esbuild')); } catch {}
+
+  // 3. Find in pnpm store by walking the directory
+  const fs = require('fs');
+  const pnpmDir = path.join(rootNM, '.pnpm');
+  if (fs.existsSync(pnpmDir)) {
+    const entries = fs.readdirSync(pnpmDir).filter(e => e.startsWith('esbuild@'));
+    for (const entry of entries.sort().reverse()) {
+      const candidate = path.join(pnpmDir, entry, 'node_modules', 'esbuild');
+      try { return require(candidate); } catch {}
+    }
+  }
+  throw new Error('Could not resolve esbuild from any location');
+}
+
+const esbuild = resolveEsbuild();
+console.log('Resolved esbuild version:', esbuild.version);
+
+esbuild.buildSync({
+  entryPoints: ['api/_entry.ts'],
+  bundle: true,
+  platform: 'node',
+  target: 'node20',
+  format: 'cjs',
+  minify: true,
+  outfile: process.env.ESBUILD_OUTFILE,
+  external: ['sharp'],
+  alias: {
+    'bullmq': '/tmp/bullmq-shim/index.js',
+    '@decorai/shared': '../shared/src/index.ts'
+  }
+});
+console.log('esbuild bundled successfully');
+BUILDEOF
 
 # Create .vc-config.json for the serverless function
 cat > "$FUNC_DIR/.vc-config.json" << 'EOF'
